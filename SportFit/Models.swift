@@ -125,7 +125,7 @@ enum SportDate {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = TimeZone(secondsFromGMT: 0)
+        f.timeZone = .current
         f.dateFormat = "yyyy-MM-dd"
         return f
     }()
