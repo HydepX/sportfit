@@ -95,7 +95,7 @@ struct HomeScreen: View {
                                     .foregroundStyle(.secondary)
                             }
                             Button(action: onWorkout) {
-                                Text("Открыть тренировку").fontWeight(.bold())
+                                Text("Открыть тренировку").fontWeight(.bold)
                                     .frame(maxWidth: .infinity).padding(13)
                             }
                             .buttonStyle(.plain).background(Palette.accent, in: RoundedRectangle(cornerRadius: 13))
@@ -198,7 +198,7 @@ struct ExerciseDetailScreen: View {
                 Text("Техника выполнения").font(.title3.bold())
                 ForEach(Array(exercise.instructions.enumerated()), id: \.offset) { index, instruction in
                     HStack(alignment: .top, spacing: 12) {
-                        Text("\(index + 1)").foregroundStyle(Palette.accent).fontWeight(.bold())
+                        Text("\(index + 1)").foregroundStyle(Palette.accent).fontWeight(.bold)
                         Text(instruction)
                     }
                 }
