@@ -113,11 +113,12 @@ private struct WorkoutExerciseRow: View {
     let date: Date
 
     var body: some View {
-        let completed = store.setCount(exerciseId: id, day: date)
+        let safeId = store.resolvedExerciseId(id)
+        let completed = store.setCount(exerciseId: safeId, day: date)
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("\(index)").font(.headline).foregroundStyle(.mint).frame(width: 25)
-                if let exercise = store.exercise(id) {
+                if let exercise = store.exercise(safeId) {
                     NavigationLink(destination: ExerciseDetailScreen(exercise: exercise)) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(exercise.title).font(.subheadline.bold())
@@ -126,20 +127,23 @@ private struct WorkoutExerciseRow: View {
                         }
                     }.tint(.white)
                 } else {
-                    Text(id).font(.subheadline.bold())
+                    Text(safeId).font(.subheadline.bold())
                 }
                 Spacer()
             }
+            if let substitution = store.substitutionNote(id) {
+                Text(substitution).font(.caption2).foregroundStyle(.yellow).padding(.leading, 33)
+            }
             HStack(spacing: 12) {
                 Button {
-                    store.undoSet(exerciseId: id, day: date)
+                    store.undoSet(exerciseId: safeId, day: date)
                 } label: {
                     Image(systemName: "minus.circle").font(.title3)
                 }.disabled(completed == 0)
                 Text("Подходов отмечено: \(completed)")
                     .font(.caption).monospacedDigit()
                 Button {
-                    store.markSet(exerciseId: id, day: date)
+                    store.markSet(exerciseId: safeId, day: date)
                 } label: {
                     Image(systemName: "plus.circle.fill").font(.title3)
                 }
