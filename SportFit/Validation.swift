@@ -57,9 +57,11 @@ enum DataValidation {
                         "Некорректная замена упражнения")
             try require(program.conditionalSubstitutions?[rule.fallback] == nil, "Цепочки замен не поддерживаются")
         }
-        for (id, rule) in program.prescriptions ?? [:] {
-            try require(known.contains(id) && (rule.sets.map { (1...100).contains($0) } ?? true) &&
-                        (rule.restSeconds.map { (0...3600).contains($0) } ?? true), "Некорректное назначение")
+        for rules in [program.prescriptions ?? [:]] + program.phases.map({ $0.prescriptions ?? [:] }) {
+            for (id, rule) in rules {
+                try require(known.contains(id) && (rule.sets.map { (1...100).contains($0) } ?? true) &&
+                            (rule.restSeconds.map { (0...3600).contains($0) } ?? true), "Некорректное назначение")
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ struct BodyMeasurement: Codable, Identifiable {
     var weightKg: Double
     var waistCm: Double?
     var bodyFatPercent: Double?
-    let source: String
+    var source: String
     var heightCm: Double?
     var chestCm: Double?
     var hipsCm: Double?

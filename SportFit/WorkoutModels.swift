@@ -30,15 +30,14 @@ struct WorkoutMovement: Codable, Identifiable {
         self.sourceId = sourceId
         exerciseId = exercise.id
         title = exercise.title
-        isTimed = exercise.primaryGroup == "Разминка" || exercise.primaryGroup == "Заминка"
-            || (exercise.suggestedRepsFromSource ?? "").localizedCaseInsensitiveContains("сек")
-            || (exercise.suggestedRepsFromSource ?? "").localizedCaseInsensitiveContains("мин")
+        let requestedTarget = prescription?.repetitions ?? exercise.suggestedRepsFromSource ?? "Не задано в программе"
+        isTimed = requestedTarget.localizedCaseInsensitiveContains("сек") || requestedTarget.localizedCaseInsensitiveContains("мин")
         self.prescription = prescription
         sourceRestSeconds = exercise.suggestedRestFromSource.flatMap { text in
             let number = text.split(whereSeparator: { !$0.isNumber }).first.flatMap { Int($0) }
             return number.map { text.contains("мин") ? $0 * 60 : $0 }
         }
-        target = prescription?.repetitions ?? exercise.suggestedRepsFromSource ?? "Не задано в программе"
+        target = requestedTarget
     }
 }
 
@@ -98,6 +97,15 @@ struct WorkoutResult: Codable, Identifiable {
     let finishedEarly: Bool
     let movements: [WorkoutMovement]
 
+    var isComplete: Bool {
+        !finishedEarly && !movements.isEmpty && movements.allSatisfy {
+            !$0.skipped && $0.sets.count >= ($0.prescription?.sets ?? 1)
+        }
+    }
+    var completionLabel: String {
+        if finishedEarly { return "Завершено досрочно" }
+        return isComplete ? "Все упражнения отмечены" : "Частично выполнено"
+    }
     var totalSets: Int { movements.reduce(0) { $0 + $1.sets.count } }
     var skippedCount: Int { movements.filter(\.skipped).count }
 }

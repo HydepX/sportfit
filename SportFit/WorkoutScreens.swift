@@ -164,7 +164,7 @@ struct CalendarScreen: View {
                         }
                         ForEach(engine.history.filter { $0.programId == program.programId && $0.date == SportDate.key(scheduledSource) }) { result in
                             NavigationLink { WorkoutResultScreen(result: result) } label: {
-                                Text("Результат: \(result.totalSets) подходов\(result.finishedEarly ? " · досрочно" : "")")
+                                Text("Результат: \(result.totalSets) подходов · \(result.completionLabel)")
                             }
                         }
                         Text("Программа: \(program.startDate) — \(program.endDate)")

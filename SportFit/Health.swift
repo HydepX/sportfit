@@ -113,6 +113,7 @@ struct HealthScreen: View {
                     Text("\(item.source) · \(item.date.formatted())").font(.caption)
                 }
             }
+            NavigationLink("Динамика показателей Apple Health") { HealthTrendsScreen() }
             NavigationLink("Ручные измерения") { MeasurementsScreen() }
             Text("Данные читаются локально и не отправляются на сервер. Автоматические показатели показываются отдельно от ручных измерений.")
         }.navigationTitle("Apple Health").task { await reader.read() }

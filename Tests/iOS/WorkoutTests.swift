@@ -10,7 +10,7 @@ import XCTest
         XCTAssertNotNil(store.program)
         return (WorkoutEngine(directory: directory), store, directory)
     }
-    func testRestPauseResumeAndRelaunch() throws {
+    func testRestPauseResumeAndRelaunch() async throws {
         let (engine, store, directory) = try makeEngine()
         defer { try? FileManager.default.removeItem(at: directory) }
         let day = ProgramDay(dayOfWeek: "Пн", name: "Тест", exerciseIds: ["press_floor"])
@@ -28,7 +28,7 @@ import XCTest
         XCTAssertGreaterThan(relaunched.restRemaining(), 0)
         XCTAssertEqual(relaunched.draft?.completedSetCount, 1)
     }
-    func testEditingAndIdempotentFinish() throws {
+    func testEditingAndIdempotentFinish() async throws {
         let (engine, store, directory) = try makeEngine()
         defer { try? FileManager.default.removeItem(at: directory) }
         engine.start(day: ProgramDay(dayOfWeek: "Пн", name: "Тест", exerciseIds: ["press_floor"]), date: Date(), store: store)
@@ -44,7 +44,7 @@ import XCTest
         XCTAssertNil(engine.finish(feeling: nil))
         XCTAssertEqual(WorkoutEngine(directory: directory).history.count, 1)
     }
-    func testInvalidAndDeletedSets() throws {
+    func testInvalidAndDeletedSets() async throws {
         let (engine, store, directory) = try makeEngine()
         defer { try? FileManager.default.removeItem(at: directory) }
         engine.start(day: ProgramDay(dayOfWeek: "Пн", name: "Тест", exerciseIds: ["press_floor"]), date: Date(), store: store)
@@ -56,7 +56,7 @@ import XCTest
         engine.deleteSet(id)
         XCTAssertEqual(engine.draft?.completedSetCount, 0)
     }
-    func testCorruptHistoryIsNeverOverwritten() throws {
+    func testCorruptHistoryIsNeverOverwritten() async throws {
         let (engine, store, directory) = try makeEngine()
         _ = engine
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -68,7 +68,7 @@ import XCTest
         XCTAssertNil(loaded.draft)
         XCTAssertEqual(try Data(contentsOf: file), corrupt)
     }
-    func testBackupRoundTripAndRejectsBadVersion() throws {
+    func testBackupRoundTripAndRejectsBadVersion() async throws {
         let (engine, store, directory) = try makeEngine()
         defer { try? FileManager.default.removeItem(at: directory) }
         let backup = SportFitBackup(engine: engine, measurements: MeasurementsStore(directory: directory), store: store, profile: ProfileStore(directory: directory))
@@ -86,7 +86,7 @@ import XCTest
         let invalid = try JSONDecoder().decode(SportFitBackup.self, from: JSONSerialization.data(withJSONObject: json))
         XCTAssertThrowsError(try BackupRestore.validate(invalid, fallback: store.catalog))
     }
-    func testCalendarBoundaries() throws {
+    func testCalendarBoundaries() async throws {
         let (_, store, directory) = try makeEngine()
         defer { try? FileManager.default.removeItem(at: directory) }
         XCTAssertNil(store.weekNumber(for: try XCTUnwrap(SportDate.from("2026-11-08"))))
@@ -94,4 +94,23 @@ import XCTest
         XCTAssertEqual(store.weekNumber(for: try XCTUnwrap(SportDate.from("2027-01-31"))), 12)
         XCTAssertNil(store.workout(on: try XCTUnwrap(SportDate.from("2027-02-01"))))
     }
+    func testFullBackupRestoreKeepsMeasurementsAndNullDraftWritable() async throws {
+        let (engine, store, directory) = try makeEngine()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let measurements = MeasurementsStore(directory: directory)
+        let profile = ProfileStore(directory: directory)
+        XCTAssertTrue(measurements.add(date: Date(), weightKg: 80, waistCm: 90, bodyFatPercent: 20))
+        profile.profile.name = "Test"
+        profile.save()
+        let backup = SportFitBackup(engine: engine, measurements: measurements, store: store, profile: profile)
+        let id = try XCTUnwrap(measurements.entries.first?.id)
+        measurements.delete(id)
+        try BackupRestore.restore(backup, engine: engine, measurements: measurements, store: store, profile: profile)
+        XCTAssertEqual(measurements.entries.first?.id, id)
+        XCTAssertEqual(profile.profile.name, "Test")
+        XCTAssertNil(engine.draft)
+        XCTAssertTrue(engine.canExport)
+        XCTAssertTrue(measurements.canExport)
+    }
+
 }

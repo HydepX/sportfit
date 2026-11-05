@@ -237,7 +237,7 @@ struct WorkoutPlayer: View {
                 .buttonStyle(SportPrimaryButton())
             movementControls()
         case .summary:
-            Label("Тренировка завершена", systemImage: "checkmark.seal.fill")
+            Label(draft.finishedEarly || draft.movements.contains(where: { $0.skipped || $0.sets.isEmpty }) ? "Частичное занятие" : "Итог занятия", systemImage: "checkmark.seal.fill")
                 .font(.title2.bold()).foregroundStyle(.mint)
             Text("\(draft.completedSetCount) подходов · \(draft.skippedCount) пропущено")
                 .foregroundStyle(.secondary)

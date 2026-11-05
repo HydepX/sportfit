@@ -233,6 +233,7 @@ struct MeasurementsScreen: View {
 
 private struct NewMeasurementSheet: View {
     @EnvironmentObject private var store: MeasurementsStore
+    @EnvironmentObject private var profile: ProfileStore
     @Environment(\.dismiss) private var dismiss
     var entry: BodyMeasurement? = nil
     @State private var height = ""
@@ -273,7 +274,10 @@ private struct NewMeasurementSheet: View {
                     .font(.footnote).foregroundStyle(.secondary)
             }
             .onAppear {
-                guard let entry else { return }
+                guard let entry else {
+                    height = profile.profile.heightCm.map { String($0) } ?? ""
+                    return
+                }
                 measuredAt = entry.measuredAt
                 weight = String(entry.weightKg)
                 waist = entry.waistCm.map { String($0) } ?? ""
@@ -307,6 +311,9 @@ private struct NewMeasurementSheet: View {
                         }
                         var updated = entry ?? BodyMeasurement(date: measuredAt, weightKg: weightValue,
                                                                waistCm: waistValue, bodyFatPercent: fatValue)
+                        if entry != nil && updated.source != "manual" {
+                            updated.source = "manual (исправлено; исходный: \(updated.source))"
+                        }
                         updated.measuredAt = measuredAt
                         updated.weightKg = weightValue
                         updated.waistCm = waistValue

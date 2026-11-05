@@ -81,13 +81,14 @@ struct ProgramPhase: Codable, Identifiable {
     let title: String
     let subtitle: String
     let days: [ProgramDay]
+    let prescriptions: [String: ExercisePrescription]?
     var id: String { phaseId }
 
     enum CodingKeys: String, CodingKey {
         case phaseId = "phase_id"
         case weekStart = "week_start"
         case weekEnd = "week_end"
-        case title, subtitle, days
+        case title, subtitle, days, prescriptions
     }
 }
 

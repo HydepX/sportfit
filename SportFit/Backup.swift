@@ -112,6 +112,9 @@ struct SportFitBackupDocument: FileDocument {
                                    "Копия содержит повторяющиеся записи")
         try DataValidation.require(backup.manualMeasurements.allSatisfy(MeasurementsStore.valid), "Некорректные измерения")
         let known = Set(catalog.exercises.map(\.id))
+        let allSets = backup.workouts.flatMap(\.movements).flatMap(\.sets) + (backup.activeWorkout?.movements.flatMap(\.sets) ?? [])
+        try DataValidation.require(Set(allSets.map(\.id)).count == allSets.count, "Повторяющиеся ID подходов")
+        try DataValidation.require(Set((backup.schedule ?? []).map(\.id)).count == (backup.schedule ?? []).count, "Повторяющиеся переносы")
         func movementsValid(_ movements: [WorkoutMovement]) -> Bool {
             let sets = movements.flatMap(\.sets)
             return !movements.isEmpty && Set(movements.map(\.id)).count == movements.count &&

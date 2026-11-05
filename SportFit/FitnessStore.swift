@@ -144,6 +144,11 @@ import SwiftUI
         return (days / 7) + 1
     }
 
+    func prescription(_ id: String, on date: Date) -> ExercisePrescription? {
+        if let week = weekNumber(for: date), let rule = phase(week: week)?.prescriptions?[id] { return rule }
+        return program?.prescriptions?[id]
+    }
+
     func nextWorkout(after date: Date = Date()) -> Date? {
         guard let program, let end = SportDate.from(program.endDate) else { return nil }
         var day = SportDate.calendar.startOfDay(for: date)

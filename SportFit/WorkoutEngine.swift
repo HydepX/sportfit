@@ -76,7 +76,7 @@ final class WorkoutEngine: ObservableObject {
         }
         let movements = day.exerciseIds.compactMap { sourceId -> WorkoutMovement? in
             guard let exercise = store.exercise(store.resolvedExerciseId(sourceId)) else { return nil }
-            return WorkoutMovement(sourceId: sourceId, exercise: exercise, prescription: store.program?.prescriptions?[sourceId])
+            return WorkoutMovement(sourceId: sourceId, exercise: exercise, prescription: store.prescription(exercise.id, on: date))
         }
         guard !movements.isEmpty, movements.count == day.exerciseIds.count, let programId = store.program?.programId else {
             notice = "Не удалось сопоставить упражнения с библиотекой"
@@ -95,6 +95,9 @@ final class WorkoutEngine: ObservableObject {
     func complete(reps: Int?, weight: Double?, seconds: Int?) {
         guard let d = draft, d.phase == .active, d.movements.indices.contains(d.currentIndex) else { return }
         let movement = d.movements[d.currentIndex]
+        if let last = movement.sets.last, Date().timeIntervalSince(last.completedAt) < 1 {
+            notice = "Этот подход уже отмечен"; return
+        }
         if movement.isTimed {
             guard let seconds, (1...3600).contains(seconds) else {
                 notice = "Укажи длительность от 1 до 3600 секунд"; return

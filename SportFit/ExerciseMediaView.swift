@@ -11,7 +11,8 @@ struct ExerciseMediaView: View {
         Bundle.main.url(forResource: "loop", withExtension: "mp4", subdirectory: "media/\(exerciseId)")
     }
     var body: some View {
-        Group {
+        VStack {
+          Group {
             if let player { VideoPlayer(player: player) }
             else if let url = Bundle.main.url(forResource: "start", withExtension: "jpg", subdirectory: "media/\(exerciseId)"),
                     let image = UIImage(contentsOfFile: url.path) {
@@ -22,7 +23,17 @@ struct ExerciseMediaView: View {
                     Text("Медиа пока нет — техника описана ниже").font(.caption)
                 }.foregroundStyle(.mint).frame(maxWidth: .infinity)
             }
-        }.frame(height: 210).background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 20))
+          }.frame(height: 210)
+          HStack {
+              ForEach(["start", "middle", "finish"], id: \.self) { position in
+                  if let url = Bundle.main.url(forResource: position, withExtension: "jpg", subdirectory: "media/\(exerciseId)"),
+                     let image = UIImage(contentsOfFile: url.path) {
+                      Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 100)
+                          .accessibilityLabel(position == "start" ? "Начальное положение" : position == "middle" ? "Движение" : "Конечное положение")
+                  }
+              }
+          }
+        }.background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 20))
             .accessibilityLabel("Техника упражнения")
             .onAppear {
                 guard player == nil, let url = videoURL else { player?.play(); return }

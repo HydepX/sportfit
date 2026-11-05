@@ -27,6 +27,8 @@ targets:
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: Доступ к записи в Здоровье не используется в первой версии.
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIFileSharingEnabled: YES
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: YES
   SportFitTests:
     type: bundle.unit-test
     platform: iOS

@@ -92,7 +92,7 @@ struct WorkoutResultScreen: View {
     var body: some View {
         List {
             Text(result.date)
-            Text(result.finishedEarly ? "Завершено досрочно" : "Занятие завершено")
+            Text(result.completionLabel)
             ForEach(result.movements) { movement in
                 Section(movement.title) {
                     Text("План: \(movement.target)")
@@ -125,13 +125,14 @@ struct ProgramReportScreen: View {
     var body: some View {
         List {
             Text("\(program.startDate) — \(program.endDate)")
-            let completed = Set(results.filter { !$0.finishedEarly && $0.totalSets > 0 && $0.movements.allSatisfy { !$0.skipped && !$0.sets.isEmpty } }.map(\.date))
+            let completed = Set(results.filter(\.isComplete).map(\.date))
             let due = Set(plannedDates)
-            LabeledContent("Полностью выполнено", value: String(completed.intersection(due).count))
+            LabeledContent("Все упражнения отмечены", value: String(completed.intersection(due).count))
             LabeledContent("Запланировано к сегодня", value: String(due.count))
             if !due.isEmpty {
-                LabeledContent("Соблюдение программы", value: "\(Int(Double(completed.intersection(due).count) / Double(due.count) * 100))%")
+                LabeledContent("Доля отмеченных занятий", value: "\(Int(Double(completed.intersection(due).count) / Double(due.count) * 100))%")
             }
+            Text("Оценка проверяет отмеченные упражнения и количество подходов, когда оно задано. Если подходы не назначены в JSON, по одному подходу нельзя оценить выполнение всей нагрузки.").font(.footnote)
             LabeledContent("Явно пропущено", value: String(profile.changes.filter { $0.programId == program.programId && $0.skipped }.count))
             LabeledContent("Перенесено", value: String(profile.changes.filter { $0.programId == program.programId && $0.movedTo != nil }.count))
             ForEach(program.phases) { phase in
