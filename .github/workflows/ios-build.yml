@@ -1,4 +1,4 @@
-name: iOS simulator build
+name: iOS build (simulator and unsigned iPhone IPA)
 on:
   push:
     branches: [main]
@@ -23,4 +23,28 @@ jobs:
           xcodebuild -project SportFit.xcodeproj \
             -scheme SportFit -configuration Debug \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/SportFitSimulator" \
             CODE_SIGNING_ALLOWED=NO build
+      - name: Build for physical iPhone (unsigned)
+        run: |
+          xcodebuild -project SportFit.xcodeproj \
+            -scheme SportFit -configuration Debug \
+            -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/SportFitDevice" \
+            CODE_SIGNING_ALLOWED=NO build
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/SportFitDevice/Build/Products/Debug-iphoneos/SportFit.app"
+          test -d "$APP"
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/SportFit.app"
+          (cd "$RUNNER_TEMP/ipa" && zip -qry "$GITHUB_WORKSPACE/SportFit-unsigned.ipa" Payload)
+          unzip -l "$GITHUB_WORKSPACE/SportFit-unsigned.ipa" | grep 'Payload/SportFit.app/'
+      - name: Upload unsigned iPhone IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SportFit-unsigned-iphone
+          path: SportFit-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
