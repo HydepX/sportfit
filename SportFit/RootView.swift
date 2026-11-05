@@ -38,7 +38,8 @@ struct RootView: View {
 }
 
 private struct Panel<Content: View>: View {
-    @ViewBuilder let content: Content
+    let content: Content
+    init(@ViewBuilder content: () -> Content) { self.content = content() }
     var body: some View {
         content.padding(16).frame(maxWidth: .infinity, alignment: .leading)
             .background(Palette.panel, in: RoundedRectangle(cornerRadius: 19))
