@@ -48,6 +48,7 @@ private struct Panel<Content: View>: View {
 
 struct HomeScreen: View {
     @EnvironmentObject private var store: FitnessStore
+    @EnvironmentObject private var measurements: MeasurementsStore
     let onWorkout: () -> Void
 
     var body: some View {
@@ -68,6 +69,17 @@ struct HomeScreen: View {
                             } else {
                                 Text("Импортируй план тренировок в настройках")
                                     .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    if let latest = measurements.latest {
+                        Panel {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Последний замер").font(.headline)
+                                Text("\(latest.weightKg.formatted(.number.precision(.fractionLength(1)))) кг")
+                                    .font(.title.bold())
+                                Text(latest.measuredAt, format: .dateTime.day().month().year())
+                                    .font(.caption).foregroundStyle(.secondary)
                             }
                         }
                     }
