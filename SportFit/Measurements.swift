@@ -199,10 +199,17 @@ private struct NewMeasurementSheet: View {
                         func value(_ text: String) -> Double? {
                             Double(text.replacingOccurrences(of: ",", with: "."))
                         }
+                        let waistValue = waist.isEmpty ? nil : value(waist)
+                        let fatValue = fat.isEmpty ? nil : value(fat)
+                        guard (waist.isEmpty || waistValue != nil),
+                              (fat.isEmpty || fatValue != nil) else {
+                            store.error = "Введи числовые значения для талии и процента жира."
+                            return
+                        }
                         if store.add(date: measuredAt,
                                      weightKg: value(weight),
-                                     waistCm: waist.isEmpty ? nil : value(waist),
-                                     bodyFatPercent: fat.isEmpty ? nil : value(fat)) {
+                                     waistCm: waistValue,
+                                     bodyFatPercent: fatValue) {
                             dismiss()
                         }
                     }.fontWeight(.bold)
