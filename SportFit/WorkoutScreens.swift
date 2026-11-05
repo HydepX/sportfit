@@ -236,8 +236,12 @@ struct ProgressScreen: View {
 
 struct SettingsScreen: View {
     @EnvironmentObject private var store: FitnessStore
+    @EnvironmentObject private var engine: WorkoutEngine
+    @EnvironmentObject private var measurements: MeasurementsStore
     @State private var importingCatalog = false
     @State private var importingProgram = false
+    @State private var exportingBackup = false
+    @State private var backupDocument: SportFitBackupDocument?
 
     var body: some View {
         NavigationStack {
@@ -250,6 +254,16 @@ struct SettingsScreen: View {
                           systemImage: "calendar")
                     Button("Импортировать program_12w.v1.json") { importingProgram = true }
                     Text("Импортируются распакованные JSON-файлы из BLOCK03_iOS_library_package. Не ZIP.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                Section("Резервная копия") {
+                    Button("Экспортировать мои данные") {
+                        backupDocument = SportFitBackupDocument(
+                            backup: SportFitBackup(engine: engine, measurements: measurements,
+                                                   store: store))
+                        exportingBackup = true
+                    }
+                    Text("Копия включает историю тренировок, черновик и ручные замеры. Сохрани файл в приложении «Файлы» в надёжном месте. Восстановление из копии добавим отдельно.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("Apple Health") {
@@ -276,6 +290,12 @@ struct SettingsScreen: View {
                           allowedContentTypes: [.json], allowsMultipleSelection: false) { result in
                 if case .success(let urls) = result, let url = urls.first {
                     store.importJSON(from: url, kind: .program)
+                }
+            }
+            .fileExporter(isPresented: $exportingBackup, document: $backupDocument,
+                          contentType: .json, defaultFilename: "sportfit-backup") { result in
+                if case .failure(let error) = result {
+                    store.message = "Не удалось экспортировать копию: \(error.localizedDescription)"
                 }
             }
         }
