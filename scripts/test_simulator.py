@@ -20,8 +20,8 @@ subprocess.run([
 
 summary = json.loads(subprocess.check_output([
     'xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path',
-    os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests.xcresult'), '--format', 'json'
+    os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests.xcresult')
 ]))
-if summary.get('totalTestCount', 0) < 7 or summary.get('failedTests', 0) != 0:
+if summary.get('passedTests', 0) < 7 or summary.get('failedTests', 0) != 0:
     raise SystemExit(f"Unexpected simulator test result counts: {summary}")
 print(f"Verified {summary['totalTestCount']} simulator tests executed")
