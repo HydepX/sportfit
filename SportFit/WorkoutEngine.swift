@@ -106,15 +106,17 @@ final class WorkoutEngine: ObservableObject {
     init() {
         draft = load(WorkoutDraft.self, file: draftFile)
         history = load([WorkoutResult].self, file: historyFile) ?? []
-        // The app may have been terminated mid-exercise. Resume in an explicit paused state.
-        if var current = draft {
-            if current.phase != .summary {
-                current.phase = .paused
-                current.restEndsAt = nil
-                current.pauseStartedAt = Date()
-                draft = current
-                save(current, file: draftFile)
+        // After a process restart, require explicit resume. Preserve any prior pause.
+        if var current = draft, current.phase != .summary {
+            let now = Date()
+            if let previousPause = current.pauseStartedAt {
+                current.elapsedPausedSeconds += max(0, now.timeIntervalSince(previousPause))
             }
+            current.phase = .paused
+            current.restEndsAt = nil
+            current.pauseStartedAt = now
+            draft = current
+            save(current, file: draftFile)
         }
     }
 
@@ -126,12 +128,15 @@ final class WorkoutEngine: ObservableObject {
         guard let data = try? Data(contentsOf: url(file)) else { return nil }
         return try? JSONDecoder().decode(type, from: data)
     }
-    private func save<T: Encodable>(_ value: T, file: String) {
+    @discardableResult
+    private func save<T: Encodable>(_ value: T, file: String) -> Bool {
         do {
             let data = try JSONEncoder().encode(value)
             try data.write(to: url(file), options: .atomic)
+            return true
         } catch {
             notice = "Не удалось сохранить данные: \(error.localizedDescription)"
+            return false
         }
     }
     private func commit(_ update: (inout WorkoutDraft) -> Void) {
@@ -284,7 +289,10 @@ final class WorkoutEngine: ObservableObject {
         // Idempotency: if a saved workout is re-opened, keep one result per UUID.
         if !history.contains(where: { $0.id == result.id }) {
             history.append(result)
-            save(history, file: historyFile)
+            guard save(history, file: historyFile) else {
+                history.removeAll { $0.id == result.id }
+                return nil
+            }
         }
         draft = nil
         try? FileManager.default.removeItem(at: url(draftFile))
