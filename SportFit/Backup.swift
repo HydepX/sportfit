@@ -11,6 +11,7 @@ struct SportFitBackup: Codable {
     let manualMeasurements: [BodyMeasurement]
     let legacySetRecords: [SetRecord]
 
+    @MainActor
     init(engine: WorkoutEngine, measurements: MeasurementsStore, store: FitnessStore) {
         self.format = "sportfit-backup-v1"
         self.exportedAt = Date()
