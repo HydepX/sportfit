@@ -1,0 +1,26 @@
+name: iOS simulator build
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate --spec project.yml
+      - name: Validate bundled data
+        run: python3 scripts/validate_data.py
+      - name: Build for simulator (no code signing)
+        run: |
+          xcodebuild -project SportFit.xcodeproj \
+            -scheme SportFit -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build
