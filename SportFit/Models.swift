@@ -60,7 +60,7 @@ struct TrainingProgram: Codable {
     let endDate: String
     let durationWeeks: Int
     let phases: [ProgramPhase]
-    let conditionalSubstitutions: [ConditionalSubstitution]?
+    let conditionalSubstitutions: [String: ConditionalSubstitution]?
 
     enum CodingKeys: String, CodingKey {
         case phases
@@ -103,13 +103,8 @@ struct ProgramDay: Codable {
 }
 
 struct ConditionalSubstitution: Codable {
-    let exerciseId: String?
-    let substituteId: String?
-
-    enum CodingKeys: String, CodingKey {
-        case exerciseId = "exercise_id"
-        case substituteId = "substitute_id"
-    }
+    let fallback: String
+    let reason: String
 }
 
 struct SetRecord: Codable, Identifiable {
