@@ -1,0 +1,3345 @@
+{
+  "schema_version": "1.0.0",
+  "language": "ru",
+  "exercise_count": 53,
+  "exercises": [
+    {
+      "id": "press_floor",
+      "title": "Жим гантелей лёжа на полу",
+      "primary_group": "Грудь",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Базовое движение для груди и трицепса с ограниченной амплитудой.",
+      "instructions": [
+        "Ляг на коврик, расположи ноги удобно и возьми лёгкие гантели.",
+        "Держи локти под углом примерно 30–45° к туловищу.",
+        "Выдохни и плавно выжми гантели вверх.",
+        "На вдохе медленно опусти плечи и локти до касания пола."
+      ],
+      "common_mistakes_draft": [
+        "Не выгибайся и не задерживай дыхание."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/dumbbell-floor-press",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/press_floor/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/press_floor/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/press_floor/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/press_floor/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "press_alt",
+      "title": "Поочерёдный жим гантелей лёжа",
+      "primary_group": "Грудь",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Вариант жима для координации и контроля корпуса.",
+      "instructions": [
+        "Ляг на коврик с двумя лёгкими гантелями.",
+        "Выжми обе вверх; одну медленно опускай к полу.",
+        "Верни её вверх, затем поменяй руку.",
+        "Сохраняй спокойное дыхание и положение плеч."
+      ],
+      "common_mistakes_draft": [
+        "Не разворачивай корпус вслед за гантелью."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%9F%D0%BE%D0%BE%D1%87%D0%B5%D1%80%D1%91%D0%B4%D0%BD%D1%8B%D0%B9%20%D0%B6%D0%B8%D0%BC%20%D0%B3%D0%B0%D0%BD%D1%82%D0%B5%D0%BB%D0%B5%D0%B9%20%D0%BB%D1%91%D0%B6%D0%B0%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/press_alt/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/press_alt/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/press_alt/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/press_alt/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "press_close",
+      "title": "Жим гантелей узким хватом лёжа",
+      "primary_group": "Трицепс",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Смещение акцента на трицепс и внутреннюю часть жимового движения.",
+      "instructions": [
+        "Ляг на коврик, гантели по бокам груди ладонями друг к другу.",
+        "Держи локти ближе к телу.",
+        "Выжми вверх на выдохе.",
+        "Медленно верни к полу."
+      ],
+      "common_mistakes_draft": [
+        "Гантели не нужно стучать друг о друга."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/dumbbell-floor-press",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/press_close/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/press_close/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/press_close/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/press_close/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "fly_floor",
+      "title": "Разведение рук с лёгкими гантелями лёжа",
+      "primary_group": "Грудь",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Мягкая изоляция груди с ограниченной амплитудой на полу.",
+      "instructions": [
+        "Ляг на коврик, выжми очень лёгкие гантели над грудью.",
+        "Слегка согни локти.",
+        "Раскрой руки в стороны до безопасной амплитуды, не преодолевая дискомфорт.",
+        "Сведи руки назад без рывка."
+      ],
+      "common_mistakes_draft": [
+        "Не растягивай плечи через боль."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%A0%D0%B0%D0%B7%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5%20%D1%80%D1%83%D0%BA%20%D1%81%20%D0%BB%D1%91%D0%B3%D0%BA%D0%B8%D0%BC%D0%B8%20%D0%B3%D0%B0%D0%BD%D1%82%D0%B5%D0%BB%D1%8F%D0%BC%D0%B8%20%D0%BB%D1%91%D0%B6%D0%B0%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/fly_floor/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/fly_floor/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/fly_floor/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/fly_floor/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wall_push",
+      "title": "Отжимания от стены",
+      "primary_group": "Грудь",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Облегчённый жим без положения планки на полу.",
+      "instructions": [
+        "Встань лицом к стене, ладони на ширине плеч.",
+        "Отойди на комфортное расстояние.",
+        "Плавно согни локти и приблизь грудь к стене.",
+        "Выдохни, выпрямляя руки."
+      ],
+      "common_mistakes_draft": [
+        "Ноги работают как опора; при дискомфорте замени на жим лёжа."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [
+        "press_alt",
+        "press_floor"
+      ],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "По разрешению врача",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/wall-push-up",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wall_push/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wall_push/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wall_push/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wall_push/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "shoulder_press",
+      "title": "Жим лёгких гантелей сидя",
+      "primary_group": "Плечи",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Развитие передних и средних пучков плеч; возможна повышенная нагрузка при натуживании.",
+      "instructions": [
+        "Сядь на устойчивый стул, спина вертикальна.",
+        "Держи лёгкие гантели около плеч нейтральным хватом.",
+        "Выдохни и подними руки вверх в удобной амплитуде.",
+        "Плавно опусти без прогиба поясницы."
+      ],
+      "common_mistakes_draft": [
+        "Если требуется тужиться — вес чрезмерный."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "По разрешению врача",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/overhead-press",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/shoulder_press/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/shoulder_press/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/shoulder_press/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/shoulder_press/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "lateral",
+      "title": "Разведение гантелей в стороны сидя",
+      "primary_group": "Плечи",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Работа средних дельтовидных мышц.",
+      "instructions": [
+        "Сядь ровно, лёгкие гантели вдоль тела.",
+        "Чуть согни локти.",
+        "Подними руки примерно до высоты плеч.",
+        "Медленно опусти без раскачивания."
+      ],
+      "common_mistakes_draft": [
+        "Для начала достаточно очень лёгкого веса."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://musclewiki.com/exercise/seated-lateral-raise",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/lateral/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/lateral/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/lateral/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/lateral/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "front_raise",
+      "title": "Подъём гантелей перед собой сидя",
+      "primary_group": "Плечи",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Упражнение на передние пучки дельт.",
+      "instructions": [
+        "Сядь на устойчивый стул.",
+        "Возьми лёгкие гантели нейтральным хватом.",
+        "Поочерёдно поднимай руки перед собой до высоты плеч.",
+        "Опускай плавно, не запрокидывая туловище."
+      ],
+      "common_mistakes_draft": [
+        "Не поднимай плечи к ушам."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/front-raises",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/front_raise/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/front_raise/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/front_raise/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/front_raise/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "rear_fly",
+      "title": "Разведения в наклоне сидя",
+      "primary_group": "Спина",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Нагрузка на задние дельты и мышцы верхней части спины.",
+      "instructions": [
+        "Сядь и наклонись слегка вперёд с ровной спиной.",
+        "Опусти очень лёгкие гантели под плечами.",
+        "Разведи руки в стороны, сохраняя мягкие локти.",
+        "Медленно верни назад."
+      ],
+      "common_mistakes_draft": [
+        "Избегай сильного наклона и давления на живот."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/reverse-fly",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/rear_fly/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/rear_fly/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/rear_fly/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/rear_fly/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "row_seated",
+      "title": "Тяга гантелей сидя в наклоне",
+      "primary_group": "Спина",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Тяговое движение для широчайших и мышц между лопатками.",
+      "instructions": [
+        "Сядь устойчиво, слегка наклонись от тазобедренных суставов.",
+        "Держи гантели под плечами.",
+        "Подтяни локти к поясу на выдохе.",
+        "Плавно опусти."
+      ],
+      "common_mistakes_draft": [
+        "Не округляй поясницу и не задерживай дыхание."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/bent-over-rows",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/row_seated/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/row_seated/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/row_seated/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/row_seated/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "row_one",
+      "title": "Поочерёдная тяга одной гантели сидя",
+      "primary_group": "Спина",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Вариант тяги для контроля правой и левой сторон.",
+      "instructions": [
+        "Сядь, слегка наклонись вперёд.",
+        "Подтяни одну гантель локтем к тазу.",
+        "На вдохе медленно опусти.",
+        "Закончи повторы и поменяй руку."
+      ],
+      "common_mistakes_draft": [
+        "Не скручивай туловище и не опирайся на шаткий табурет."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/single-arm-dumbbell-row",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/row_one/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/row_one/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/row_one/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/row_one/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "pullover",
+      "title": "Пуловер с одной гантелью лёжа",
+      "primary_group": "Спина",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Движение для плечевого пояса и широчайших с лёгким весом.",
+      "instructions": [
+        "Ляг на коврик, держи одну лёгкую гантель двумя руками над грудью.",
+        "Сохраняя лёгкий сгиб локтей, отведи руки назад до комфортного уровня.",
+        "На выдохе верни гантель над грудью.",
+        "Не допускай прогиба поясницы."
+      ],
+      "common_mistakes_draft": [
+        "Если плечо болит — исключи упражнение."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/dumbbell-pullover",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/pullover/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/pullover/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/pullover/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/pullover/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "scap_retract",
+      "title": "Сведение лопаток сидя",
+      "primary_group": "Спина",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Мягкое движение для осанки и контроля лопаток.",
+      "instructions": [
+        "Сядь ровно и расслабь плечи.",
+        "Плавно сведи лопатки назад и немного вниз.",
+        "Удержи 1–2 секунды без задержки дыхания.",
+        "Расслабь и повтори."
+      ],
+      "common_mistakes_draft": [
+        "Не запрокидывай голову."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%A1%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BB%D0%BE%D0%BF%D0%B0%D1%82%D0%BE%D0%BA%20%D1%81%D0%B8%D0%B4%D1%8F%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "12–15 повторений",
+      "suggested_rest_from_source": "30 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/scap_retract/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/scap_retract/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/scap_retract/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/scap_retract/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "prone_y",
+      "title": "Подъём рук буквой Y лёжа на животе",
+      "primary_group": "Спина",
+      "equipment": [
+        "Коврик"
+      ],
+      "description": "Лёгкая работа стабилизаторов лопаток.",
+      "instructions": [
+        "Ляг на живот, руки выведи диагонально вперёд в форме Y.",
+        "Лоб расположи комфортно, шею не запрокидывай.",
+        "Слегка подними кисти от пола.",
+        "Опусти и повтори без задержки дыхания."
+      ],
+      "common_mistakes_draft": [
+        "Не поднимай высоко корпус."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/prone-y-raises",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/prone_y/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/prone_y/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/prone_y/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/prone_y/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "reverse_angel",
+      "title": "Обратные снежные ангелы лёжа",
+      "primary_group": "Спина",
+      "equipment": [
+        "Коврик"
+      ],
+      "description": "Контролируемое движение рук для верхней спины и плеч.",
+      "instructions": [
+        "Ляг на живот, руки вдоль тела.",
+        "Медленно проведи руками через стороны к положению над головой.",
+        "Верни по той же траектории.",
+        "Дыши спокойно, амплитуда комфортная."
+      ],
+      "common_mistakes_draft": [
+        "Не стремись оторвать грудь от пола."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/reverse-snow-angels",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/reverse_angel/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/reverse_angel/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/reverse_angel/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/reverse_angel/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "bicep",
+      "title": "Сгибание рук на бицепс сидя",
+      "primary_group": "Бицепс",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Классическая проработка сгибателей локтя.",
+      "instructions": [
+        "Сядь, локти прижми к туловищу.",
+        "Ладони направь вперёд.",
+        "На выдохе согни локти, не двигая плечами.",
+        "Медленно опусти гантели."
+      ],
+      "common_mistakes_draft": [
+        "Никакого раскачивания корпуса."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/bicep-curls",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/bicep/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/bicep/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/bicep/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/bicep/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "hammer",
+      "title": "Молотковые сгибания сидя",
+      "primary_group": "Бицепс",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Нагрузка на плечелучевую мышцу и бицепс.",
+      "instructions": [
+        "Сядь прямо, гантели по бокам ладонями внутрь.",
+        "Не двигая плечом, согни руки.",
+        "Задержись на мгновение сверху.",
+        "Опусти контролируемо."
+      ],
+      "common_mistakes_draft": [
+        "Запястья держи нейтрально."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/hammer-curls",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/hammer/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/hammer/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/hammer/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/hammer/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "concentration",
+      "title": "Концентрированное сгибание сидя",
+      "primary_group": "Бицепс",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Одиночная работа рукой с опорой локтя о внутреннюю сторону бедра.",
+      "instructions": [
+        "Сядь, слегка разведи колени без напряжения.",
+        "Локоть работающей руки размести ближе к внутренней стороне бедра.",
+        "Согни руку, не раскачивая корпус.",
+        "Медленно разогни и поменяй сторону."
+      ],
+      "common_mistakes_draft": [
+        "Если наклон вызывает давление/дискомфорт — замени обычным сгибанием."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/concentration-curl",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/concentration/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/concentration/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/concentration/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/concentration/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "triceps_lying",
+      "title": "Разгибание рук с гантелями лёжа",
+      "primary_group": "Трицепс",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Нагрузка на трицепс без опоры весом тела на ноги.",
+      "instructions": [
+        "Ляг на коврик и держи лёгкие гантели над грудью.",
+        "Не двигая плечами, медленно согни локти.",
+        "Опусти гантели по обе стороны головы в комфортной амплитуде.",
+        "Разогни локти на выдохе."
+      ],
+      "common_mistakes_draft": [
+        "Не разводи локти резко."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%A0%D0%B0%D0%B7%D0%B3%D0%B8%D0%B1%D0%B0%D0%BD%D0%B8%D0%B5%20%D1%80%D1%83%D0%BA%20%D1%81%20%D0%B3%D0%B0%D0%BD%D1%82%D0%B5%D0%BB%D1%8F%D0%BC%D0%B8%20%D0%BB%D1%91%D0%B6%D0%B0%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/triceps_lying/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/triceps_lying/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/triceps_lying/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/triceps_lying/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "kickback_seated",
+      "title": "Разгибание руки назад сидя в наклоне",
+      "primary_group": "Трицепс",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Дополнительный вариант разгибания локтя с небольшим весом.",
+      "instructions": [
+        "Сядь и слегка наклонись, спина ровная.",
+        "Подними локоть к туловищу.",
+        "Разогни руку назад, не двигая плечом.",
+        "Верни предплечье и поменяй руку."
+      ],
+      "common_mistakes_draft": [
+        "Работай с очень лёгким весом."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [
+        "triceps_lying"
+      ],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/tricep-kickbacks",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/kickback_seated/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/kickback_seated/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/kickback_seated/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/kickback_seated/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wrist_curl",
+      "title": "Сгибание кистей сидя",
+      "primary_group": "Предплечья",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Развитие мышц предплечий и контроля хвата.",
+      "instructions": [
+        "Сядь, предплечья положи на бёдра ладонями вверх.",
+        "Очень лёгкие гантели находятся в кистях.",
+        "Плавно согни запястья вверх.",
+        "Верни в нейтральное положение."
+      ],
+      "common_mistakes_draft": [
+        "Двигай только кистями."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [
+        "wrist_reverse"
+      ],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%A1%D0%B3%D0%B8%D0%B1%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%BA%D0%B8%D1%81%D1%82%D0%B5%D0%B9%20%D1%81%D0%B8%D0%B4%D1%8F%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "12–15 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wrist_curl/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wrist_curl/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wrist_curl/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wrist_curl/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wrist_reverse",
+      "title": "Разгибание кистей сидя",
+      "primary_group": "Предплечья",
+      "equipment": [
+        "Гантели"
+      ],
+      "description": "Работа разгибателей предплечья.",
+      "instructions": [
+        "Сядь и положи предплечья на бёдра ладонями вниз.",
+        "Мягко приподними тыльную сторону кисти с лёгкой гантелью.",
+        "Задержись на мгновение.",
+        "Опусти без рывка."
+      ],
+      "common_mistakes_draft": [
+        "Не используй большой вес."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [
+        "wrist_curl"
+      ],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Осторожно",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%A0%D0%B0%D0%B7%D0%B3%D0%B8%D0%B1%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%BA%D0%B8%D1%81%D1%82%D0%B5%D0%B9%20%D1%81%D0%B8%D0%B4%D1%8F%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "12–15 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wrist_reverse/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wrist_reverse/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wrist_reverse/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wrist_reverse/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "breathing",
+      "title": "Диафрагмальное дыхание лёжа",
+      "primary_group": "Корпус",
+      "equipment": [
+        "Коврик"
+      ],
+      "description": "Спокойная дыхательная практика для контроля дыхания и восстановления.",
+      "instructions": [
+        "Ляг удобно, положи ладонь на живот и другую на грудь.",
+        "Медленно вдохни, ощущая мягкое движение живота.",
+        "Плавно выдохни без натуживания.",
+        "Повтори в комфортном ритме."
+      ],
+      "common_mistakes_draft": [
+        "Не втягивай живот силой и не задерживай дыхание."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%94%D0%B8%D0%B0%D1%84%D1%80%D0%B0%D0%B3%D0%BC%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5%20%D0%B4%D1%8B%D1%85%D0%B0%D0%BD%D0%B8%D0%B5%20%D0%BB%D1%91%D0%B6%D0%B0%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "5–8 циклов",
+      "suggested_rest_from_source": "20 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/breathing/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/breathing/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/breathing/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/breathing/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "brace",
+      "title": "Мягкая активация мышц живота лёжа",
+      "primary_group": "Корпус",
+      "equipment": [
+        "Коврик"
+      ],
+      "description": "Освоение умеренного напряжения мышц живота без задержки дыхания.",
+      "instructions": [
+        "Ляг, расположи ноги удобно.",
+        "На мягком выдохе слегка активируй мышцы живота.",
+        "Не делай силового втягивания и не тужься.",
+        "Расслабься, восстанови дыхание."
+      ],
+      "common_mistakes_draft": [
+        "Не удерживай сильное напряжение."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%9C%D1%8F%D0%B3%D0%BA%D0%B0%D1%8F%20%D0%B0%D0%BA%D1%82%D0%B8%D0%B2%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BC%D1%8B%D1%88%D1%86%20%D0%B6%D0%B8%D0%B2%D0%BE%D1%82%D0%B0%20%D0%BB%D1%91%D0%B6%D0%B0%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "5–8 дыхательных циклов",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/brace/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/brace/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/brace/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/brace/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "pelvic_tilt",
+      "title": "Мягкий наклон таза лёжа",
+      "primary_group": "Корпус",
+      "equipment": [
+        "Коврик"
+      ],
+      "description": "Небольшое движение таза для контроля поясничного отдела.",
+      "instructions": [
+        "Ляг на спину, колени слегка согнуты если комфортно.",
+        "На выдохе чуть приблизь поясницу к коврику поворотом таза.",
+        "Не отрывай ягодицы от пола.",
+        "Верни нейтральное положение."
+      ],
+      "common_mistakes_draft": [
+        "Не дави ногами сильно в пол."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%9C%D1%8F%D0%B3%D0%BA%D0%B8%D0%B9%20%D0%BD%D0%B0%D0%BA%D0%BB%D0%BE%D0%BD%20%D1%82%D0%B0%D0%B7%D0%B0%20%D0%BB%D1%91%D0%B6%D0%B0%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "8–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/pelvic_tilt/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/pelvic_tilt/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/pelvic_tilt/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/pelvic_tilt/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "seated_rotate",
+      "title": "Плавный поворот грудного отдела сидя",
+      "primary_group": "Подвижность",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Мобильность грудного отдела позвоночника.",
+      "instructions": [
+        "Сядь ровно и скрести руки перед грудью.",
+        "На выдохе мягко поверни плечи вправо.",
+        "Вернись и поверни влево.",
+        "Таз остаётся неподвижным."
+      ],
+      "common_mistakes_draft": [
+        "Маленькая амплитуда, без рывков."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%9F%D0%BB%D0%B0%D0%B2%D0%BD%D1%8B%D0%B9%20%D0%BF%D0%BE%D0%B2%D0%BE%D1%80%D0%BE%D1%82%20%D0%B3%D1%80%D1%83%D0%B4%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%BE%D1%82%D0%B4%D0%B5%D0%BB%D0%B0%20%D1%81%D0%B8%D0%B4%D1%8F%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "6–8 на сторону",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/seated_rotate/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/seated_rotate/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/seated_rotate/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/seated_rotate/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "shoulder_circles",
+      "title": "Круговые движения плечами сидя",
+      "primary_group": "Подвижность",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Разминка плечевого пояса.",
+      "instructions": [
+        "Сядь ровно, опусти руки.",
+        "Медленно подними плечи, уведи назад и опусти.",
+        "Сделай несколько кругов.",
+        "Смени направление."
+      ],
+      "common_mistakes_draft": [
+        "Не выполняй резких движений."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.stridefitapp.com/exercises/arm-circles",
+      "suggested_reps_from_source": "30–40 секунд",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/shoulder_circles/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/shoulder_circles/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/shoulder_circles/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/shoulder_circles/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "neck",
+      "title": "Мягкие повороты головы",
+      "primary_group": "Подвижность",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Лёгкая разминка шеи.",
+      "instructions": [
+        "Сядь с нейтральной спиной.",
+        "Медленно поверни голову вправо до комфортного положения.",
+        "Верни в центр.",
+        "Повтори влево."
+      ],
+      "common_mistakes_draft": [
+        "Не запрокидывай голову и не делай полных быстрых кругов."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%9C%D1%8F%D0%B3%D0%BA%D0%B8%D0%B5%20%D0%BF%D0%BE%D0%B2%D0%BE%D1%80%D0%BE%D1%82%D1%8B%20%D0%B3%D0%BE%D0%BB%D0%BE%D0%B2%D1%8B%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "5 на сторону",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/neck/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/neck/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/neck/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/neck/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "chest_open",
+      "title": "Раскрытие грудной клетки сидя",
+      "primary_group": "Подвижность",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Мягкое движение рук и лопаток.",
+      "instructions": [
+        "Сядь прямо, согни руки в локтях.",
+        "Плавно разведи локти в стороны и слегка сведи лопатки.",
+        "Сделай спокойный вдох.",
+        "На выдохе верни руки вперёд."
+      ],
+      "common_mistakes_draft": [
+        "Избегай переразгибания спины."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "",
+      "original_external_reference": "https://www.youtube.com/results?search_query=%D0%A0%D0%B0%D1%81%D0%BA%D1%80%D1%8B%D1%82%D0%B8%D0%B5%20%D0%B3%D1%80%D1%83%D0%B4%D0%BD%D0%BE%D0%B9%20%D0%BA%D0%BB%D0%B5%D1%82%D0%BA%D0%B8%20%D1%81%D0%B8%D0%B4%D1%8F%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0%20%D1%83%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F",
+      "suggested_reps_from_source": "10–12 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/chest_open/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/chest_open/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/chest_open/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/chest_open/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "ankle_pump",
+      "title": "Движение стопами на себя и от себя",
+      "primary_group": "Голень",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Лёгкая динамическая активация голеностопа без силовой работы.",
+      "instructions": [
+        "Сядь или ляг, голени расположи удобно.",
+        "Потяни носки на себя.",
+        "Затем мягко направь стопы от себя.",
+        "Повторяй плавно, без боли."
+      ],
+      "common_mistakes_draft": [
+        "Только если врач разрешил обычные движения голеностопа."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Уточнить у врача",
+      "safety_note": "",
+      "original_external_reference": "https://www.oxfordhealth.nhs.uk/wp-content/uploads/2015/08/OH-210.20-Looking-after-your-legs-leaflet.pdf",
+      "suggested_reps_from_source": "10–15 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/ankle_pump/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/ankle_pump/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/ankle_pump/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/ankle_pump/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "ankle_circle",
+      "title": "Круги стопами сидя",
+      "primary_group": "Голень",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Поддержание подвижности голеностопа.",
+      "instructions": [
+        "Сядь с удобной опорой ног.",
+        "Слегка приподними стопу.",
+        "Сделай небольшие круги вправо.",
+        "Повтори влево, затем смени ногу."
+      ],
+      "common_mistakes_draft": [
+        "Не выполняй через болезненность."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Уточнить у врача",
+      "safety_note": "",
+      "original_external_reference": "https://www.leedsth.nhs.uk/patients/resources/movement-and-activity-for-chronic-leg-oedema-and-lymphoedema/",
+      "suggested_reps_from_source": "8 кругов в каждую сторону",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/ankle_circle/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/ankle_circle/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/ankle_circle/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/ankle_circle/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "toe_moves",
+      "title": "Сгибание и разгибание пальцев стоп",
+      "primary_group": "Голень",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Щадящие движения пальцами ног для повседневной активности.",
+      "instructions": [
+        "Сядь или ляг удобно.",
+        "Плавно согни пальцы стоп.",
+        "Распрями и расслабь.",
+        "Повтори без напряжения голени."
+      ],
+      "common_mistakes_draft": [
+        "Не заменяет прогулки и лечение."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Уточнить у врача",
+      "safety_note": "",
+      "original_external_reference": "https://www.oxfordhealth.nhs.uk/wp-content/uploads/2015/08/OH-210.20-Looking-after-your-legs-leaflet.pdf",
+      "suggested_reps_from_source": "10–15 повторений",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/toe_moves/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/toe_moves/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/toe_moves/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/toe_moves/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "walk",
+      "title": "Спокойная ходьба по ровной поверхности",
+      "primary_group": "Ноги / кардио",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Основная доступная активность для мышц ног и кровообращения согласно рекомендации врача.",
+      "instructions": [
+        "Начни с комфортного времени и ровной поверхности.",
+        "Держи темп, при котором можно разговаривать.",
+        "Делай короткие прогулки в течение дня.",
+        "Остановись при боли или появлении необычного отёка."
+      ],
+      "common_mistakes_draft": [
+        "Наращивай время постепенно, не гонись за 10 000 шагов."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Разрешённая ходьба",
+      "safety_note": "",
+      "original_external_reference": "https://www.nhs.uk/conditions/varicose-veins/",
+      "suggested_reps_from_source": "10–25 минут",
+      "suggested_rest_from_source": "—",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/walk/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/walk/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/walk/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/walk/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "march_seated",
+      "title": "Поочерёдное поднятие колен сидя",
+      "primary_group": "Ноги / кардио",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Очень лёгкая двигательная активность ног без сопротивления.",
+      "instructions": [
+        "Сядь на устойчивый стул.",
+        "Слегка подними одно колено на небольшую высоту.",
+        "Поставь стопу обратно.",
+        "Повтори другой ногой в спокойном темпе."
+      ],
+      "common_mistakes_draft": [
+        "Добавить только после подтверждения врача; если нагружать ногу нельзя, не выполнять."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [
+        "toe_moves",
+        "ankle_pump"
+      ],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Уточнить у врача",
+      "safety_note": "",
+      "original_external_reference": "https://www.leedsth.nhs.uk/patients/resources/movement-and-activity-for-chronic-leg-oedema-and-lymphoedema/",
+      "suggested_reps_from_source": "6–10 на ногу",
+      "suggested_rest_from_source": "60 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/march_seated/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/march_seated/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/march_seated/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/march_seated/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "sit_to_stand",
+      "title": "Вставание со стула",
+      "primary_group": "Ноги / ягодицы",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Облегчённое приседание без гантелей с контролируемой амплитудой.",
+      "instructions": [
+        "Сядь на устойчивый стул, стопы полностью на полу.",
+        "Наклони корпус немного вперёд, выдохни и спокойно встань.",
+        "Медленно сядь обратно без падения на стул.",
+        "При необходимости помогай себе руками."
+      ],
+      "common_mistakes_draft": [
+        "Не задерживай дыхание. Начни с 5–8 повторений и только при хорошей переносимости."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Лёгкая нагрузка",
+      "safety_note": "Без дополнительного веса. Прекратить при боли, отёке или тяжести в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=sit%20to%20stand%20exercise%20physical%20therapy%20proper%20form",
+      "suggested_reps_from_source": "5–8 повторений",
+      "suggested_rest_from_source": "45–75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/sit_to_stand/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/sit_to_stand/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/sit_to_stand/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/sit_to_stand/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "seated_knee_ext",
+      "title": "Разгибание колена сидя",
+      "primary_group": "Ноги / бёдра",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Лёгкая работа передней поверхности бедра без дополнительного веса.",
+      "instructions": [
+        "Сядь устойчиво, стопы на полу.",
+        "Медленно выпрями одну ногу в колене до комфортной амплитуды.",
+        "Плавно опусти и повтори другой ногой.",
+        "Дыши свободно."
+      ],
+      "common_mistakes_draft": [
+        "Без утяжелителей, не фиксируй колено с усилием."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Лёгкая нагрузка",
+      "safety_note": "Без дополнительного веса. Прекратить при боли, отёке или тяжести в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=seated%20knee%20extension%20no%20weight%20physical%20therapy",
+      "suggested_reps_from_source": "6–10 на ногу",
+      "suggested_rest_from_source": "45–75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/seated_knee_ext/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/seated_knee_ext/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/seated_knee_ext/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/seated_knee_ext/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "glute_bridge_light",
+      "title": "Ягодичный мост без веса",
+      "primary_group": "Ноги / ягодицы",
+      "equipment": [
+        "Коврик"
+      ],
+      "description": "Мягкая работа ягодиц с весом собственного тела.",
+      "instructions": [
+        "Ляг на спину, колени согни, стопы поставь на коврик.",
+        "На выдохе плавно подними таз на комфортную высоту.",
+        "Слегка напряги ягодицы, не прогибая поясницу.",
+        "Опусти таз под контролем."
+      ],
+      "common_mistakes_draft": [
+        "Если появляется давление, тяжесть или боль в ноге — прекрати."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Лёгкая нагрузка",
+      "safety_note": "Без дополнительного веса. Прекратить при боли, отёке или тяжести в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=glute%20bridge%20bodyweight%20proper%20form%20beginner",
+      "suggested_reps_from_source": "6–10 повторений",
+      "suggested_rest_from_source": "45–75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/glute_bridge_light/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/glute_bridge_light/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/glute_bridge_light/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/glute_bridge_light/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "standing_hip_abd",
+      "title": "Отведение ноги в сторону с опорой",
+      "primary_group": "Ноги / ягодицы",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Небольшая амплитуда для ягодичных мышц и контроля равновесия.",
+      "instructions": [
+        "Встань рядом с устойчивой опорой и держись рукой.",
+        "Медленно отведи прямую ногу в сторону на небольшую высоту.",
+        "Не наклоняй корпус и не разворачивай стопу наружу.",
+        "Верни ногу, поменяй сторону."
+      ],
+      "common_mistakes_draft": [
+        "Не используй резинки и утяжелители; не стой долго неподвижно."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Лёгкая нагрузка",
+      "safety_note": "Без дополнительного веса. Прекратить при боли, отёке или тяжести в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=standing%20hip%20abduction%20with%20chair%20support%20physical%20therapy",
+      "suggested_reps_from_source": "6–8 на ногу",
+      "suggested_rest_from_source": "45–75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/standing_hip_abd/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/standing_hip_abd/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/standing_hip_abd/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/standing_hip_abd/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "heel_raise_support",
+      "title": "Подъём на носки с опорой",
+      "primary_group": "Голень",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Лёгкое динамическое движение голеностопа и икроножных мышц.",
+      "instructions": [
+        "Встань у устойчивой опоры.",
+        "Плавно приподними пятки без рывка.",
+        "Сразу мягко опусти пятки.",
+        "Дыши свободно, избегай натуживания."
+      ],
+      "common_mistakes_draft": [
+        "При симптомах в ноге прекрати; начать можно с движений стопами сидя."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Лёгкая нагрузка",
+      "safety_note": "Без дополнительного веса. Прекратить при боли, отёке или тяжести в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=supported%20calf%20raises%20beginner%20physical%20therapy",
+      "suggested_reps_from_source": "6–10 повторений",
+      "suggested_rest_from_source": "45–75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/heel_raise_support/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/heel_raise_support/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/heel_raise_support/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/heel_raise_support/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "dead_bug_easy",
+      "title": "Dead Bug — облегчённый",
+      "primary_group": "Корпус",
+      "equipment": [
+        "Коврик"
+      ],
+      "description": "Контроль мышц живота с минимальным движением ног.",
+      "instructions": [
+        "Ляг на спину, колени согнуты, стопы на коврике.",
+        "Слегка напряги живот без задержки дыхания.",
+        "Поочерёдно отводи руки назад, сохраняя поясницу стабильной.",
+        "Верни руки, дыши спокойно."
+      ],
+      "common_mistakes_draft": [
+        "Не нужно поднимать ноги в воздух; это облегчённый вариант."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Без дополнительного веса. Прекратить при боли, отёке или тяжести в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=dead%20bug%20arms%20only%20beginner%20core%20exercise",
+      "suggested_reps_from_source": "6–8 на руку",
+      "suggested_rest_from_source": "45–75 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/dead_bug_easy/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/dead_bug_easy/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/dead_bug_easy/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/dead_bug_easy/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wu_breath",
+      "title": "Спокойное дыхание и настрой",
+      "primary_group": "Разминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Подготовка к движению.",
+      "instructions": [
+        "Сядь или встань удобно.",
+        "Сделай 3–4 плавных вдоха и выдоха.",
+        "Не задерживай дыхание."
+      ],
+      "common_mistakes_draft": [
+        "Дыши естественно."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=gentle%20breathing%20exercise%20warm%20up",
+      "suggested_reps_from_source": "30 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wu_breath/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wu_breath/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wu_breath/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wu_breath/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wu_neck",
+      "title": "Мягкие повороты шеи",
+      "primary_group": "Разминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Разогрев шеи без резких движений.",
+      "instructions": [
+        "Держи голову ровно.",
+        "Плавно поверни вправо, вернись в центр, затем влево.",
+        "Не запрокидывай голову."
+      ],
+      "common_mistakes_draft": [
+        "Без круговых резких вращений."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=gentle%20neck%20rotation%20warm%20up",
+      "suggested_reps_from_source": "30 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wu_neck/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wu_neck/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wu_neck/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wu_neck/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wu_shoulders",
+      "title": "Круги плечами и локтями",
+      "primary_group": "Разминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Разогрев плеч и рук.",
+      "instructions": [
+        "Медленно вращай плечами назад и вперёд.",
+        "Сделай небольшие круги локтями.",
+        "Держи плечи расслабленными."
+      ],
+      "common_mistakes_draft": [
+        "Амплитуда комфортная."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=shoulder%20circles%20arm%20warm%20up",
+      "suggested_reps_from_source": "40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wu_shoulders/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wu_shoulders/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wu_shoulders/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wu_shoulders/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wu_chest",
+      "title": "Раскрытие грудной клетки",
+      "primary_group": "Разминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Подготовка грудных мышц и лопаток.",
+      "instructions": [
+        "Сядь или встань ровно.",
+        "Медленно разведи руки в стороны, сведя лопатки.",
+        "Верни руки перед собой."
+      ],
+      "common_mistakes_draft": [
+        "Не прогибай поясницу."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=chest%20opener%20dynamic%20warm%20up",
+      "suggested_reps_from_source": "40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wu_chest/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wu_chest/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wu_chest/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wu_chest/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wu_torso",
+      "title": "Мягкие повороты грудного отдела",
+      "primary_group": "Разминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Мобилизация верхней части спины.",
+      "instructions": [
+        "Сядь на устойчивый стул.",
+        "Скрести руки на груди.",
+        "Медленно поверни плечи вправо и влево, таз остаётся неподвижным."
+      ],
+      "common_mistakes_draft": [
+        "Без рывков и задержки дыхания."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=seated%20thoracic%20rotation%20exercise",
+      "suggested_reps_from_source": "40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wu_torso/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wu_torso/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wu_torso/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wu_torso/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wu_elbows",
+      "title": "Сгибание и разгибание рук без веса",
+      "primary_group": "Разминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Подготовка локтей и предплечий.",
+      "instructions": [
+        "Держи локти рядом с корпусом.",
+        "Спокойно сгибай и разгибай руки.",
+        "Добавь мягкие вращения кистями."
+      ],
+      "common_mistakes_draft": [
+        "Без усилия и рывков."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=elbow%20wrist%20warm%20up%20mobility",
+      "suggested_reps_from_source": "40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wu_elbows/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wu_elbows/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wu_elbows/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wu_elbows/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wu_ankles",
+      "title": "Движения стопами сидя",
+      "primary_group": "Разминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Лёгкое движение голеностопов без отягощений.",
+      "instructions": [
+        "Сядь устойчиво.",
+        "Плавно потяни носки на себя и от себя.",
+        "При необходимости чередуй ноги."
+      ],
+      "common_mistakes_draft": [
+        "Только в разрешённой врачом амплитуде."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=seated%20ankle%20pumps%20exercise",
+      "suggested_reps_from_source": "40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wu_ankles/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wu_ankles/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wu_ankles/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wu_ankles/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "wu_leg",
+      "title": "Лёгкое разгибание колен сидя",
+      "primary_group": "Разминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Подготовка мышц бёдер без веса.",
+      "instructions": [
+        "Сядь устойчиво.",
+        "Плавно выпрями одно колено, затем опусти.",
+        "Повтори другой ногой."
+      ],
+      "common_mistakes_draft": [
+        "При тяжести, боли или отёке пропусти."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=seated%20knee%20extension%20no%20weight%20physical%20therapy",
+      "suggested_reps_from_source": "40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/wu_leg/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/wu_leg/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/wu_leg/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/wu_leg/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "cd_breath",
+      "title": "Восстановление дыхания",
+      "primary_group": "Заминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Спокойное завершение занятия.",
+      "instructions": [
+        "Сядь удобно.",
+        "Дыши плавно 40–60 секунд.",
+        "Не задерживай дыхание."
+      ],
+      "common_mistakes_draft": [
+        "Не пытайся делать слишком глубокие вдохи."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=relaxed%20breathing%20cool%20down%20exercise",
+      "suggested_reps_from_source": "45 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/cd_breath/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/cd_breath/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/cd_breath/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/cd_breath/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "cd_chest",
+      "title": "Мягкое растяжение груди",
+      "primary_group": "Заминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Снятие напряжения после жимов.",
+      "instructions": [
+        "Сядь или встань ровно.",
+        "Мягко отведи руки немного назад, раскрывая грудь.",
+        "Удержи 15–20 секунд, без боли."
+      ],
+      "common_mistakes_draft": [
+        "Не выворачивай плечи."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=gentle%20chest%20stretch%20standing",
+      "suggested_reps_from_source": "30–40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/cd_chest/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/cd_chest/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/cd_chest/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/cd_chest/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "cd_shoulder",
+      "title": "Растяжение плеча поперёк груди",
+      "primary_group": "Заминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Мягкая растяжка задней части плеч.",
+      "instructions": [
+        "Приведи одну руку перед грудью.",
+        "Другой рукой слегка поддержи её выше локтя.",
+        "Удержи 15 секунд и поменяй руку."
+      ],
+      "common_mistakes_draft": [
+        "Не дави на локтевой сустав."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=cross%20body%20shoulder%20stretch",
+      "suggested_reps_from_source": "30–40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/cd_shoulder/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/cd_shoulder/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/cd_shoulder/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/cd_shoulder/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "cd_back",
+      "title": "Мягкое округление и выпрямление спины сидя",
+      "primary_group": "Заминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Снижение напряжения мышц спины.",
+      "instructions": [
+        "Сядь на устойчивый стул.",
+        "Медленно слегка округли верх спины.",
+        "Вернись к нейтральному положению."
+      ],
+      "common_mistakes_draft": [
+        "Не делай глубоких наклонов и не задерживай дыхание."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=seated%20cat%20cow%20gentle%20spine%20stretch",
+      "suggested_reps_from_source": "40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/cd_back/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/cd_back/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/cd_back/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/cd_back/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    },
+    {
+      "id": "cd_leg",
+      "title": "Расслабление ног и движение стопами",
+      "primary_group": "Заминка",
+      "equipment": [
+        "Без инвентаря"
+      ],
+      "description": "Лёгкое движение для ног после занятия.",
+      "instructions": [
+        "Сядь удобно.",
+        "Сделай несколько плавных движений стопами на себя и от себя.",
+        "Расслабь мышцы ног."
+      ],
+      "common_mistakes_draft": [
+        "Не удерживай длительную статическую растяжку ног через дискомфорт."
+      ],
+      "common_mistakes_review_status": "needs_review",
+      "alternatives": [],
+      "alternatives_review_status": "needs_review",
+      "safety_flag": "Щадящее",
+      "safety_note": "Разминка/заминка не должна вызывать боль, натуживание или усиливать симптомы в ноге.",
+      "original_external_reference": "https://www.youtube.com/results?search_query=seated%20ankle%20pumps%20cool%20down",
+      "suggested_reps_from_source": "40 сек",
+      "suggested_rest_from_source": "0–15 с",
+      "media": {
+        "status": "not_created",
+        "keyframes": [
+          {
+            "position": "start",
+            "path": "media/cd_leg/start.webp",
+            "status": "pending"
+          },
+          {
+            "position": "mid",
+            "path": "media/cd_leg/middle.webp",
+            "status": "pending"
+          },
+          {
+            "position": "end",
+            "path": "media/cd_leg/finish.webp",
+            "status": "pending"
+          }
+        ],
+        "animation": {
+          "path": "media/cd_leg/loop.mp4",
+          "status": "pending",
+          "loop": true,
+          "muted": true
+        },
+        "rights": {
+          "license": "not_verified",
+          "author": null,
+          "source_url": null,
+          "attribution": null
+        },
+        "technique_review": {
+          "status": "pending",
+          "reviewer": null,
+          "review_date": null
+        }
+      }
+    }
+  ]
+}
