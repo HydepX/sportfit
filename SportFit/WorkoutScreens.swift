@@ -168,10 +168,30 @@ private struct WorkoutExerciseRow: View {
 struct ProgressScreen: View {
     @EnvironmentObject private var store: FitnessStore
     @EnvironmentObject private var engine: WorkoutEngine
+    @EnvironmentObject private var measurements: MeasurementsStore
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    NavigationLink {
+                        MeasurementsScreen()
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Измерения тела").font(.headline)
+                                if let weight = measurements.latest?.weightKg {
+                                    Text("\(weight.formatted(.number.precision(.fractionLength(1)))) кг — последний вес")
+                                        .font(.subheadline).foregroundStyle(.secondary)
+                                } else {
+                                    Text("Добавь первый вес, талию и процент жира")
+                                        .font(.subheadline).foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right").foregroundStyle(.mint)
+                        }.padding().background(.white.opacity(0.07),
+                                                in: RoundedRectangle(cornerRadius: 18))
+                    }.buttonStyle(.plain)
                     Text("Журнал тренировок").font(.title2.bold())
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Отмеченные подходы").font(.subheadline).foregroundStyle(.secondary)
