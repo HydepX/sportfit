@@ -81,6 +81,17 @@ import SwiftUI
 
     func exercise(_ id: String) -> Exercise? { catalog?.exercises.first { $0.id == id } }
 
+    /// Conservative default: conditional movements are never treated as approved.
+    /// A medical clearance workflow may be added later; until then use the source fallback.
+    func resolvedExerciseId(_ id: String) -> String {
+        program?.conditionalSubstitutions?[id]?.fallback ?? id
+    }
+
+    func substitutionNote(_ id: String) -> String? {
+        guard let rule = program?.conditionalSubstitutions?[id] else { return nil }
+        return "В плане: \(id). \(rule.reason). Используется разрешённая альтернатива."
+    }
+
     func phase(week: Int) -> ProgramPhase? {
         program?.phases.first { $0.weekStart <= week && week <= $0.weekEnd }
     }
