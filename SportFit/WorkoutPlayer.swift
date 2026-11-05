@@ -8,7 +8,6 @@ struct WorkoutPlayer: View {
     @State private var weightText = "0"
     @State private var secondsText = "40"
     @State private var feeling = "Как раз"
-    @State private var skipReason = "Не подошло по самочувствию"
     @State private var skipSheet = false
     @State private var showDiscard = false
     @State private var currentSecond = Date()
@@ -198,7 +197,7 @@ struct WorkoutPlayer: View {
                 .font(.title2.bold()).foregroundStyle(.mint)
             Text("\(draft.completedSetCount) подходов · \(draft.skippedCount) пропущено")
                 .foregroundStyle(.secondary)
-            Text("Активное время: \(timeString(draft.activeSeconds(now: currentSecond)))")
+            Text("Время занятия без пауз: \(timeString(draft.activeSeconds(now: currentSecond)))")
             Text("Как ты себя чувствуешь?").font(.headline)
             Picker("Самочувствие", selection: $feeling) {
                 ForEach(["Сложно", "Как раз", "Легко"], id: \.self) { option in
