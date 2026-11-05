@@ -180,15 +180,12 @@ final class WorkoutEngine: ObservableObject {
         commit { d in
             d.movements[d.currentIndex].sets.append(
                 ActualSet(reps: reps, weightKg: weight, seconds: seconds, completedAt: Date()))
-            let wasLast = d.currentIndex == d.movements.count - 1
-            if wasLast {
-                d.phase = .summary
-            } else {
-                d.phase = .rest
-                d.restSecondsLeft = 45
-                d.restEndsAt = Date().addingTimeInterval(45)
-                d.restAfterLastSet = true
-            }
+            // Never assume that one set is the entire prescription.
+            // The user chooses whether to add another set or move on.
+            d.phase = .rest
+            d.restSecondsLeft = 45
+            d.restEndsAt = Date().addingTimeInterval(45)
+            d.restAfterLastSet = false
         }
     }
 
@@ -264,7 +261,10 @@ final class WorkoutEngine: ObservableObject {
     func tick() {
         guard let d = draft, d.phase == .rest,
               let end = d.restEndsAt, end <= Date() else { return }
-        nextExercise()
+        commit {
+            $0.phase = .active
+            $0.restEndsAt = nil
+        }
     }
     func restRemaining() -> Int {
         guard let d = draft, d.phase == .rest, let end = d.restEndsAt else { return 0 }
