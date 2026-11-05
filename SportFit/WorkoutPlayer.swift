@@ -163,6 +163,10 @@ struct WorkoutPlayer: View {
                                 weight: movement.isTimed ? nil : kg,
                                 seconds: movement.isTimed ? Int(secondsText) : nil)
             }.buttonStyle(SportPrimaryButton())
+            Button(draft.currentIndex == draft.movements.count - 1 ? "Завершить занятие" : "Следующее упражнение") {
+                engine.nextExercise()
+            }
+            .buttonStyle(.bordered)
             HStack {
                 Button("Пауза") { engine.pause() }
                 Spacer()
@@ -182,7 +186,7 @@ struct WorkoutPlayer: View {
             }
             Button("Добавить ещё подход") { engine.addAnotherSet() }
                 .buttonStyle(.bordered)
-            Button("Следующее упражнение") { engine.nextExercise() }
+            Button(draft.currentIndex == draft.movements.count - 1 ? "Завершить занятие" : "Следующее упражнение") { engine.nextExercise() }
                 .buttonStyle(SportPrimaryButton())
             Button("Пауза") { engine.pause() }.foregroundStyle(.mint)
         case .paused:
