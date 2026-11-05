@@ -71,7 +71,7 @@ struct WorkoutDraft: Codable, Identifiable {
         self.elapsedPausedSeconds = 0
         self.pauseStartedAt = nil
         self.restEndsAt = nil
-        self.restSecondsLeft = 45
+        self.restSecondsLeft = 0
         self.restAfterLastSet = false
         self.finishedEarly = false
     }

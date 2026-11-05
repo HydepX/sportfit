@@ -19,6 +19,7 @@ targets:
         type: folder
     settings:
       base:
+        CODE_SIGN_ENTITLEMENTS: ""
         PRODUCT_BUNDLE_IDENTIFIER: com.hydepx.sportfit
         INFOPLIST_KEY_CFBundleDisplayName: SportFit
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES

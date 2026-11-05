@@ -5,5 +5,8 @@ settings:
     SWIFT_ACTIVE_COMPILATION_CONDITIONS: '$(inherited) SPORTFIT_HEALTHKIT'
 targets:
   SportFit:
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: SportFit/SportFit.entitlements
     entitlements:
       path: SportFit/SportFit.entitlements
