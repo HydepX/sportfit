@@ -292,7 +292,7 @@ struct SettingsScreen: View {
                     store.importJSON(from: url, kind: .program)
                 }
             }
-            .fileExporter(isPresented: $exportingBackup, document: $backupDocument,
+            .fileExporter(isPresented: $exportingBackup, document: backupDocument,
                           contentType: .json, defaultFilename: "sportfit-backup") { result in
                 if case .failure(let error) = result {
                     store.message = "Не удалось экспортировать копию: \(error.localizedDescription)"
