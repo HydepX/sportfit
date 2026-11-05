@@ -3,7 +3,9 @@ import UniformTypeIdentifiers
 
 struct CalendarScreen: View {
     @EnvironmentObject private var store: FitnessStore
+    @EnvironmentObject private var engine: WorkoutEngine
     @State private var selectedDate = Date()
+    @State private var showPlayer = false
 
     private var currentWeekMonday: Date {
         let weekday = Calendar.current.component(.weekday, from: selectedDate)
@@ -69,13 +71,33 @@ struct CalendarScreen: View {
                            let phase = store.phase(week: week) {
                             Text(phase.subtitle).font(.subheadline).foregroundStyle(.secondary)
                         }
+                        if let draft = engine.draft {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Label("Незавершённая тренировка", systemImage: "pause.circle.fill")
+                                    .font(.headline).foregroundStyle(.mint)
+                                Text("\(draft.title) · \(draft.date)")
+                                    .font(.subheadline)
+                                Text("Отмечено подходов: \(draft.completedSetCount)")
+                                    .font(.caption).foregroundStyle(.secondary)
+                                Button("Продолжить тренировку") { showPlayer = true }
+                                    .buttonStyle(SportPrimaryButton())
+                            }
+                            .padding(16).background(Color.mint.opacity(0.12),
+                                                    in: RoundedRectangle(cornerRadius: 20))
+                        }
                         if let day = store.workout(on: selectedDate) {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text(day.name).font(.title2.bold())
                                 Text("\(day.exerciseIds.count) упражнений, включая разминку и заминку")
                                     .font(.subheadline).foregroundStyle(.secondary)
-                                Text("Нажимай на упражнение, чтобы открыть технику. Отмечай завершённые подходы ниже.")
+                                Text("Перед началом можно посмотреть технику любого упражнения.")
                                     .font(.footnote).foregroundStyle(.secondary)
+                                Button("▶ Начать тренировку") {
+                                    engine.start(day: day, date: selectedDate, store: store)
+                                    if engine.draft != nil { showPlayer = true }
+                                }
+                                .buttonStyle(SportPrimaryButton())
+                                .disabled(engine.draft != nil)
                                 ForEach(Array(day.exerciseIds.enumerated()), id: \.offset) { index, id in
                                     WorkoutExerciseRow(index: index + 1, id: id, date: selectedDate)
                                     if index < day.exerciseIds.count - 1 { Divider() }
@@ -102,6 +124,11 @@ struct CalendarScreen: View {
             }
             .background(Color(red: 0.035, green: 0.055, blue: 0.086))
             .navigationTitle("Тренировка")
+            .sheet(isPresented: $showPlayer) {
+                WorkoutPlayer()
+                    .environmentObject(engine)
+                    .environmentObject(store)
+            }
         }
     }
 }
@@ -114,7 +141,6 @@ private struct WorkoutExerciseRow: View {
 
     var body: some View {
         let safeId = store.resolvedExerciseId(id)
-        let completed = store.setCount(exerciseId: safeId, day: date)
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("\(index)").font(.headline).foregroundStyle(.mint).frame(width: 25)
@@ -134,26 +160,14 @@ private struct WorkoutExerciseRow: View {
             if let substitution = store.substitutionNote(id) {
                 Text(substitution).font(.caption2).foregroundStyle(.yellow).padding(.leading, 33)
             }
-            HStack(spacing: 12) {
-                Button {
-                    store.undoSet(exerciseId: safeId, day: date)
-                } label: {
-                    Image(systemName: "minus.circle").font(.title3)
-                }.disabled(completed == 0)
-                Text("Подходов отмечено: \(completed)")
-                    .font(.caption).monospacedDigit()
-                Button {
-                    store.markSet(exerciseId: safeId, day: date)
-                } label: {
-                    Image(systemName: "plus.circle.fill").font(.title3)
-                }
-            }.tint(.mint).padding(.leading, 33)
+
         }.padding(.vertical, 7)
     }
 }
 
 struct ProgressScreen: View {
     @EnvironmentObject private var store: FitnessStore
+    @EnvironmentObject private var engine: WorkoutEngine
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -161,12 +175,27 @@ struct ProgressScreen: View {
                     Text("Журнал тренировок").font(.title2.bold())
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Отмеченные подходы").font(.subheadline).foregroundStyle(.secondary)
-                        Text("\(store.completedSets.count)").font(.system(size: 45, weight: .bold))
+                        Text("\(engine.history.reduce(0) { $0 + $1.totalSets } + store.completedSets.count)")
+                            .font(.system(size: 45, weight: .bold))
                         Text("Сохранены локально на iPhone")
                             .font(.footnote).foregroundStyle(.secondary)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                         .padding().background(Color.white.opacity(0.07),
                                                in: RoundedRectangle(cornerRadius: 20))
+                    ForEach(engine.history.sorted(by: { $0.finishedAt > $1.finishedAt })) { workout in
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(workout.title).font(.headline)
+                            HStack {
+                                Text(workout.date)
+                                Spacer()
+                                Text("\(workout.totalSets) подходов")
+                            }.font(.caption).foregroundStyle(.secondary)
+                            Text("Активное время: \(workout.durationSeconds / 60) мин · пропущено: \(workout.skippedCount)")
+                                .font(.caption).foregroundStyle(.mint)
+                        }.padding().frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.white.opacity(0.07),
+                                        in: RoundedRectangle(cornerRadius: 14))
+                    }
                     ForEach(Array(Dictionary(grouping: store.completedSets, by: \.date).keys.sorted().reversed()), id: \.self) { date in
                         let count = store.completedSets.filter { $0.date == date }.count
                         HStack {
