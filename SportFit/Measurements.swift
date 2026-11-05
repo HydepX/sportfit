@@ -75,6 +75,13 @@ struct MeasurementsScreen: View {
     @EnvironmentObject private var store: MeasurementsStore
     @State private var showNew = false
 
+    private func measurementDetails(_ entry: BodyMeasurement) -> String {
+        var parts = ["Вручную"]
+        if let waist = entry.waistCm { parts.append("талия \(waist) см") }
+        if let fat = entry.bodyFatPercent { parts.append("жир \(fat)%") }
+        return parts.joined(separator: " · ")
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -129,8 +136,7 @@ struct MeasurementsScreen: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(entry.measuredAt, format: .dateTime.day().month().year())
                                 .font(.headline)
-                            Text("Вручную" + (entry.waistCm.map { " · талия \($0) см" } ?? "")
-                                 + (entry.bodyFatPercent.map { " · жир \($0)%" } ?? ""))
+                            Text(measurementDetails(entry))
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer()
