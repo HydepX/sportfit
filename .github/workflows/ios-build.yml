@@ -1,15 +1,22 @@
-name: iOS build (simulator and unsigned iPhone IPA)
+name: iOS tests and unsigned iPhone IPA
 on:
   push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
-
+permissions:
+  contents: read
+concurrency:
+  group: sportfit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
+  core:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/validate_data.py
+      - run: swift test --parallel
+      - run: python3 -m unittest discover -s Tests/Python -v
   build:
     runs-on: macos-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Install XcodeGen
@@ -18,21 +25,16 @@ jobs:
         run: xcodegen generate --spec project.yml
       - name: Validate bundled data
         run: python3 scripts/validate_data.py
-      - name: Build for simulator (no code signing)
-        run: |
-          xcodebuild -project SportFit.xcodeproj \
-            -scheme SportFit -configuration Debug \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath "$RUNNER_TEMP/SportFitSimulator" \
-            CODE_SIGNING_ALLOWED=NO build
-      - name: Build for physical iPhone (unsigned)
+      - name: Run iPhone simulator tests
+        run: python3 scripts/test_simulator.py
+      - name: Build for physical iPhone (unsigned, no HealthKit capability)
         run: |
           xcodebuild -project SportFit.xcodeproj \
             -scheme SportFit -configuration Debug \
             -sdk iphoneos -destination 'generic/platform=iOS' \
             -derivedDataPath "$RUNNER_TEMP/SportFitDevice" \
             CODE_SIGNING_ALLOWED=NO build
-      - name: Package unsigned IPA
+      - name: Package and validate unsigned IPA
         run: |
           set -euo pipefail
           APP="$RUNNER_TEMP/SportFitDevice/Build/Products/Debug-iphoneos/SportFit.app"
@@ -40,11 +42,29 @@ jobs:
           mkdir -p "$RUNNER_TEMP/ipa/Payload"
           cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/SportFit.app"
           (cd "$RUNNER_TEMP/ipa" && zip -qry "$GITHUB_WORKSPACE/SportFit-unsigned.ipa" Payload)
-          unzip -l "$GITHUB_WORKSPACE/SportFit-unsigned.ipa" | grep 'Payload/SportFit.app/'
+          python3 scripts/verify_ipa.py SportFit-unsigned.ipa
+          shasum -a 256 SportFit-unsigned.ipa > SportFit-unsigned.ipa.sha256
       - name: Upload unsigned iPhone IPA
         uses: actions/upload-artifact@v4
         with:
-          name: SportFit-unsigned-iphone
-          path: SportFit-unsigned.ipa
+          name: SportFit-unsigned-iphone-${{ github.sha }}
+          path: |
+            SportFit-unsigned.ipa
+            SportFit-unsigned.ipa.sha256
           if-no-files-found: error
           retention-days: 14
+      - name: Preserve simulator test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulator-test-results
+          path: ${{ runner.temp }}/SportFitTests.xcresult
+          if-no-files-found: warn
+      - name: Compile optional HealthKit integration separately
+        run: |
+          xcodegen generate --spec project-healthkit.yml
+          xcodebuild -project SportFit.xcodeproj \
+            -scheme SportFit -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/SportFitHealthKit" \
+            CODE_SIGNING_ALLOWED=NO build

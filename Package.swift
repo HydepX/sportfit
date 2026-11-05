@@ -1,0 +1,15 @@
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "SportFitCore",
+    products: [.library(name: "SportFitCore", targets: ["SportFitCore"])],
+    targets: [
+        .target(name: "SportFitCore", path: "SportFit", exclude: [
+            "Analytics.swift", "Backup.swift", "ExerciseMediaView.swift", "FitnessStore.swift",
+            "Health.swift", "Measurements.swift", "Profile.swift", "RootView.swift", "SportFitApp.swift",
+            "WorkoutEngine.swift", "WorkoutPlayer.swift", "WorkoutScreens.swift", "Resources", "SportFit.entitlements"
+        ], sources: ["Models.swift", "Validation.swift", "LocalFiles.swift", "WorkoutModels.swift", "BodyMeasurement.swift", "UserProfile.swift"]),
+        .testTarget(name: "SportFitCoreTests", dependencies: ["SportFitCore"], path: "Tests/Core")
+    ]
+)

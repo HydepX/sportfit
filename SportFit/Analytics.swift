@@ -1,0 +1,147 @@
+import SwiftUI
+import Charts
+
+enum AnalyticsPeriod: String, CaseIterable, Identifiable {
+    case week = "Неделя", month = "Месяц", quarter = "Квартал", year = "Год", all = "Всё"
+    var id: String { rawValue }
+    func contains(_ date: Date, now: Date = Date()) -> Bool {
+        let component: Calendar.Component
+        let amount: Int
+        switch self {
+        case .week: component = .day; amount = -7
+        case .month: component = .month; amount = -1
+        case .quarter: component = .month; amount = -3
+        case .year: component = .year; amount = -1
+        case .all: return date <= now
+        }
+        let start = SportDate.calendar.date(byAdding: component, value: amount, to: now) ?? now
+        return date >= start && date <= now
+    }
+}
+
+struct WorkoutAnalyticsScreen: View {
+    @EnvironmentObject private var engine: WorkoutEngine
+    @EnvironmentObject private var store: FitnessStore
+    @EnvironmentObject private var profile: ProfileStore
+    @State private var period = AnalyticsPeriod.all
+    @State private var exerciseId = ""
+    private var workouts: [WorkoutResult] {
+        engine.history.filter { period.contains($0.finishedAt) &&
+            (exerciseId.isEmpty || $0.movements.contains { $0.exerciseId == exerciseId && !$0.sets.isEmpty }) }
+    }
+    private var sets: [ActualSet] {
+        workouts.flatMap(\.movements).filter { exerciseId.isEmpty || $0.exerciseId == exerciseId }.flatMap(\.sets)
+    }
+    var body: some View {
+        List {
+            Picker("Период", selection: $period) {
+                ForEach(AnalyticsPeriod.allCases) { Text($0.rawValue).tag($0) }
+            }
+            Picker("Упражнение", selection: $exerciseId) {
+                Text("Все").tag("")
+                ForEach(store.catalog?.exercises ?? []) { Text($0.title).tag($0.id) }
+            }
+            Section("Реальные результаты") {
+                LabeledContent("Занятий с результатами", value: String(workouts.filter { $0.totalSets > 0 }.count))
+                LabeledContent("Досрочно завершено", value: String(workouts.filter(\.finishedEarly).count))
+                LabeledContent("Подходов", value: String(sets.count))
+                LabeledContent("Время, мин", value: String(workouts.reduce(0) { $0 + $1.durationSeconds } / 60))
+                LabeledContent("Пропущено упражнений", value: String(workouts.reduce(0) { $0 + $1.skippedCount }))
+            }
+            if !exerciseId.isEmpty && sets.count > 1 {
+                Section("Рабочий вес, кг") {
+                    Chart(sets) { item in
+                        if let kg = item.weightKg {
+                            PointMark(x: .value("Дата", item.completedAt), y: .value("кг", kg))
+                        }
+                    }.frame(height: 180)
+                    Chart(sets) { item in
+                        if let reps = item.reps {
+                            PointMark(x: .value("Дата", item.completedAt), y: .value("Повторы", reps))
+                        }
+                    }.frame(height: 180)
+                }
+            }
+            if workouts.isEmpty { Text("За выбранный период результатов пока нет") }
+            Section("Кварталы и версии программ") {
+                ForEach(Array((store.archivedPrograms + [store.program].compactMap { $0 }).enumerated()), id: \.offset) { _, program in
+                    NavigationLink {
+                        ProgramReportScreen(program: program)
+                    } label: {
+                        VStack(alignment: .leading) {
+                            Text(program.programId)
+                            Text("\(program.startDate) — \(program.endDate)").font(.caption)
+                        }
+                    }
+                }
+            }
+            ForEach(workouts.sorted { $0.finishedAt > $1.finishedAt }) { workout in
+                NavigationLink { WorkoutResultScreen(result: workout) } label: {
+                    VStack(alignment: .leading) {
+                        Text(workout.title)
+                        Text("\(workout.date) · \(workout.totalSets) подходов").font(.caption)
+                    }
+                }
+            }
+        }.navigationTitle("Статистика")
+    }
+}
+
+struct WorkoutResultScreen: View {
+    let result: WorkoutResult
+    var body: some View {
+        List {
+            Text(result.date)
+            Text(result.finishedEarly ? "Завершено досрочно" : "Занятие завершено")
+            ForEach(result.movements) { movement in
+                Section(movement.title) {
+                    Text("План: \(movement.target)")
+                    if movement.skipped { Text("Пропущено: \(movement.skipReason ?? "Без причины")") }
+                    if movement.sets.isEmpty && !movement.skipped { Text("Нет выполненных подходов") }
+                    ForEach(movement.sets) { actual in
+                        if let seconds = actual.seconds { Text("\(seconds) сек") }
+                        else { Text("\(actual.reps ?? 0) повторов · \((actual.weightKg ?? 0).formatted()) кг") }
+                    }
+                }
+            }
+        }.navigationTitle(result.title)
+    }
+}
+
+struct ProgramReportScreen: View {
+    @EnvironmentObject private var engine: WorkoutEngine
+    @EnvironmentObject private var profile: ProfileStore
+    let program: TrainingProgram
+    private var results: [WorkoutResult] { engine.history.filter { $0.programId == program.programId } }
+    private var plannedDates: [String] {
+        guard let start = SportDate.from(program.startDate) else { return [] }
+        return (0..<(program.durationWeeks * 7)).compactMap { offset in
+            guard let date = SportDate.calendar.date(byAdding: .day, value: offset, to: start), date <= Date(),
+                  let day = program.day(on: date) else { return nil }
+            _ = day
+            return SportDate.key(date)
+        }
+    }
+    var body: some View {
+        List {
+            Text("\(program.startDate) — \(program.endDate)")
+            let completed = Set(results.filter { !$0.finishedEarly && $0.totalSets > 0 && $0.movements.allSatisfy { !$0.skipped && !$0.sets.isEmpty } }.map(\.date))
+            let due = Set(plannedDates)
+            LabeledContent("Полностью выполнено", value: String(completed.intersection(due).count))
+            LabeledContent("Запланировано к сегодня", value: String(due.count))
+            if !due.isEmpty {
+                LabeledContent("Соблюдение программы", value: "\(Int(Double(completed.intersection(due).count) / Double(due.count) * 100))%")
+            }
+            LabeledContent("Явно пропущено", value: String(profile.changes.filter { $0.programId == program.programId && $0.skipped }.count))
+            LabeledContent("Перенесено", value: String(profile.changes.filter { $0.programId == program.programId && $0.movedTo != nil }.count))
+            ForEach(program.phases) { phase in
+                Section(phase.title) {
+                    Text(phase.subtitle)
+                    ForEach(Array(phase.days.enumerated()), id: \.offset) { _, day in
+                        Text("\(day.dayOfWeek): \(day.name)")
+                    }
+                }
+            }
+        }.navigationTitle("Отчёт программы")
+    }
+}

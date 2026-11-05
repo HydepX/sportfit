@@ -1,99 +1,6 @@
 import Foundation
 import SwiftUI
 
-enum TrainingPhase: String, Codable {
-    case prepare, active, rest, paused, summary
-}
-
-struct ActualSet: Codable, Identifiable {
-    var id: UUID = UUID()
-    let reps: Int?
-    let weightKg: Double?
-    let seconds: Int?
-    let completedAt: Date
-}
-
-struct WorkoutMovement: Codable, Identifiable {
-    let id: UUID
-    let sourceId: String
-    let exerciseId: String
-    let title: String
-    let isTimed: Bool
-    let target: String
-    var sets: [ActualSet] = []
-    var skipped: Bool = false
-    var skipReason: String? = nil
-
-    init(sourceId: String, exercise: Exercise) {
-        id = UUID()
-        self.sourceId = sourceId
-        exerciseId = exercise.id
-        title = exercise.title
-        isTimed = exercise.primaryGroup == "Разминка" || exercise.primaryGroup == "Заминка"
-            || (exercise.suggestedRepsFromSource ?? "").localizedCaseInsensitiveContains("сек")
-            || (exercise.suggestedRepsFromSource ?? "").localizedCaseInsensitiveContains("мин")
-        target = exercise.suggestedRepsFromSource ?? "По самочувствию"
-    }
-}
-
-struct WorkoutDraft: Codable, Identifiable {
-    let id: UUID
-    let date: String
-    let programId: String
-    let title: String
-    let startedAt: Date
-    var currentIndex: Int
-    var phase: TrainingPhase
-    var movements: [WorkoutMovement]
-    var elapsedPausedSeconds: TimeInterval
-    var pauseStartedAt: Date?
-    var restEndsAt: Date?
-    var restSecondsLeft: Int
-    var restAfterLastSet: Bool
-    var finishedEarly: Bool
-
-    init(date: String, programId: String, title: String, movements: [WorkoutMovement]) {
-        id = UUID()
-        self.date = date
-        self.programId = programId
-        self.title = title
-        self.startedAt = Date()
-        self.currentIndex = 0
-        self.phase = .prepare
-        self.movements = movements
-        self.elapsedPausedSeconds = 0
-        self.pauseStartedAt = nil
-        self.restEndsAt = nil
-        self.restSecondsLeft = 45
-        self.restAfterLastSet = false
-        self.finishedEarly = false
-    }
-
-    var completedSetCount: Int { movements.reduce(0) { $0 + $1.sets.count } }
-    var skippedCount: Int { movements.filter(\.skipped).count }
-
-    func activeSeconds(now: Date = Date()) -> Int {
-        let pause = pauseStartedAt.map { now.timeIntervalSince($0) } ?? 0
-        return max(0, Int(now.timeIntervalSince(startedAt) - elapsedPausedSeconds - pause))
-    }
-}
-
-struct WorkoutResult: Codable, Identifiable {
-    let id: UUID
-    let date: String
-    let programId: String
-    let title: String
-    let startedAt: Date
-    let finishedAt: Date
-    let durationSeconds: Int
-    let feeling: String?
-    let finishedEarly: Bool
-    let movements: [WorkoutMovement]
-
-    var totalSets: Int { movements.reduce(0) { $0 + $1.sets.count } }
-    var skippedCount: Int { movements.filter(\.skipped).count }
-}
-
 @MainActor
 final class WorkoutEngine: ObservableObject {
     @Published private(set) var draft: WorkoutDraft?
@@ -103,34 +10,48 @@ final class WorkoutEngine: ObservableObject {
     private let draftFile = "active_workout.v1.json"
     private let historyFile = "workout_history.v1.json"
 
-    init() {
-        draft = load(WorkoutDraft.self, file: draftFile)
+    private let directory: URL
+    private var storageHealthy = true
+    var canExport: Bool { storageHealthy && LocalFiles.recoveryError == nil }
+
+    init(directory: URL = LocalFiles.directory) {
+        self.directory = directory
+        LocalFiles.recoverIfNeeded()
+        draft = load(WorkoutDraft?.self, file: draftFile) ?? nil
         history = load([WorkoutResult].self, file: historyFile) ?? []
-        // After a process restart, require explicit resume. Preserve any prior pause.
-        if var current = draft, current.phase != .summary {
-            let now = Date()
-            if let previousPause = current.pauseStartedAt {
-                current.elapsedPausedSeconds += max(0, now.timeIntervalSince(previousPause))
-            }
-            current.phase = .paused
-            current.restEndsAt = nil
-            current.pauseStartedAt = now
-            draft = current
-            save(current, file: draftFile)
+        // Absolute rest deadlines continue across screen lock and process restart.
+        // A pre-existing pause remains paused; never silently discard the rest state.
+        if let id = draft?.id, history.contains(where: { $0.id == id }) {
+            draft = nil
+            try? FileManager.default.removeItem(at: url(draftFile))
         }
+        if let current = draft, !current.movements.indices.contains(current.currentIndex) {
+            storageHealthy = false
+            notice = "Повреждён индекс черновика; восстанови резервную копию"
+        }
+        tick()
     }
 
     private func url(_ name: String) -> URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent(name)
+        directory.appendingPathComponent(name)
     }
     private func load<T: Decodable>(_ type: T.Type, file: String) -> T? {
-        guard let data = try? Data(contentsOf: url(file)) else { return nil }
-        return try? JSONDecoder().decode(type, from: data)
+        guard FileManager.default.fileExists(atPath: url(file).path) else { return nil }
+        do { return try JSONDecoder().decode(type, from: Data(contentsOf: url(file))) }
+        catch {
+            storageHealthy = false
+            notice = "Не удалось прочитать \(file). Исходный файл сохранён; новые записи заблокированы: \(error.localizedDescription)"
+            return nil
+        }
     }
     @discardableResult
     private func save<T: Encodable>(_ value: T, file: String) -> Bool {
+        guard storageHealthy, LocalFiles.recoveryError == nil else {
+            notice = LocalFiles.recoveryError ?? "Сначала восстанови повреждённые данные из копии"
+            return false
+        }
         do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             let data = try JSONEncoder().encode(value)
             try data.write(to: url(file), options: .atomic)
             return true
@@ -139,30 +60,37 @@ final class WorkoutEngine: ObservableObject {
             return false
         }
     }
-    private func commit(_ update: (inout WorkoutDraft) -> Void) {
-        guard var d = draft else { return }
+    @discardableResult
+    private func commit(_ update: (inout WorkoutDraft) -> Void) -> Bool {
+        guard var d = draft else { return false }
         update(&d)
+        guard save(d, file: draftFile) else { return false }
         draft = d
-        save(d, file: draftFile)
+        return true
     }
 
     func start(day: ProgramDay, date: Date, store: FitnessStore) {
         guard draft == nil else { notice = "Сначала заверши или удали незавершённую тренировку"; return }
+        guard !history.contains(where: { $0.programId == store.program?.programId && $0.date == SportDate.key(date) }) else {
+            notice = "За этот день уже есть результат. Открой его в журнале"; return
+        }
         let movements = day.exerciseIds.compactMap { sourceId -> WorkoutMovement? in
             guard let exercise = store.exercise(store.resolvedExerciseId(sourceId)) else { return nil }
-            return WorkoutMovement(sourceId: sourceId, exercise: exercise)
+            return WorkoutMovement(sourceId: sourceId, exercise: exercise, prescription: store.program?.prescriptions?[sourceId])
         }
-        guard movements.count == day.exerciseIds.count, let programId = store.program?.programId else {
+        guard !movements.isEmpty, movements.count == day.exerciseIds.count, let programId = store.program?.programId else {
             notice = "Не удалось сопоставить упражнения с библиотекой"
             return
         }
         let d = WorkoutDraft(date: SportDate.key(date), programId: programId,
                              title: day.name, movements: movements)
-        draft = d
-        save(d, file: draftFile)
+        if save(d, file: draftFile) { draft = d }
     }
 
-    func begin() { commit { $0.phase = .active } }
+    func begin() {
+        guard draft?.phase == .prepare else { return }
+        commit { $0.phase = .active }
+    }
 
     func complete(reps: Int?, weight: Double?, seconds: Int?) {
         guard let d = draft, d.phase == .active, d.movements.indices.contains(d.currentIndex) else { return }
@@ -172,7 +100,7 @@ final class WorkoutEngine: ObservableObject {
                 notice = "Укажи длительность от 1 до 3600 секунд"; return
             }
         } else {
-            guard let reps, (0...300).contains(reps),
+            guard let reps, (1...300).contains(reps),
                   let weight, (0...250).contains(weight) else {
                 notice = "Проверь повторения (0–300) и вес (0–250 кг)"; return
             }
@@ -182,9 +110,13 @@ final class WorkoutEngine: ObservableObject {
                 ActualSet(reps: reps, weightKg: weight, seconds: seconds, completedAt: Date()))
             // Never assume that one set is the entire prescription.
             // The user chooses whether to add another set or move on.
-            d.phase = .rest
-            d.restSecondsLeft = 45
-            d.restEndsAt = Date().addingTimeInterval(45)
+            d.movements[d.currentIndex].skipped = false
+            d.movements[d.currentIndex].skipReason = nil
+            let rest = movement.prescription?.restSeconds ?? movement.sourceRestSeconds
+            // Missing prescriptions are explicit; never invent the same rest for every exercise.
+            d.restSecondsLeft = rest ?? 0
+            d.phase = (rest ?? 0) > 0 ? .rest : .active
+            d.restEndsAt = rest.flatMap { $0 > 0 ? Date().addingTimeInterval(Double($0)) : nil }
             d.restAfterLastSet = false
         }
     }
@@ -199,9 +131,9 @@ final class WorkoutEngine: ObservableObject {
     }
 
     func nextExercise() {
-        guard let d = draft else { return }
+        guard let d = draft, d.phase != .paused, d.phase != .summary else { return }
         if d.currentIndex + 1 >= d.movements.count {
-            commit { $0.phase = .summary; $0.restEndsAt = nil }
+            commit { $0.phase = .summary; $0.endedAt = Date(); $0.restEndsAt = nil }
         } else {
             commit {
                 $0.currentIndex += 1
@@ -212,7 +144,7 @@ final class WorkoutEngine: ObservableObject {
     }
 
     func move(by delta: Int) {
-        guard let d = draft else { return }
+        guard let d = draft, d.phase != .summary, d.phase != .paused else { return }
         let target = d.currentIndex + delta
         guard d.movements.indices.contains(target) else { return }
         commit {
@@ -223,12 +155,11 @@ final class WorkoutEngine: ObservableObject {
     }
 
     func skip(reason: String) {
-        guard draft != nil else { return }
-        commit {
+        guard let d = draft, d.phase != .summary, d.phase != .paused, d.movements.indices.contains(d.currentIndex) else { return }
+        if commit({
             $0.movements[$0.currentIndex].skipped = true
             $0.movements[$0.currentIndex].skipReason = reason
-        }
-        nextExercise()
+        }) { nextExercise() }
     }
 
     func pause() {
@@ -237,6 +168,7 @@ final class WorkoutEngine: ObservableObject {
             if current.phase == .rest {
                 current.restSecondsLeft = max(0, Int(ceil(current.restEndsAt?.timeIntervalSinceNow ?? 0)))
             }
+            current.pausedPhase = current.phase
             current.restEndsAt = nil
             current.pauseStartedAt = Date()
             current.phase = .paused
@@ -247,8 +179,13 @@ final class WorkoutEngine: ObservableObject {
         commit { current in
             current.elapsedPausedSeconds += Date().timeIntervalSince(current.pauseStartedAt ?? Date())
             current.pauseStartedAt = nil
-            current.phase = .active
+            current.phase = current.pausedPhase ?? .active
+            if current.phase == .rest {
+                current.restEndsAt = Date().addingTimeInterval(Double(current.restSecondsLeft))
+            }
+            current.pausedPhase = nil
         }
+        tick()
     }
 
     func extendRest(_ seconds: Int) {
@@ -272,6 +209,11 @@ final class WorkoutEngine: ObservableObject {
     }
     func earlyFinish() {
         commit {
+            if let paused = $0.pauseStartedAt {
+                $0.elapsedPausedSeconds += Date().timeIntervalSince(paused)
+                $0.pauseStartedAt = nil
+            }
+            $0.endedAt = Date()
             $0.finishedEarly = true
             $0.phase = .summary
             $0.restEndsAt = nil
@@ -283,7 +225,7 @@ final class WorkoutEngine: ObservableObject {
         guard let d = draft, d.phase == .summary else { return nil }
         let result = WorkoutResult(
             id: d.id, date: d.date, programId: d.programId, title: d.title,
-            startedAt: d.startedAt, finishedAt: Date(),
+            startedAt: d.startedAt, finishedAt: d.endedAt ?? Date(),
             durationSeconds: d.activeSeconds(), feeling: feeling,
             finishedEarly: d.finishedEarly, movements: d.movements)
         // Idempotency: if a saved workout is re-opened, keep one result per UUID.
@@ -299,7 +241,54 @@ final class WorkoutEngine: ObservableObject {
         return result
     }
     func discard() {
-        draft = nil
-        try? FileManager.default.removeItem(at: url(draftFile))
+        do {
+            if FileManager.default.fileExists(atPath: url(draftFile).path) {
+                try FileManager.default.removeItem(at: url(draftFile))
+            }
+            draft = nil
+        } catch { notice = "Не удалось удалить черновик: \(error.localizedDescription)" }
+    }
+
+    func reload() {
+        storageHealthy = true
+        draft = load(WorkoutDraft?.self, file: draftFile) ?? nil
+        history = load([WorkoutResult].self, file: historyFile) ?? []
+        tick()
+    }
+
+    func editSet(_ id: UUID, reps: Int?, weight: Double?, seconds: Int?) {
+        guard let d = draft, d.phase != .summary,
+              let movement = d.movements.first(where: { $0.sets.contains(where: { $0.id == id }) }) else { return }
+        let valid = movement.isTimed
+            ? seconds.map { (1...3600).contains($0) } == true
+            : (reps.map { (1...300).contains($0) } == true && weight.map { $0.isFinite && (0...250).contains($0) } == true)
+        guard valid else { notice = "Проверь значения подхода"; return }
+        commit { current in
+            for i in current.movements.indices {
+                if let index = current.movements[i].sets.firstIndex(where: { $0.id == id }) {
+                    current.movements[i].sets[index].reps = movement.isTimed ? nil : reps
+                    current.movements[i].sets[index].weightKg = movement.isTimed ? nil : weight
+                    current.movements[i].sets[index].seconds = movement.isTimed ? seconds : nil
+                }
+            }
+        }
+    }
+
+    func deleteSet(_ id: UUID) {
+        guard draft?.phase != .summary else { return }
+        commit { current in
+            for i in current.movements.indices { current.movements[i].sets.removeAll { $0.id == id } }
+        }
+    }
+
+    func reorder(from: Int, to: Int) {
+        guard let d = draft, d.phase == .prepare, d.movements.indices.contains(from),
+              d.movements.indices.contains(to) else { return }
+        let selected = d.movements[d.currentIndex].id
+        commit { current in
+            let movement = current.movements.remove(at: from)
+            current.movements.insert(movement, at: to)
+            current.currentIndex = current.movements.firstIndex { $0.id == selected } ?? 0
+        }
     }
 }

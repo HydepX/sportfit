@@ -1,0 +1,9 @@
+include:
+  - project.yml
+settings:
+  base:
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS: '$(inherited) SPORTFIT_HEALTHKIT'
+targets:
+  SportFit:
+    entitlements:
+      path: SportFit/SportFit.entitlements

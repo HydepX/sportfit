@@ -60,10 +60,11 @@ struct TrainingProgram: Codable {
     let endDate: String
     let durationWeeks: Int
     let phases: [ProgramPhase]
+    let prescriptions: [String: ExercisePrescription]?
     let conditionalSubstitutions: [String: ConditionalSubstitution]?
 
     enum CodingKeys: String, CodingKey {
-        case phases
+        case phases, prescriptions
         case schemaVersion = "schema_version"
         case programId = "program_id"
         case startDate = "start_date"
@@ -121,15 +122,37 @@ struct SetRecord: Codable, Identifiable {
 }
 
 enum SportDate {
-    static let iso: DateFormatter = {
+    static var iso: DateFormatter {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "en_US_POSIX")
         f.timeZone = .current
         f.dateFormat = "yyyy-MM-dd"
         return f
-    }()
-    static func from(_ text: String) -> Date? { iso.date(from: text) }
+    }
+    static var calendar: Calendar {
+        var value = Calendar(identifier: .gregorian)
+        value.timeZone = .current
+        value.firstWeekday = 2
+        return value
+    }
+    static func from(_ text: String) -> Date? {
+        guard let date = iso.date(from: text), iso.string(from: date) == text else { return nil }
+        return date
+    }
     static func key(_ date: Date) -> String { iso.string(from: date) }
     static func dayNumber(_ date: Date) -> Int { Calendar.current.component(.day, from: date) }
+}
+
+extension TrainingProgram {
+    func day(on date: Date) -> ProgramDay? {
+        guard let start = SportDate.from(startDate), let end = SportDate.from(endDate) else { return nil }
+        let value = SportDate.calendar.startOfDay(for: date)
+        guard value >= start && value <= end else { return nil }
+        let offset = SportDate.calendar.dateComponents([.day], from: start, to: value).day ?? -1
+        let week = offset / 7 + 1
+        let weekdays = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"]
+        let weekday = weekdays[SportDate.calendar.component(.weekday, from: value) - 1]
+        return phases.first { $0.weekStart <= week && week <= $0.weekEnd }?.days.first { $0.dayOfWeek == weekday }
+    }
 }

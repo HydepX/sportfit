@@ -1,42 +1,67 @@
 import SwiftUI
 import Charts
 
-struct BodyMeasurement: Codable, Identifiable {
-    let id: UUID
-    let measuredAt: Date
-    let weightKg: Double
-    let waistCm: Double?
-    let bodyFatPercent: Double?
-    let source: String
-
-    init(date: Date, weightKg: Double, waistCm: Double?, bodyFatPercent: Double?) {
-        self.id = UUID()
-        self.measuredAt = date
-        self.weightKg = weightKg
-        self.waistCm = waistCm
-        self.bodyFatPercent = bodyFatPercent
-        self.source = "manual"
-    }
-}
-
 @MainActor
 final class MeasurementsStore: ObservableObject {
     @Published private(set) var entries: [BodyMeasurement] = []
     @Published var error: String?
+    private var storageHealthy = true
+    var canExport: Bool { storageHealthy && LocalFiles.recoveryError == nil }
 
     private var fileURL: URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("body_measurements.v1.json")
+        directory.appendingPathComponent("body_measurements.v1.json")
     }
 
-    init() {
-        if let data = try? Data(contentsOf: fileURL),
-           let values = try? JSONDecoder().decode([BodyMeasurement].self, from: data) {
+    let directory: URL
+    init(directory: URL = LocalFiles.directory) { self.directory = directory; reload() }
+
+    func reload() {
+        storageHealthy = true
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { entries = []; return }
+        do {
+            let values = try JSONDecoder().decode([BodyMeasurement].self, from: Data(contentsOf: fileURL))
+            try DataValidation.require(values.allSatisfy(Self.valid), "Некорректные сохранённые измерения")
             entries = values.sorted { $0.measuredAt < $1.measuredAt }
+        } catch {
+            storageHealthy = false
+            self.error = "Ошибка чтения измерений; исходный файл сохранён: \(error.localizedDescription)"
         }
     }
 
     var latest: BodyMeasurement? { entries.last }
+
+    func update(_ entry: BodyMeasurement) -> Bool {
+        guard Self.valid(entry) else { error = "Проверь значения измерений"; return false }
+        let previous = entries
+        if let i = entries.firstIndex(where: { $0.id == entry.id }) { entries[i] = entry }
+        else { entries.append(entry) }
+        entries.sort { $0.measuredAt < $1.measuredAt }
+        if !persist() { entries = previous; return false }
+        return true
+    }
+
+    static func valid(_ entry: BodyMeasurement) -> Bool {
+        entry.weightKg.isFinite && (20...400).contains(entry.weightKg) &&
+        entry.measuredAt <= Date() &&
+        [entry.waistCm, entry.chestCm, entry.hipsCm].allSatisfy { $0.map { $0.isFinite && (10...300).contains($0) } ?? true } &&
+        (entry.bodyFatPercent.map { $0.isFinite && (1...75).contains($0) } ?? true) &&
+        (entry.heightCm.map { $0.isFinite && (50...250).contains($0) } ?? true) &&
+        (entry.muscleMassKg.map { $0.isFinite && (1...250).contains($0) } ?? true) &&
+        !entry.source.isEmpty
+    }
+
+    func importFile(_ url: URL) throws {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        let imported = try JSONDecoder().decode([BodyMeasurement].self, from: Data(contentsOf: url))
+        try DataValidation.require(imported.allSatisfy(Self.valid) && Set(imported.map(\.id)).count == imported.count,
+                                   "Некорректные измерения")
+        let previous = entries
+        let known = Set(entries.map(\.id))
+        entries += imported.filter { !known.contains($0.id) }
+        entries.sort { $0.measuredAt < $1.measuredAt }
+        if !persist() { entries = previous; throw DataValidation.Failure(message: error ?? "Ошибка записи") }
+    }
 
     func add(date: Date, weightKg: Double?, waistCm: Double?, bodyFatPercent: Double?) -> Bool {
         guard let weightKg, (20...400).contains(weightKg),
@@ -61,6 +86,10 @@ final class MeasurementsStore: ObservableObject {
 
     @discardableResult
     private func persist() -> Bool {
+        guard storageHealthy, LocalFiles.recoveryError == nil else {
+            error = LocalFiles.recoveryError ?? "Восстанови измерения из копии перед изменением"
+            return false
+        }
         do {
             try JSONEncoder().encode(entries).write(to: fileURL, options: .atomic)
             return true
@@ -71,12 +100,37 @@ final class MeasurementsStore: ObservableObject {
     }
 }
 
+enum MeasurementMetric: String, CaseIterable, Identifiable {
+    case weight = "Вес, кг", waist = "Талия, см", chest = "Грудь, см", hips = "Бёдра, см"
+    case fat = "Жир, %", muscle = "Мышцы, кг", bmi = "ИМТ"
+    var id: String { rawValue }
+    func value(_ entry: BodyMeasurement) -> Double? {
+        switch self {
+        case .weight: return entry.weightKg
+        case .waist: return entry.waistCm
+        case .chest: return entry.chestCm
+        case .hips: return entry.hipsCm
+        case .fat: return entry.bodyFatPercent
+        case .muscle: return entry.muscleMassKg
+        case .bmi: return entry.bmi
+        }
+    }
+}
+
 struct MeasurementsScreen: View {
     @EnvironmentObject private var store: MeasurementsStore
     @State private var showNew = false
+    @State private var editing: BodyMeasurement?
+    @State private var period = AnalyticsPeriod.all
+    @State private var metric = MeasurementMetric.weight
+    private var filtered: [BodyMeasurement] { store.entries.filter { period.contains($0.measuredAt) } }
 
     private func measurementDetails(_ entry: BodyMeasurement) -> String {
-        var parts = ["Вручную"]
+        var parts = [entry.source == "manual" ? "Вручную" : entry.source]
+        if let value = entry.bmi { parts.append("ИМТ \(value.formatted(.number.precision(.fractionLength(1))))") }
+        if let value = entry.chestCm { parts.append("грудь \(value) см") }
+        if let value = entry.hipsCm { parts.append("бёдра \(value) см") }
+        if let value = entry.muscleMassKg { parts.append("мышцы \(value) кг") }
         if let waist = entry.waistCm { parts.append("талия \(waist) см") }
         if let fat = entry.bodyFatPercent { parts.append("жир \(fat)%") }
         return parts.joined(separator: " · ")
@@ -107,16 +161,26 @@ struct MeasurementsScreen: View {
                         description: Text("Добавь первое измерение. Данные сохраняются только на этом iPhone."))
                 }
 
-                if store.entries.count >= 2 {
+                Picker("Период", selection: $period) {
+                    ForEach(AnalyticsPeriod.allCases) { Text($0.rawValue).tag($0) }
+                }
+                Picker("Показатель", selection: $metric) {
+                    ForEach(MeasurementMetric.allCases) { Text($0.rawValue).tag($0) }
+                }
+                let values = filtered.compactMap { metric.value($0) }
+                if let first = values.first, let last = values.last, values.count > 1 {
+                    Text("Изменение: \((last - first).formatted(.number.precision(.fractionLength(1)))) · \(metric.rawValue)")
+                } else { Text("Недостаточно измерений для сравнения").foregroundStyle(.secondary) }
+                if filtered.count >= 2 {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Динамика веса").font(.headline)
-                        Chart(store.entries) { entry in
-                            LineMark(x: .value("Дата", entry.measuredAt),
-                                     y: .value("Вес, кг", entry.weightKg))
-                                .foregroundStyle(.mint)
-                            PointMark(x: .value("Дата", entry.measuredAt),
-                                      y: .value("Вес, кг", entry.weightKg))
-                                .foregroundStyle(.mint)
+                        Text(metric.rawValue).font(.headline)
+                        Chart(filtered) { entry in
+                            if let value = metric.value(entry) {
+                                LineMark(x: .value("Дата", entry.measuredAt), y: .value(metric.rawValue, value))
+                                    .foregroundStyle(by: .value("Источник", entry.source))
+                                PointMark(x: .value("Дата", entry.measuredAt), y: .value(metric.rawValue, value))
+                                    .foregroundStyle(by: .value("Источник", entry.source))
+                            }
                         }
                         .frame(height: 180)
                         .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) }
@@ -131,7 +195,7 @@ struct MeasurementsScreen: View {
                 }.buttonStyle(SportPrimaryButton())
 
                 Text("История измерений").font(.title3.bold())
-                ForEach(store.entries.reversed()) { entry in
+                ForEach(filtered.reversed()) { entry in
                     HStack(spacing: 10) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(entry.measuredAt, format: .dateTime.day().month().year())
@@ -146,6 +210,7 @@ struct MeasurementsScreen: View {
                     .padding(12)
                     .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
                     .contextMenu {
+                        Button("Изменить") { editing = entry }
                         Button("Удалить запись", role: .destructive) { store.delete(entry.id) }
                     }
                 }
@@ -156,6 +221,7 @@ struct MeasurementsScreen: View {
         .background(Color(red: 0.035, green: 0.055, blue: 0.086))
         .navigationTitle("Замеры")
         .sheet(isPresented: $showNew) { NewMeasurementSheet() }
+        .sheet(item: $editing) { NewMeasurementSheet(entry: $0) }
         .alert("SportFit", isPresented: Binding(
             get: { store.error != nil },
             set: { if !$0 { store.error = nil } }
@@ -168,6 +234,11 @@ struct MeasurementsScreen: View {
 private struct NewMeasurementSheet: View {
     @EnvironmentObject private var store: MeasurementsStore
     @Environment(\.dismiss) private var dismiss
+    var entry: BodyMeasurement? = nil
+    @State private var height = ""
+    @State private var chest = ""
+    @State private var hips = ""
+    @State private var muscle = ""
     @State private var measuredAt = Date()
     @State private var weight = ""
     @State private var waist = ""
@@ -191,10 +262,28 @@ private struct NewMeasurementSheet: View {
                             .keyboardType(.decimalPad).multilineTextAlignment(.trailing)
                     }
                 }
+                if let error = store.error { Text(error).foregroundStyle(.red) }
+                Section("Дополнительно") {
+                    TextField("Рост, см", text: $height).keyboardType(.decimalPad)
+                    TextField("Грудь, см", text: $chest).keyboardType(.decimalPad)
+                    TextField("Бёдра, см", text: $hips).keyboardType(.decimalPad)
+                    TextField("Мышечная масса, кг", text: $muscle).keyboardType(.decimalPad)
+                }
                 Text("Показатели состава тела с биоимпедансных весов ориентировочные; важнее наблюдать изменения во времени.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
-            .navigationTitle("Новое измерение")
+            .onAppear {
+                guard let entry else { return }
+                measuredAt = entry.measuredAt
+                weight = String(entry.weightKg)
+                waist = entry.waistCm.map { String($0) } ?? ""
+                fat = entry.bodyFatPercent.map { String($0) } ?? ""
+                height = entry.heightCm.map { String($0) } ?? ""
+                chest = entry.chestCm.map { String($0) } ?? ""
+                hips = entry.hipsCm.map { String($0) } ?? ""
+                muscle = entry.muscleMassKg.map { String($0) } ?? ""
+            }
+            .navigationTitle(entry == nil ? "Новое измерение" : "Изменить измерение")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -212,12 +301,21 @@ private struct NewMeasurementSheet: View {
                             store.error = "Введи числовые значения для талии и процента жира."
                             return
                         }
-                        if store.add(date: measuredAt,
-                                     weightKg: value(weight),
-                                     waistCm: waistValue,
-                                     bodyFatPercent: fatValue) {
-                            dismiss()
+                        let optionalValues = [height, chest, hips, muscle]
+                        guard optionalValues.allSatisfy({ $0.isEmpty || value($0) != nil }), let weightValue = value(weight) else {
+                            store.error = "Введи числовые значения"; return
                         }
+                        var updated = entry ?? BodyMeasurement(date: measuredAt, weightKg: weightValue,
+                                                               waistCm: waistValue, bodyFatPercent: fatValue)
+                        updated.measuredAt = measuredAt
+                        updated.weightKg = weightValue
+                        updated.waistCm = waistValue
+                        updated.bodyFatPercent = fatValue
+                        updated.heightCm = value(height)
+                        updated.chestCm = value(chest)
+                        updated.hipsCm = value(hips)
+                        updated.muscleMassKg = value(muscle)
+                        if store.update(updated) { dismiss() }
                     }.fontWeight(.bold)
                 }
             }

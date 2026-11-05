@@ -15,14 +15,14 @@ struct RootView: View {
         TabView(selection: $selection) {
             HomeScreen(onWorkout: { selection = 2 })
                 .tabItem { Label("Главная", systemImage: "house") }.tag(0)
-            LibraryScreen()
-                .tabItem { Label("Упражнения", systemImage: "figure.strengthtraining.traditional") }.tag(1)
+            CalendarScreen(title: "План")
+                .tabItem { Label("План", systemImage: "calendar") }.tag(1)
             CalendarScreen()
                 .tabItem { Label("Тренировка", systemImage: "play.circle.fill") }.tag(2)
             ProgressScreen()
                 .tabItem { Label("Прогресс", systemImage: "chart.xyaxis.line") }.tag(3)
             SettingsScreen()
-                .tabItem { Label("Настройки", systemImage: "gearshape") }.tag(4)
+                .tabItem { Label("Профиль", systemImage: "person.crop.circle") }.tag(4)
         }
         .tint(Palette.accent)
         .background(Palette.background)
@@ -60,12 +60,12 @@ struct HomeScreen: View {
                     Panel {
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Личная программа", systemImage: "person.crop.circle").font(.headline)
-                            Text("12 недель · 9 ноября 2026 — 31 января 2027")
+                            Text(store.program.map { "\($0.durationWeeks) недель · \($0.startDate) — \($0.endDate)" } ?? "Нет программы")
                                 .foregroundStyle(.secondary).font(.subheadline)
                             if let program = store.program {
                                 Text("Программа: \(program.programId)")
                                     .font(.caption).foregroundStyle(.secondary)
-                                Text("3 этапа · 4 дня в неделю").font(.title3.bold())
+                                Text("\(program.phases.count) этапа · индивидуальный план").font(.title3.bold())
                             } else {
                                 Text("Импортируй план тренировок в настройках")
                                     .foregroundStyle(.secondary)
@@ -86,7 +86,8 @@ struct HomeScreen: View {
                     Panel {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Ближайшая тренировка").font(.headline)
-                            if let day = store.workout(on: Date()) {
+                            if let upcoming = store.nextWorkout(), let day = store.workout(on: upcoming) {
+                                Text(upcoming, format: .dateTime.day().month().weekday()).font(.subheadline)
                                 Text(day.name).font(.title3.bold())
                                 Text("\(day.exerciseIds.count) упражнений, включая разминку и заминку")
                                     .foregroundStyle(.secondary).font(.subheadline)
@@ -175,17 +176,13 @@ struct ExerciseDetailScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20).fill(Palette.panel)
-                    VStack(spacing: 8) {
-                        Image(systemName: "figure.strengthtraining.traditional")
-                            .font(.system(size: 58)).foregroundStyle(Palette.accent)
-                        Text("Фото и видео будут добавлены позже")
-                            .font(.footnote).foregroundStyle(.secondary)
-                    }
-                }.frame(height: 210)
+                ExerciseMediaView(exerciseId: exercise.id)
                 Text(exercise.primaryGroup).foregroundStyle(Palette.accent)
                 Text(exercise.description)
+                Text("Инвентарь: " + exercise.equipment.joined(separator: ", "))
+                if let rest = exercise.suggestedRestFromSource {
+                    Text("Отдых из источника: " + rest).font(.subheadline)
+                }
                 if !exercise.safetyFlag.isEmpty {
                     Panel {
                         Label(exercise.safetyFlag, systemImage: "exclamationmark.shield")
@@ -202,10 +199,8 @@ struct ExerciseDetailScreen: View {
                         Text(instruction)
                     }
                 }
-                if let mistakes = exercise.commonMistakesDraft, !mistakes.isEmpty {
+                if exercise.commonMistakesReviewStatus == "approved", let mistakes = exercise.commonMistakesDraft, !mistakes.isEmpty {
                     Text("На что обратить внимание").font(.title3.bold())
-                    Text("Черновые замечания — ещё не прошли проверку")
-                        .font(.caption).foregroundStyle(.yellow)
                     ForEach(mistakes, id: \.self) { Text("• " + $0) }
                 }
                 if let reps = exercise.suggestedRepsFromSource {
