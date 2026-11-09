@@ -113,4 +113,50 @@ import XCTest
         XCTAssertTrue(measurements.canExport)
     }
 
+    func testExactPlanAcceptsActualBelowTargetAndKeepsHistorySnapshot() async throws {
+        let (engine, store, directory) = try makeEngine()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let day = ProgramDay(dayOfWeek: "Пн", name: "Тест", exerciseIds: ["press_floor"])
+        let date = try XCTUnwrap(SportDate.from("2026-11-09"))
+        engine.start(day: day, date: date, store: store)
+        XCTAssertEqual(engine.draft?.movements.first?.prescription?.targetReps, 10)
+        engine.begin()
+        engine.complete(reps: 4, weight: 0, seconds: nil)
+        XCTAssertEqual(engine.draft?.movements.first?.sets.first?.reps, 4)
+        engine.nextExercise()
+        let result = try XCTUnwrap(engine.finish(feeling: nil))
+        XCTAssertEqual(result.movements.first?.prescription?.targetReps, 10)
+        XCTAssertEqual(result.movements.first?.sets.first?.reps, 4)
+        let reloaded = WorkoutEngine(directory: directory)
+        XCTAssertEqual(reloaded.history.first?.movements.first?.sets.first?.reps, 4)
+    }
+
+    func testUpgradeOriginalPlanArchivesItOnceWithoutChangingHistory() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let legacyURL = try XCTUnwrap(Bundle.main.url(forResource: "program_12w.v1", withExtension: "json"))
+        try Data(contentsOf: legacyURL).write(to: directory.appendingPathComponent("program_12w.v1.json"))
+        let history = Data("[]".utf8)
+        try history.write(to: directory.appendingPathComponent("workout_history.v1.json"))
+        let store = FitnessStore(directory: directory)
+        XCTAssertEqual(store.program?.schemaVersion, "2.0.0")
+        XCTAssertEqual(store.archivedPrograms.count, 1)
+        XCTAssertEqual(store.archivedPrograms.first?.schemaVersion, "1.0.0")
+        XCTAssertEqual(FitnessStore(directory: directory).archivedPrograms.count, 1)
+        XCTAssertEqual(try Data(contentsOf: directory.appendingPathComponent("workout_history.v1.json")), history)
+    }
+
+    func testV2ClearanceRequiresExplicitConfirmationAndNoSubstitution() async throws {
+        let (engine, store, directory) = try makeEngine()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let date = try XCTUnwrap(SportDate.from("2026-12-07"))
+        engine.start(day: ProgramDay(dayOfWeek: "Пн", name: "Тест", exerciseIds: ["wall_push"]), date: date, store: store)
+        XCTAssertEqual(engine.draft?.movements.first?.exerciseId, "wall_push")
+        engine.begin()
+        XCTAssertEqual(engine.draft?.phase, .prepare)
+        engine.begin(clearanceConfirmed: true)
+        XCTAssertEqual(engine.draft?.phase, .active)
+    }
+
 }

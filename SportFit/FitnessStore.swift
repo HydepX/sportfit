@@ -19,7 +19,7 @@ import SwiftUI
     init(directory: URL = LocalFiles.directory, bundledDirectory: URL? = nil) {
         self.directory = directory
         self.bundledDirectory = bundledDirectory
-        LocalFiles.recoverIfNeeded()
+        LocalFiles.recoverIfNeeded(directory: directory)
         reload()
     }
 
@@ -55,8 +55,29 @@ import SwiftUI
 
     func loadProgram() {
         do {
-            guard let data = content(programName), let catalog else { throw ImportError.invalidProgram }
-            let decoded = try JSONDecoder().decode(TrainingProgram.self, from: data)
+            guard let catalog else { throw ImportError.invalidProgram }
+            let local = FileManager.default.fileExists(atPath: fileURL(programName).path) ? try Data(contentsOf: fileURL(programName)) : nil
+            let exactURL = bundledDirectory?.appendingPathComponent("program_12w_with_sets.v2.json") ?? Bundle.main.url(forResource: "program_12w_with_sets.v2", withExtension: "json")
+            let exact = exactURL.flatMap { try? Data(contentsOf: $0) }
+            guard let data = local ?? exact ?? content(programName) else { throw ImportError.invalidProgram }
+            var decoded = try JSONDecoder().decode(TrainingProgram.self, from: data)
+            if storageHealthy, LocalFiles.recoveryError == nil, local != nil, decoded.schemaVersion == "1.0.0", let exact,
+               let legacyURL = bundledDirectory?.appendingPathComponent(programName) ?? Bundle.main.url(forResource: "program_12w.v1", withExtension: "json"),
+               let legacyBytes = try? Data(contentsOf: legacyURL),
+               let legacy = try? JSONDecoder().decode(TrainingProgram.self, from: legacyBytes) {
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .sortedKeys
+                // Upgrade only the unchanged original plan, never a user-edited import.
+                if try encoder.encode(decoded) == encoder.encode(legacy) {
+                    let updated = try JSONDecoder().decode(TrainingProgram.self, from: exact)
+                    try DataValidation.program(updated, catalog: catalog)
+                    var archive = archivedPrograms
+                    archive.append(decoded)
+                    try LocalFiles.restore([programName: exact, "program_archive.v1.json": try encoder.encode(archive)], directory: directory)
+                    archivedPrograms = archive
+                    decoded = updated
+                }
+            }
             try DataValidation.program(decoded, catalog: catalog)
             program = decoded
         } catch { storageHealthy = false; message = "Программа не прочитана: \(error.localizedDescription)" }
@@ -112,8 +133,8 @@ import SwiftUI
     func reload() {
         storageHealthy = true
         loadCatalog()
-        loadProgram()
         archivedPrograms = read([TrainingProgram].self, file: "program_archive.v1.json") ?? []
+        loadProgram()
         completedSets = read([SetRecord].self, file: setsName) ?? []
     }
 
@@ -145,6 +166,9 @@ import SwiftUI
     }
 
     func prescription(_ id: String, on date: Date) -> ExercisePrescription? {
+        if let sessions = program?.sessions {
+            return sessions.first { $0.date == SportDate.key(date) }?.items.first { $0.exerciseId == id }?.prescription
+        }
         if let week = weekNumber(for: date), let rule = phase(week: week)?.prescriptions?[id] { return rule }
         return program?.prescriptions?[id]
     }
@@ -160,12 +184,7 @@ import SwiftUI
         return nil
     }
 
-    func workout(on date: Date) -> ProgramDay? {
-        guard let week = weekNumber(for: date), let phase = phase(week: week) else { return nil }
-        let day = SportDate.calendar.component(.weekday, from: date)
-        let key = [1: "Вс", 2: "Пн", 3: "Вт", 4: "Ср", 5: "Чт", 6: "Пт", 7: "Сб"][day]
-        return phase.days.first { $0.dayOfWeek == key }
-    }
+    func workout(on date: Date) -> ProgramDay? { program?.day(on: date) }
 
     func setCount(exerciseId: String, day: Date) -> Int {
         completedSets.filter { $0.exerciseId == exerciseId && $0.date == SportDate.key(day) }.count

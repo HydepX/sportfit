@@ -21,6 +21,7 @@ struct WorkoutMovement: Codable, Identifiable {
     let target: String
     var prescription: ExercisePrescription?
     var sourceRestSeconds: Int?
+    var clearanceConfirmed: Bool?
     var sets: [ActualSet] = []
     var skipped: Bool = false
     var skipReason: String? = nil
@@ -31,7 +32,7 @@ struct WorkoutMovement: Codable, Identifiable {
         exerciseId = exercise.id
         title = exercise.title
         let requestedTarget = prescription?.repetitions ?? exercise.suggestedRepsFromSource ?? "Не задано в программе"
-        isTimed = requestedTarget.localizedCaseInsensitiveContains("сек") || requestedTarget.localizedCaseInsensitiveContains("мин")
+        isTimed = prescription?.mode.map { $0 == "duration" } ?? (requestedTarget.localizedCaseInsensitiveContains("сек") || requestedTarget.localizedCaseInsensitiveContains("мин"))
         self.prescription = prescription
         sourceRestSeconds = exercise.suggestedRestFromSource.flatMap { text in
             let number = text.split(whereSeparator: { !$0.isNumber }).first.flatMap { Int($0) }

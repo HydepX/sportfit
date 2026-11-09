@@ -40,7 +40,9 @@ struct WorkoutPlayer: View {
                             ExerciseMediaView(exerciseId: movement.exerciseId)
 
                             Text(movement.title).font(.title2.bold()).multilineTextAlignment(.center)
-                            Text(movement.target).foregroundStyle(.secondary)
+                            Text("План: " + movement.target).foregroundStyle(.secondary)
+                            if let rest = movement.prescription?.restSeconds { Text("Отдых между подходами: \(rest) сек").font(.caption) }
+                            if let load = movement.prescription?.load { Text(load).font(.footnote).foregroundStyle(.yellow) }
                             if movement.sourceId != movement.exerciseId {
                                 Text("Используется щадящая замена: \(movement.sourceId) → \(movement.exerciseId)")
                                     .font(.footnote).foregroundStyle(.yellow)
@@ -167,8 +169,14 @@ struct WorkoutPlayer: View {
         case .prepare:
             Text("Подготовься к выполнению упражнения")
                 .foregroundStyle(.secondary)
-            Button("Начать упражнение") { engine.begin() }
-                .buttonStyle(SportPrimaryButton())
+            if movement.prescription?.requiresClearance == true && movement.clearanceConfirmed != true {
+                Text(movement.prescription?.clearanceNote ?? "Нужно разрешение врача").foregroundStyle(.yellow)
+                Button("Разрешение врача есть — начать") { engine.begin(clearanceConfirmed: true) }
+                    .buttonStyle(SportPrimaryButton())
+                Button("Пропустить без замены") { engine.skip(reason: "Нет подтверждённого разрешения врача") }
+            } else {
+                Button("Начать упражнение") { engine.begin() }.buttonStyle(SportPrimaryButton())
+            }
             movementControls()
         case .active:
             Text(timeString(draft.activeSeconds(now: currentSecond)))
@@ -183,7 +191,7 @@ struct WorkoutPlayer: View {
             } else {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("Повторений").font(.caption)
+                        Text(current?.prescription?.mode == "repetitions_per_side" ? "Фактически на каждую сторону" : current?.prescription?.mode == "breath_cycles" ? "Фактически дыхательных циклов" : "Фактически повторений").font(.caption)
                         TextField("Количество", text: $repsText).keyboardType(.numberPad)
                             .textFieldStyle(.roundedBorder)
                     }
@@ -194,7 +202,7 @@ struct WorkoutPlayer: View {
                     }
                 }
             }
-            Text("Количество подходов корректируй по своему согласованному плану и самочувствию.")
+            Text("Запиши сколько получилось: например, 4 повтора вместо 5 по плану. План от этого не изменится.")
                 .font(.caption).foregroundStyle(.secondary)
             Button("✓ Подход выполнен") {
                 let reps = Int(repsText)
@@ -224,7 +232,9 @@ struct WorkoutPlayer: View {
                         .buttonStyle(.bordered)
                 }
             }
-            Button("Добавить ещё подход") { engine.addAnotherSet() }
+            Button(movement.sets.count < (movement.prescription?.sets ?? 0)
+                   ? "Следующий подход (\(movement.sets.count + 1) из \(movement.prescription?.sets ?? 0))"
+                   : "Добавить дополнительный подход") { engine.addAnotherSet() }
                 .buttonStyle(.bordered)
             Button(draft.currentIndex == draft.movements.count - 1 ? "Завершить занятие" : "Следующее упражнение") { engine.nextExercise() }
                 .buttonStyle(SportPrimaryButton())
@@ -273,6 +283,12 @@ struct WorkoutPlayer: View {
 
     private func loadInputDefaults() {
         guard let movement = current else { return }
+        if let rule = movement.prescription, let mode = rule.mode {
+            repsText = mode == "duration" ? "" : rule.targetReps.map { String($0) } ?? ""
+            secondsText = rule.targetSeconds.map { String($0) } ?? ""
+            weightText = "0"
+            return
+        }
         let fromSource = movement.target
         let nums = fromSource.split(whereSeparator: { !$0.isNumber })
         let first = nums.first.flatMap { Int($0) }

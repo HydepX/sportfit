@@ -16,7 +16,7 @@ final class WorkoutEngine: ObservableObject {
 
     init(directory: URL = LocalFiles.directory) {
         self.directory = directory
-        LocalFiles.recoverIfNeeded()
+        LocalFiles.recoverIfNeeded(directory: directory)
         draft = load(WorkoutDraft?.self, file: draftFile) ?? nil
         history = load([WorkoutResult].self, file: historyFile) ?? []
         // Absolute rest deadlines continue across screen lock and process restart.
@@ -87,14 +87,25 @@ final class WorkoutEngine: ObservableObject {
         if save(d, file: draftFile) { draft = d }
     }
 
-    func begin() {
-        guard draft?.phase == .prepare else { return }
-        commit { $0.phase = .active }
+    func begin(clearanceConfirmed: Bool = false) {
+        guard let d = draft, d.phase == .prepare, d.movements.indices.contains(d.currentIndex) else { return }
+        let movement = d.movements[d.currentIndex]
+        guard movement.prescription?.requiresClearance != true || movement.clearanceConfirmed == true || clearanceConfirmed else {
+            notice = movement.prescription?.clearanceNote ?? "Для этого упражнения нужно разрешение врача. Без него пропусти упражнение."
+            return
+        }
+        commit {
+            if clearanceConfirmed { $0.movements[$0.currentIndex].clearanceConfirmed = true }
+            $0.phase = .active
+        }
     }
 
     func complete(reps: Int?, weight: Double?, seconds: Int?) {
         guard let d = draft, d.phase == .active, d.movements.indices.contains(d.currentIndex) else { return }
         let movement = d.movements[d.currentIndex]
+        guard movement.prescription?.requiresClearance != true || movement.clearanceConfirmed == true else {
+            notice = "Для упражнения не подтверждено разрешение врача"; return
+        }
         if let last = movement.sets.last, Date().timeIntervalSince(last.completedAt) < 1 {
             notice = "Этот подход уже отмечен"; return
         }

@@ -60,11 +60,22 @@ struct TrainingProgram: Codable {
     let endDate: String
     let durationWeeks: Int
     let phases: [ProgramPhase]
+    let sessions: [DetailedSession]?
+    let generalRules: [String: String]?
+    let sessionCount: Int?
+    let exerciseCount: Int?
+    let programDescription: String?
+    let derivedFrom: String?
     let prescriptions: [String: ExercisePrescription]?
     let conditionalSubstitutions: [String: ConditionalSubstitution]?
 
     enum CodingKeys: String, CodingKey {
-        case phases, prescriptions
+        case phases, prescriptions, sessions
+        case generalRules = "general_rules"
+        case sessionCount = "session_count"
+        case exerciseCount = "exercise_count"
+        case programDescription = "description"
+        case derivedFrom = "derived_from"
         case schemaVersion = "schema_version"
         case programId = "program_id"
         case startDate = "start_date"
@@ -72,6 +83,38 @@ struct TrainingProgram: Codable {
         case durationWeeks = "duration_weeks"
         case conditionalSubstitutions = "conditional_substitutions"
     }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        schemaVersion = try c.decode(String.self, forKey: .schemaVersion)
+        programId = try c.decode(String.self, forKey: .programId)
+        startDate = try c.decode(String.self, forKey: .startDate)
+        endDate = try c.decode(String.self, forKey: .endDate)
+        durationWeeks = try c.decode(Int.self, forKey: .durationWeeks)
+        prescriptions = try c.decodeIfPresent([String: ExercisePrescription].self, forKey: .prescriptions)
+        conditionalSubstitutions = try c.decodeIfPresent([String: ConditionalSubstitution].self, forKey: .conditionalSubstitutions)
+        sessions = try c.decodeIfPresent([DetailedSession].self, forKey: .sessions)
+        generalRules = try c.decodeIfPresent([String: String].self, forKey: .generalRules)
+        sessionCount = try c.decodeIfPresent(Int.self, forKey: .sessionCount)
+        exerciseCount = try c.decodeIfPresent(Int.self, forKey: .exerciseCount)
+        programDescription = try c.decodeIfPresent(String.self, forKey: .programDescription)
+        derivedFrom = try c.decodeIfPresent(String.self, forKey: .derivedFrom)
+        if let existing = try c.decodeIfPresent([ProgramPhase].self, forKey: .phases) { phases = existing }
+        else {
+            let grouped = Dictionary(grouping: sessions ?? [], by: \.phaseId)
+            phases = grouped.keys.sorted().map { id in
+                let days = (grouped[id] ?? []).sorted { $0.date < $1.date }
+                var seen = Set<String>()
+                let firstWeek = days.map(\.week).min() ?? 1
+                let lastWeek = days.map(\.week).max() ?? 1
+                return ProgramPhase(phaseId: id, weekStart: firstWeek,
+                    weekEnd: lastWeek, title: "Недели \(firstWeek)–\(lastWeek)", subtitle: "Точные назначения по датам",
+                    days: days.filter { seen.insert($0.day).inserted }.map {
+                        ProgramDay(dayOfWeek: $0.day, name: $0.name, exerciseIds: $0.items.map(\.exerciseId))
+                    }, prescriptions: nil)
+            }
+        }
+    }
+
 }
 
 struct ProgramPhase: Codable, Identifiable {
@@ -149,6 +192,10 @@ extension TrainingProgram {
     func day(on date: Date) -> ProgramDay? {
         guard let start = SportDate.from(startDate), let end = SportDate.from(endDate) else { return nil }
         let value = SportDate.calendar.startOfDay(for: date)
+        if let sessions {
+            guard let session = sessions.first(where: { $0.date == SportDate.key(date) }) else { return nil }
+            return ProgramDay(dayOfWeek: session.day, name: session.name, exerciseIds: session.items.map(\.exerciseId))
+        }
         guard value >= start && value <= end else { return nil }
         let offset = SportDate.calendar.dateComponents([.day], from: start, to: value).day ?? -1
         let week = offset / 7 + 1

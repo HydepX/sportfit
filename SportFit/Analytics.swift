@@ -23,7 +23,7 @@ struct WorkoutAnalyticsScreen: View {
     @EnvironmentObject private var engine: WorkoutEngine
     @EnvironmentObject private var store: FitnessStore
     @EnvironmentObject private var profile: ProfileStore
-    @State private var period = AnalyticsPeriod.all
+    @State private var period = AnalyticsPeriod.week
     @State private var exerciseId = ""
     private var workouts: [WorkoutResult] {
         engine.history.filter { period.contains($0.finishedAt) &&
@@ -91,16 +91,25 @@ struct WorkoutResultScreen: View {
     let result: WorkoutResult
     var body: some View {
         List {
-            Text(result.date)
+            Text("Выполнено: " + result.finishedAt.formatted(date: .long, time: .shortened))
+            Text("Дата по плану: " + result.date)
+            Text("Длительность: \(result.durationSeconds / 60) мин · подходов: \(result.totalSets)")
             Text(result.completionLabel)
             ForEach(result.movements) { movement in
                 Section(movement.title) {
-                    Text("План: \(movement.target)")
+                    Text("План: \(movement.prescription?.sets.map { "\($0) подходов × " } ?? "")\(movement.target)")
+                    if let rest = movement.prescription?.restSeconds { Text("Отдых: \(rest) сек").font(.caption) }
                     if movement.skipped { Text("Пропущено: \(movement.skipReason ?? "Без причины")") }
                     if movement.sets.isEmpty && !movement.skipped { Text("Нет выполненных подходов") }
-                    ForEach(movement.sets) { actual in
-                        if let seconds = actual.seconds { Text("\(seconds) сек") }
-                        else { Text("\(actual.reps ?? 0) повторов · \((actual.weightKg ?? 0).formatted()) кг") }
+                    ForEach(Array(movement.sets.enumerated()), id: \.element.id) { index, actual in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Подход \(index + 1)").font(.subheadline.bold())
+                            if let seconds = actual.seconds { Text("Факт: \(seconds) сек") }
+                            else {
+                                let unit = movement.prescription?.mode == "breath_cycles" ? "дыхательных циклов" : movement.prescription?.mode == "repetitions_per_side" ? "на каждую сторону" : "повторов"
+                                Text("Факт: \(actual.reps ?? 0) \(unit) · \((actual.weightKg ?? 0).formatted()) кг")
+                            }
+                        }
                     }
                 }
             }

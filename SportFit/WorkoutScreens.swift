@@ -142,7 +142,7 @@ struct CalendarScreen: View {
                                     }
                                 }.buttonStyle(.bordered)
                                 ForEach(Array(day.exerciseIds.enumerated()), id: \.offset) { index, id in
-                                    WorkoutExerciseRow(index: index + 1, id: id, date: selectedDate)
+                                    WorkoutExerciseRow(index: index + 1, id: id, date: scheduledSource)
                                     if index < day.exerciseIds.count - 1 { Divider() }
                                 }
                             }
@@ -165,6 +165,13 @@ struct CalendarScreen: View {
                         ForEach(engine.history.filter { $0.programId == program.programId && $0.date == SportDate.key(scheduledSource) }) { result in
                             NavigationLink { WorkoutResultScreen(result: result) } label: {
                                 Text("Результат: \(result.totalSets) подходов · \(result.completionLabel)")
+                            }
+                        }
+                        if let rules = program.generalRules {
+                            DisclosureGroup("Правила программы") {
+                                ForEach(rules.keys.sorted(), id: \.self) { key in
+                                    Text(rules[key] ?? "").font(.footnote).padding(.vertical, 3)
+                                }
                             }
                         }
                         Text("Программа: \(program.startDate) — \(program.endDate)")
@@ -223,7 +230,13 @@ private struct WorkoutExerciseRow: View {
                     NavigationLink(destination: ExerciseDetailScreen(exercise: exercise)) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(exercise.title).font(.subheadline.bold())
-                            Text(exercise.suggestedRepsFromSource ?? exercise.primaryGroup)
+                            Text(store.prescription(safeId, on: date)?.repetitions ?? exercise.suggestedRepsFromSource ?? exercise.primaryGroup)
+                                .font(.caption).foregroundStyle(.secondary)
+                            if let rule = store.prescription(safeId, on: date) {
+                                Text("\(rule.sets ?? 0) подходов · отдых \(rule.restSeconds ?? 0) сек")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
+                            Text(exercise.primaryGroup)
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                     }.tint(.white)
@@ -231,6 +244,9 @@ private struct WorkoutExerciseRow: View {
                     Text(safeId).font(.subheadline.bold())
                 }
                 Spacer()
+            }
+            if let rule = store.prescription(safeId, on: date), rule.requiresClearance == true {
+                Text(rule.clearanceNote ?? "Требуется разрешение врача").font(.caption).foregroundStyle(.yellow)
             }
             if let substitution = store.substitutionNote(id) {
                 Text(substitution).font(.caption2).foregroundStyle(.yellow).padding(.leading, 33)
@@ -269,40 +285,7 @@ struct ProgressScreen: View {
                     }.buttonStyle(.plain)
                     NavigationLink("Статистика и отчёты") { WorkoutAnalyticsScreen() }
                     Text("Журнал тренировок").font(.title2.bold())
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Отмеченные подходы").font(.subheadline).foregroundStyle(.secondary)
-                        Text("\(engine.history.reduce(0) { $0 + $1.totalSets } + store.completedSets.count)")
-                            .font(.system(size: 45, weight: .bold))
-                        Text("Сохранены локально на iPhone")
-                            .font(.footnote).foregroundStyle(.secondary)
-                    }.frame(maxWidth: .infinity, alignment: .leading)
-                        .padding().background(Color.white.opacity(0.07),
-                                               in: RoundedRectangle(cornerRadius: 20))
-                    ForEach(engine.history.sorted(by: { $0.finishedAt > $1.finishedAt })) { workout in
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(workout.title).font(.headline)
-                            HStack {
-                                Text(workout.date)
-                                Spacer()
-                                Text("\(workout.totalSets) подходов")
-                            }.font(.caption).foregroundStyle(.secondary)
-                            Text("Активное время: \(workout.durationSeconds / 60) мин · пропущено: \(workout.skippedCount)")
-                                .font(.caption).foregroundStyle(.mint)
-                        }.padding().frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color.white.opacity(0.07),
-                                        in: RoundedRectangle(cornerRadius: 14))
-                    }
-                    ForEach(Array(Dictionary(grouping: store.completedSets, by: \.date).keys.sorted().reversed()), id: \.self) { date in
-                        let count = store.completedSets.filter { $0.date == date }.count
-                        HStack {
-                            Text(date)
-                            Spacer()
-                            Text("\(count) подходов").foregroundStyle(.mint)
-                        }.padding().background(Color.white.opacity(0.07),
-                                                in: RoundedRectangle(cornerRadius: 14))
-                    }
-                    Text("Графики веса, состава тела, активности и автоматическая синхронизация Apple Health появятся после проверки подписи HealthKit.")
-                        .font(.footnote).foregroundStyle(.secondary)
+                    WorkoutHistoryView()
                 }.padding()
             }.background(Color(red: 0.035, green: 0.055, blue: 0.086))
                 .navigationTitle("Прогресс")
@@ -338,8 +321,8 @@ struct SettingsScreen: View {
                     Button("Импортировать exercises.v1.json") { importingCatalog = true }
                     Label(store.program == nil ? "План не загружен" : "12-недельный план загружен",
                           systemImage: "calendar")
-                    Button("Импортировать program_12w.v1.json") { importingProgram = true }
-                    Text("Импортируются распакованные JSON-файлы из BLOCK03_iOS_library_package. Не ZIP.")
+                    Button("Импортировать программу JSON (v1 / v2)") { importingProgram = true }
+                    Text("Выбери распакованный program_12w_with_sets.v2.json или совместимый план v1, не ZIP-архив.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("Резервная копия") {

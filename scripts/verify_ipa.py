@@ -38,6 +38,16 @@ def verify(path):
         references = {eid for phase in program['phases'] for day in phase['days'] for eid in day['exercise_ids']}
         if not references <= set(ids):
             raise ValueError('Unknown bundled exercise IDs')
+        exact = json.loads(archive.read(base + 'program_12w_with_sets.v2.json'))
+        if exact.get('schema_version') != '2.0.0' or exact.get('session_count') != len(exact.get('sessions', [])) or not exact.get('sessions'):
+            raise ValueError('Missing precise workout sessions')
+        for session in exact['sessions']:
+            for item in session['items']:
+                if item['exercise_id'] not in ids or item['sets'] < 1:
+                    raise ValueError('Invalid precise assignment')
+                field = 'target_seconds' if item['mode'] == 'duration' else 'target_reps'
+                if item.get(field, 0) < 1:
+                    raise ValueError('Missing precise target')
         if any(n.endswith('embedded.mobileprovision') for n in names):
             raise ValueError('Expected an unsigned archive without a provisioning profile')
     print('OK: physical-iPhone IPA, executable, Info.plist, 53 IDs, bundled program and ZIP integrity')
