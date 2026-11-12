@@ -138,6 +138,7 @@ enum PrivateHealthFile {
         catch { message = "Проверка выполнена, но кэш не сохранён: \(error.localizedDescription)" }
     }
     func reset() {
+        guard !loading else { return }
         do {
             if FileManager.default.fileExists(atPath: file.path) { try FileManager.default.removeItem(at: file) }
             cache = HealthCache()

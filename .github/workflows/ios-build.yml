@@ -82,7 +82,7 @@ jobs:
           test -d "$APP"
           codesign --force --sign - --entitlements SportFit/SportFit.entitlements "$APP"
           codesign --verify --strict "$APP"
-          codesign --display --entitlements - "$APP" > "$GITHUB_WORKSPACE/HealthKit-entitlements.plist"
+          codesign --display --entitlements :- "$APP" > "$GITHUB_WORKSPACE/HealthKit-entitlements.plist"
           python3 -c 'import plistlib; assert plistlib.load(open("HealthKit-entitlements.plist", "rb")).get("com.apple.developer.healthkit") is True'
           mkdir -p "$RUNNER_TEMP/healthkit-ipa/Payload"
           cp -R "$APP" "$RUNNER_TEMP/healthkit-ipa/Payload/SportFit.app"

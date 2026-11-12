@@ -123,7 +123,9 @@ struct HealthTrendPoint: Identifiable {
                         let query = HKStatisticsCollectionQuery(quantityType: type, quantitySamplePredicate: predicate,
                             options: .cumulativeSum, anchorDate: SportDate.calendar.startOfDay(for: now),
                             intervalComponents: DateComponents(day: 1))
-                        query.initialResultsHandler = { _, collection, error in
+                        let queryStore = store
+                        query.initialResultsHandler = { query, collection, error in
+                            queryStore.stop(query)
                             if let error { continuation.resume(throwing: error); return }
                             var values: [HealthTrendPoint] = []
                             collection?.enumerateStatistics(from: start, to: now) { statistics, _ in

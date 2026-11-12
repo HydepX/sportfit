@@ -11,3 +11,5 @@ targets:
         INFOPLIST_KEY_SportFitHealthKitEnabled: YES
     entitlements:
       path: SportFit/SportFit.entitlements
+      properties:
+        com.apple.developer.healthkit: true

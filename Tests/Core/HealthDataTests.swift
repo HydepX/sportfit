@@ -84,4 +84,9 @@ final class HealthDataTests: XCTestCase {
             source: "Test", day: "old-day", timeZone: TimeZone.current.identifier), now: now)
         XCTAssertTrue(cached.isOld(now: now))
     }
+    func testFractionalSDKStatisticsRemainValidWithoutInventingRounding() {
+        XCTAssertTrue(record(.steps, value: 100.5).valid)
+        XCTAssertFalse(record(.steps, value: .infinity).valid)
+        XCTAssertFalse(record(.steps, value: -1).valid)
+    }
 }

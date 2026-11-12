@@ -30,7 +30,7 @@ struct HealthRecord: Codable, Equatable, Identifiable {
     var valid: Bool {
         !id.isEmpty && !source.isEmpty && value.isFinite && value >= 0 && start <= end &&
         (field != .weight || value > 0) && (field != .pulse || value > 0) &&
-        (field != .steps || (value.rounded() == value && value <= Double(Int.max)))
+        (field != .steps || value <= Double(Int.max))
     }
     static func imported(field: HealthField, value: Double, start: Date, end: Date, source: String) -> HealthRecord {
         // Apple export has no sample UUID. Use a stable, unit-normalized natural key.
