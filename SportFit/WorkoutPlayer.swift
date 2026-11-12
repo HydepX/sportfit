@@ -11,7 +11,6 @@ struct WorkoutPlayer: View {
     @State private var secondsText = ""
     @State private var feeling = "Как раз"
     @State private var skipSheet = false
-    @State private var currentSecond = Date()
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     private var draft: WorkoutDraft? { engine.draft }
@@ -133,8 +132,7 @@ struct WorkoutPlayer: View {
             }
             .interactiveDismissDisabled(draft?.phase != .paused && draft?.phase != .summary)
             .scrollDismissesKeyboard(.interactively)
-            .onReceive(ticker) { now in
-                currentSecond = now
+            .onReceive(ticker) { _ in
                 engine.tick()
             }
             .onChange(of: draft?.currentIndex) { _, _ in loadInputDefaults() }
@@ -166,9 +164,7 @@ struct WorkoutPlayer: View {
             }
             movementControls()
         case .active:
-            Text(timeString(draft.activeSeconds(now: currentSecond)))
-                .font(.system(size: 56, weight: .bold, design: .rounded))
-                .monospacedDigit()
+            WorkoutClock(resting: false)
             if movement.isTimed {
                 VStack(alignment: .leading) {
                     Text("Фактическая длительность, сек").font(.caption)
@@ -210,9 +206,7 @@ struct WorkoutPlayer: View {
             movementControls()
         case .rest:
             Text("Отдых").font(.headline)
-            Text(timeString(engine.restRemaining()))
-                .font(.system(size: 64, weight: .bold, design: .rounded))
-                .monospacedDigit()
+            WorkoutClock(resting: true)
             HStack {
                 ForEach([15, 30, 60], id: \.self) { value in
                     Button("+\(value) сек") { engine.extendRest(value) }
@@ -238,7 +232,7 @@ struct WorkoutPlayer: View {
                 .font(.title2.bold()).foregroundStyle(.mint)
             Text("\(draft.completedSetCount) подходов · \(draft.skippedCount) пропущено")
                 .foregroundStyle(.secondary)
-            Text("Время занятия без пауз: \(timeString(draft.activeSeconds(now: currentSecond)))")
+            Text("Время занятия без пауз: \(timeString(draft.activeSeconds()))")
             Text("Как ты себя чувствуешь?").font(.headline)
             Picker("Самочувствие", selection: $feeling) {
                 ForEach(["Сложно", "Как раз", "Легко"], id: \.self) { option in
@@ -295,6 +289,21 @@ struct WorkoutPlayer: View {
     }
     private func timeString(_ seconds: Int) -> String {
         String(format: "%02d:%02d", seconds / 60, seconds % 60)
+    }
+}
+
+/// A second updates only the clock, not the player hierarchy or an open menu.
+private struct WorkoutClock: View {
+    @EnvironmentObject private var engine: WorkoutEngine
+    let resting: Bool
+    @State private var now = Date()
+    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    var body: some View {
+        let seconds = resting ? engine.restRemaining() : (engine.draft?.activeSeconds(now: now) ?? 0)
+        Text(String(format: "%02d:%02d", seconds / 60, seconds % 60))
+            .font(.system(size: resting ? 64 : 56, weight: .bold, design: .rounded))
+            .monospacedDigit()
+            .onReceive(ticker) { now = $0 }
     }
 }
 
