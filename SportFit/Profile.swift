@@ -24,10 +24,11 @@ import SwiftUI
             }
             runs = []
             if FileManager.default.fileExists(atPath: url("program_runs.v1.json").path) {
-                runs = try JSONDecoder().decode([ProgramRun].self, from: Data(contentsOf: url("program_runs.v1.json")))
-                try DataValidation.require(Set(runs.map(\.id)).count == runs.count && runs.filter { $0.closedAt == nil }.count <= 1,
+                let loaded = try JSONDecoder().decode([ProgramRun].self, from: Data(contentsOf: url("program_runs.v1.json")))
+                try DataValidation.require(Set(loaded.map(\.id)).count == loaded.count && loaded.filter { $0.closedAt == nil }.count <= 1,
                                            "Повреждён список уровней")
-                for run in runs { try run.validateStructure() }
+                for run in loaded { try run.validateStructure() }
+                runs = loaded
             }
         } catch { storageHealthy = false; self.error = "Ошибка чтения профиля: \(error.localizedDescription)" }
     }

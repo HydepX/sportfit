@@ -166,11 +166,7 @@ import SwiftUI
     }
 
     func prescription(_ id: String, on date: Date) -> ExercisePrescription? {
-        if let sessions = program?.sessions {
-            return sessions.first { $0.date == SportDate.key(date) }?.items.first { $0.exerciseId == id }?.prescription
-        }
-        if let week = weekNumber(for: date), let rule = phase(week: week)?.prescriptions?[id] { return rule }
-        return program?.prescriptions?[id]
+        program?.prescription(id, on: date)
     }
 
     func nextWorkout(after date: Date = Date()) -> Date? {

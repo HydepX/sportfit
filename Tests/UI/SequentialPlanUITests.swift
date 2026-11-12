@@ -35,6 +35,7 @@ final class SequentialPlanUITests: XCTestCase {
         app.buttons["Управление тренировкой"].tap()
         app.buttons["Завершить досрочно"].tap()
         let save = app.buttons["Сохранить результат"]
+        XCTAssertTrue(save.waitForExistence(timeout: 10))
         reveal(save, app: app)
         save.tap()
         let closeDay = app.buttons["close-program-day"]
@@ -43,8 +44,10 @@ final class SequentialPlanUITests: XCTestCase {
         closeDay.tap()
         app.buttons["Закрыть день и перейти дальше"].tap()
         XCTAssertEqual(app.staticTexts["current-program-day"].label, "Сейчас · День 2")
+        reveal(app.buttons["close-rest-day"], app: app)
         app.buttons["close-rest-day"].tap()
         XCTAssertEqual(app.staticTexts["current-program-day"].label, "Сейчас · День 3")
+        reveal(app.buttons["extra-rest"], app: app)
         app.buttons["extra-rest"].tap()
         app.buttons["Сегодня отдыхаю"].tap()
         XCTAssertEqual(app.staticTexts["current-program-day"].label, "Сейчас · День 3")

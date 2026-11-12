@@ -11,7 +11,6 @@ struct WorkoutPlayer: View {
     @State private var secondsText = ""
     @State private var feeling = "Как раз"
     @State private var skipSheet = false
-    @State private var showDiscard = false
     @State private var currentSecond = Date()
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -100,20 +99,8 @@ struct WorkoutPlayer: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { showDiscard = true } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }.accessibilityLabel("Управление тренировкой")
+                    WorkoutActions()
                 }
-            }
-            .confirmationDialog("Управление тренировкой", isPresented: $showDiscard) {
-                Button("Завершить досрочно") { engine.earlyFinish() }
-                Button("Удалить черновик", role: .destructive) {
-                    engine.discard()
-                    dismiss()
-                }
-                Button("Отмена", role: .cancel) {}
-            } message: {
-                Text("Сохранённые результаты прошлых занятий не удаляются.")
             }
             .confirmationDialog("Причина пропуска", isPresented: $skipSheet) {
                 ForEach(["Не подошло по самочувствию", "Слишком сложно",
@@ -308,6 +295,27 @@ struct WorkoutPlayer: View {
     }
     private func timeString(_ seconds: Int) -> String {
         String(format: "%02d:%02d", seconds / 60, seconds % 60)
+    }
+}
+
+/// Keep workout actions independent of the ticking player content and its dialogs.
+private struct WorkoutActions: View {
+    @EnvironmentObject private var engine: WorkoutEngine
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmDiscard = false
+    var body: some View {
+        Menu {
+            Button("Завершить досрочно") { engine.earlyFinish() }
+            Button("Удалить черновик", role: .destructive) { confirmDiscard = true }
+        } label: { Image(systemName: "ellipsis.circle") }
+        .accessibilityLabel("Управление тренировкой")
+        .alert("Удалить незавершённую тренировку?", isPresented: $confirmDiscard) {
+            Button("Удалить черновик", role: .destructive) {
+                engine.discard()
+                dismiss()
+            }
+            Button("Отмена", role: .cancel) {}
+        } message: { Text("Сохранённые результаты прошлых занятий не удаляются.") }
     }
 }
 

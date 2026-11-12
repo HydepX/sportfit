@@ -145,4 +145,18 @@ import XCTest
         let orphaned = try JSONDecoder().decode(SportFitBackup.self, from: JSONSerialization.data(withJSONObject: json))
         XCTAssertThrowsError(try BackupRestore.validate(orphaned, fallback: store.catalog))
     }
+    func testInvalidProgressIsNotPublishedOrOverwritten() async throws {
+        let (directory, _, profile, _) = try setup()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        var invalid = try XCTUnwrap(profile.activeRun)
+        invalid.days = [RunDayClosure(dayIndex: 50, outcome: .completed, closedAt: Date())]
+        let file = directory.appendingPathComponent("program_runs.v1.json")
+        let bytes = try JSONEncoder().encode([invalid])
+        try bytes.write(to: file)
+        let reloaded = ProfileStore(directory: directory)
+        XCTAssertFalse(reloaded.canExport)
+        XCTAssertTrue(reloaded.runs.isEmpty)
+        reloaded.closeDay(history: [], draft: nil, allowIncomplete: true)
+        XCTAssertEqual(try Data(contentsOf: file), bytes)
+    }
 }
