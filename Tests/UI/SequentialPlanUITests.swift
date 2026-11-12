@@ -32,11 +32,11 @@ final class SequentialPlanUITests: XCTestCase {
         reveal(resume, app: app)
         resume.tap()
         XCTAssertTrue(app.staticTexts["Тренировка приостановлена"].waitForExistence(timeout: 10))
-        app.buttons["Управление тренировкой"].tap()
+        app.buttons["workout-actions"].tap()
         // The action must stay available across clock ticks, not just during opening.
         Thread.sleep(forTimeInterval: 2)
-        XCTAssertTrue(app.buttons["Завершить досрочно"].waitForExistence(timeout: 5))
-        app.buttons["Завершить досрочно"].tap()
+        XCTAssertTrue(app.buttons["finish-early"].waitForExistence(timeout: 5))
+        app.buttons["finish-early"].tap()
         let save = app.buttons["Сохранить результат"]
         XCTAssertTrue(save.waitForExistence(timeout: 10))
         reveal(save, app: app)

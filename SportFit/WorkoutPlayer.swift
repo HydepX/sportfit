@@ -98,7 +98,11 @@ struct WorkoutPlayer: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    WorkoutActions()
+                    NavigationLink {
+                        WorkoutActions(closePlayer: { dismiss() })
+                    } label: { Image(systemName: "ellipsis.circle") }
+                    .accessibilityLabel("Управление тренировкой")
+                    .accessibilityIdentifier("workout-actions")
                 }
             }
             .confirmationDialog("Причина пропуска", isPresented: $skipSheet) {
@@ -307,21 +311,27 @@ private struct WorkoutClock: View {
     }
 }
 
-/// Keep workout actions independent of the ticking player content and its dialogs.
+/// A regular navigation screen keeps actions accessible without a transient popover.
 private struct WorkoutActions: View {
     @EnvironmentObject private var engine: WorkoutEngine
     @Environment(\.dismiss) private var dismiss
+    let closePlayer: () -> Void
     @State private var confirmDiscard = false
     var body: some View {
-        Menu {
-            Button("Завершить досрочно") { engine.earlyFinish() }
+        List {
+            Button("Завершить досрочно") {
+                engine.earlyFinish()
+                dismiss()
+            }.accessibilityIdentifier("finish-early")
             Button("Удалить черновик", role: .destructive) { confirmDiscard = true }
-        } label: { Image(systemName: "ellipsis.circle") }
-        .accessibilityLabel("Управление тренировкой")
+            Text("Досрочное завершение открывает итог: результат нужно сохранить отдельно. Сохранённые результаты прошлых занятий не удаляются.")
+                .font(.footnote).foregroundStyle(.secondary)
+        }
+        .navigationTitle("Действия")
         .alert("Удалить незавершённую тренировку?", isPresented: $confirmDiscard) {
             Button("Удалить черновик", role: .destructive) {
                 engine.discard()
-                dismiss()
+                closePlayer()
             }
             Button("Отмена", role: .cancel) {}
         } message: { Text("Сохранённые результаты прошлых занятий не удаляются.") }

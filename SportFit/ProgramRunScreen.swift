@@ -134,19 +134,19 @@ private struct RunContent: View {
             }
         }
         .sheet(isPresented: $showingPlayer) { WorkoutPlayer() }
-        .confirmationDialog("Закрыть день с неполным результатом?", isPresented: $confirmDay) {
+        .alert("Закрыть день с неполным результатом?", isPresented: $confirmDay) {
             Button("Закрыть день и перейти дальше", role: .destructive) {
                 profile.closeDay(history: engine.history, draft: engine.draft, allowIncomplete: true)
             }
             Button("Отмена", role: .cancel) {}
         } message: { Text("Сохранённая тренировка останется частичной. День без результата будет отмечен как пропущенный. Это не полное выполнение программы.") }
-        .confirmationDialog("Закрыть уровень?", isPresented: $confirmLevel) {
+        .alert("Закрыть уровень?", isPresented: $confirmLevel) {
             Button("Закрыть уровень", role: .destructive) { profile.closeRun(draft: engine.draft, allowIncomplete: true) }
             Button("Отмена", role: .cancel) {}
         } message: {
             Text("Полностью выполнено \(run.completedWorkoutCount) из \(run.workoutCount) тренировок. Незавершённые, частичные и пропущенные дни сохранят свои статусы. После закрытия можно запустить отдельную программу следующего уровня.")
         }
-        .confirmationDialog("Отметить дополнительный отдых?", isPresented: $confirmRest) {
+        .alert("Отметить дополнительный отдых?", isPresented: $confirmRest) {
             Button("Сегодня отдыхаю") { profile.addExtraRest() }
             Button("Отмена", role: .cancel) {}
         } message: { Text("Текущий день остаётся открытым. Занятия не сдвигаются и не считаются пропущенными. Продолжишь, когда будешь готов.") }
