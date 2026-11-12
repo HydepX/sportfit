@@ -1,24 +1,6 @@
 import SwiftUI
 import Charts
 
-enum AnalyticsPeriod: String, CaseIterable, Identifiable {
-    case week = "Неделя", month = "Месяц", quarter = "Квартал", year = "Год", all = "Всё"
-    var id: String { rawValue }
-    func contains(_ date: Date, now: Date = Date()) -> Bool {
-        let component: Calendar.Component
-        let amount: Int
-        switch self {
-        case .week: component = .day; amount = -7
-        case .month: component = .month; amount = -1
-        case .quarter: component = .month; amount = -3
-        case .year: component = .year; amount = -1
-        case .all: return date <= now
-        }
-        let start = SportDate.calendar.date(byAdding: component, value: amount, to: now) ?? now
-        return date >= start && date <= now
-    }
-}
-
 struct WorkoutAnalyticsScreen: View {
     @EnvironmentObject private var engine: WorkoutEngine
     @EnvironmentObject private var store: FitnessStore

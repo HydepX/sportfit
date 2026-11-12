@@ -12,7 +12,8 @@ enum LocalFiles {
     private static let permitted: Set<String> = [
         "exercises.v1.json", "program_12w.v1.json", "program_archive.v1.json",
         "completed_sets.json", "active_workout.v1.json", "workout_history.v1.json",
-        "body_measurements.v1.json", "profile.v1.json", "schedule.v1.json", "program_runs.v1.json"
+        "body_measurements.v1.json", "profile.v1.json", "schedule.v1.json", "program_runs.v1.json",
+        "workout_history.sqlite", "journal.v1.json"
     ]
     static func restore(_ files: [String: Data], directory: URL = LocalFiles.directory) throws {
         func url(_ name: String) -> URL { directory.appendingPathComponent(name) }

@@ -178,6 +178,7 @@ struct SportFitBackupDocument: FileDocument {
         var files: [String: Data] = [
             "program_runs.v1.json": try encoder.encode(backup.runs ?? []),
             "workout_history.v1.json": try encoder.encode(backup.workouts),
+            WorkoutDatabase.filename: try WorkoutDatabase.image(backup.workouts),
             "active_workout.v1.json": try encoder.encode(backup.activeWorkout),
             "body_measurements.v1.json": try encoder.encode(backup.manualMeasurements),
             "completed_sets.json": try encoder.encode(backup.legacySetRecords)

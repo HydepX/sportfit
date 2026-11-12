@@ -18,7 +18,7 @@ final class WorkoutEngine: ObservableObject {
         self.directory = directory
         LocalFiles.recoverIfNeeded(directory: directory)
         draft = load(WorkoutDraft?.self, file: draftFile) ?? nil
-        history = load([WorkoutResult].self, file: historyFile) ?? []
+        loadHistory()
         // Absolute rest deadlines continue across screen lock and process restart.
         // A pre-existing pause remains paused; never silently discard the rest state.
         if let id = draft?.id, history.contains(where: { $0.id == id }) {
@@ -34,6 +34,10 @@ final class WorkoutEngine: ObservableObject {
 
     private func url(_ name: String) -> URL {
         directory.appendingPathComponent(name)
+    }
+    private func loadHistory() {
+        do { history = try WorkoutDatabase(directory: directory).load() }
+        catch { storageHealthy = false; notice = "История не прочитана; исходные файлы сохранены: \(error.localizedDescription)" }
     }
     private func load<T: Decodable>(_ type: T.Type, file: String) -> T? {
         guard FileManager.default.fileExists(atPath: url(file).path) else { return nil }
@@ -259,11 +263,9 @@ final class WorkoutEngine: ObservableObject {
             finishedEarly: d.finishedEarly, movements: d.movements, runId: d.runId, runDayIndex: d.runDayIndex)
         // Idempotency: if a saved workout is re-opened, keep one result per UUID.
         if !history.contains(where: { $0.id == result.id }) {
-            history.append(result)
-            guard save(history, file: historyFile) else {
-                history.removeAll { $0.id == result.id }
-                return nil
-            }
+            guard canExport else { notice = "Сначала восстанови данные из копии"; return nil }
+            do { try WorkoutDatabase(directory: directory).append(result); history.append(result) }
+            catch { notice = "Результат не сохранён: \(error.localizedDescription)"; return nil }
         }
         draft = nil
         try? FileManager.default.removeItem(at: url(draftFile))
@@ -281,7 +283,7 @@ final class WorkoutEngine: ObservableObject {
     func reload() {
         storageHealthy = true
         draft = load(WorkoutDraft?.self, file: draftFile) ?? nil
-        history = load([WorkoutResult].self, file: historyFile) ?? []
+        loadHistory()
         tick()
     }
 

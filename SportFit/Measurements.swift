@@ -100,23 +100,6 @@ final class MeasurementsStore: ObservableObject {
     }
 }
 
-enum MeasurementMetric: String, CaseIterable, Identifiable {
-    case weight = "Вес, кг", waist = "Талия, см", chest = "Грудь, см", hips = "Бёдра, см"
-    case fat = "Жир, %", muscle = "Мышцы, кг", bmi = "ИМТ"
-    var id: String { rawValue }
-    func value(_ entry: BodyMeasurement) -> Double? {
-        switch self {
-        case .weight: return entry.weightKg
-        case .waist: return entry.waistCm
-        case .chest: return entry.chestCm
-        case .hips: return entry.hipsCm
-        case .fat: return entry.bodyFatPercent
-        case .muscle: return entry.muscleMassKg
-        case .bmi: return entry.bmi
-        }
-    }
-}
-
 struct MeasurementsScreen: View {
     @EnvironmentObject private var store: MeasurementsStore
     @State private var showNew = false
