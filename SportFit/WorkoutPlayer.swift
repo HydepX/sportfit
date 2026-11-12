@@ -299,7 +299,7 @@ private struct WorkoutClock: View {
     @State private var now = Date()
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     var body: some View {
-        let seconds = resting ? engine.restRemaining() : (engine.draft?.activeSeconds(now: now) ?? 0)
+        let seconds = resting ? engine.restRemaining(now: now) : (engine.draft?.activeSeconds(now: now) ?? 0)
         Text(String(format: "%02d:%02d", seconds / 60, seconds % 60))
             .font(.system(size: resting ? 64 : 56, weight: .bold, design: .rounded))
             .monospacedDigit()

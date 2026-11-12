@@ -232,9 +232,9 @@ final class WorkoutEngine: ObservableObject {
             $0.restEndsAt = nil
         }
     }
-    func restRemaining() -> Int {
+    func restRemaining(now: Date = Date()) -> Int {
         guard let d = draft, d.phase == .rest, let end = d.restEndsAt else { return 0 }
-        return max(0, Int(ceil(end.timeIntervalSinceNow)))
+        return max(0, Int(ceil(end.timeIntervalSince(now))))
     }
     func earlyFinish() {
         commit {
