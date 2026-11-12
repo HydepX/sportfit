@@ -7,7 +7,36 @@ import struct
 import zipfile
 
 
-def verify(path, healthkit=False, expected_commit=None):
+def verify_executable(binary):
+    if len(binary) < 32:
+        raise ValueError('Truncated Mach-O header')
+    magic, cpu, _, filetype, commands, command_bytes, _, _ = struct.unpack_from('<8I', binary)
+    if (magic, cpu, filetype) != (0xFEEDFACF, 0x0100000C, 2):
+        raise ValueError('Expected an ARM64 Mach-O application executable')
+    end = 32 + command_bytes
+    if end > len(binary) or commands > command_bytes // 8:
+        raise ValueError('Truncated Mach-O commands')
+    offset = 32
+    platform = None
+    for _ in range(commands):
+        if offset + 8 > end:
+            raise ValueError('Truncated Mach-O command')
+        command, size = struct.unpack_from('<II', binary, offset)
+        if size < 8 or size % 8 or offset + size > end:
+            raise ValueError('Invalid Mach-O command size')
+        if command == 0x32:  # LC_BUILD_VERSION: 2 = iOS device, 7 = iOS Simulator.
+            if size < 24:
+                raise ValueError('Truncated Mach-O build version')
+            platform = struct.unpack_from('<I', binary, offset + 8)[0]
+        if command == 0x2C:  # LC_ENCRYPTION_INFO_64
+            if size < 24 or struct.unpack_from('<I', binary, offset + 16)[0] != 0:
+                raise ValueError('Encrypted executable cannot be re-signed for AltStore')
+        offset += size
+    if offset != end or platform != 2:
+        raise ValueError('Expected an iOS device binary, regardless of Info.plist platform')
+
+
+def verify(path, healthkit=False, expected_commit=None, release=False):
     with zipfile.ZipFile(path) as archive:
         bad = archive.testzip()
         if bad:
@@ -35,8 +64,9 @@ def verify(path, healthkit=False, expected_commit=None):
         if not executable:
             raise ValueError('Missing application executable')
         binary = archive.read(base + executable)
-        if len(binary) < 8 or struct.unpack('<II', binary[:8]) != (0xFEEDFACF, 0x0100000C):
-            raise ValueError('Expected a 64-bit ARM Mach-O executable')
+        verify_executable(binary)
+        if release and any(n.endswith(('.debug.dylib', '/__preview.dylib')) for n in names):
+            raise ValueError('Expected a Release archive without Xcode debug/preview libraries')
         catalog = json.loads(archive.read(base + 'exercises.v1.json'))
         program = json.loads(archive.read(base + 'program_12w.v1.json'))
         ids = [entry['id'] for entry in catalog['exercises']]
@@ -57,7 +87,7 @@ def verify(path, healthkit=False, expected_commit=None):
                     raise ValueError('Missing precise target')
         if any(n.endswith('embedded.mobileprovision') for n in names):
             raise ValueError('Expected an unsigned archive without a provisioning profile')
-    print('OK: physical-iPhone IPA, executable, Info.plist, 53 IDs, bundled program and ZIP integrity')
+    print('OK: physical-iPhone IPA, ARM64 iOS executable, Info.plist, 53 IDs, bundled program and ZIP integrity')
 
 
 if __name__ == '__main__':
@@ -66,5 +96,6 @@ if __name__ == '__main__':
     parser.add_argument('path')
     parser.add_argument('--healthkit', action='store_true')
     parser.add_argument('--expected-commit')
+    parser.add_argument('--release', action='store_true')
     args = parser.parse_args()
-    verify(args.path, healthkit=args.healthkit, expected_commit=args.expected_commit)
+    verify(args.path, healthkit=args.healthkit, expected_commit=args.expected_commit, release=args.release)

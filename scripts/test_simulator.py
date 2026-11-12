@@ -12,10 +12,12 @@ if not candidates:
 device = candidates[0]
 subprocess.run([
     'xcodebuild', '-project', 'SportFit.xcodeproj', '-scheme', 'SportFit',
-    '-configuration', 'Debug', '-destination', f"platform=iOS Simulator,id={device['udid']}",
+    '-configuration', 'Release', '-destination', f"platform=iOS Simulator,id={device['udid']}",
     '-derivedDataPath', os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests'),
     '-resultBundlePath', os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests.xcresult'),
-    'CODE_SIGNING_ALLOWED=NO', 'SPORTFIT_BUILD_COMMIT=' + os.environ.get('GITHUB_SHA', 'local'), 'test'
+    'CODE_SIGNING_ALLOWED=NO', 'ENABLE_DEBUG_DYLIB=NO',
+    'CURRENT_PROJECT_VERSION=' + os.environ.get('GITHUB_RUN_NUMBER', '2'),
+    'SPORTFIT_BUILD_COMMIT=' + os.environ.get('GITHUB_SHA', 'local'), 'test'
 ], check=True)
 
 summary = json.loads(subprocess.check_output([

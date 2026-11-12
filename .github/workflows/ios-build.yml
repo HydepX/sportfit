@@ -1,4 +1,4 @@
-name: iOS tests and unsigned iPhone IPA
+name: iOS tests and iPhone IPA
 on:
   push:
   workflow_dispatch:
@@ -27,30 +27,33 @@ jobs:
         run: python3 scripts/validate_data.py
       - name: Run iPhone simulator tests
         run: python3 scripts/test_simulator.py
-      - name: Build for physical iPhone (unsigned, no HealthKit capability)
+      - name: Build Release for physical iPhone (no HealthKit capability)
         run: |
           xcodebuild -project SportFit.xcodeproj \
-            -scheme SportFit -configuration Debug \
+            -scheme SportFit -configuration Release \
             -sdk iphoneos -destination 'generic/platform=iOS' \
             -derivedDataPath "$RUNNER_TEMP/SportFitDevice" \
-            CODE_SIGNING_ALLOWED=NO SPORTFIT_BUILD_COMMIT="$GITHUB_SHA" build
-      - name: Package and validate unsigned IPA
+            CODE_SIGNING_ALLOWED=NO ENABLE_DEBUG_DYLIB=NO \
+            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" SPORTFIT_BUILD_COMMIT="$GITHUB_SHA" build
+      - name: Package and validate Release IPA for AltStore
         run: |
           set -euo pipefail
-          APP="$RUNNER_TEMP/SportFitDevice/Build/Products/Debug-iphoneos/SportFit.app"
+          APP="$RUNNER_TEMP/SportFitDevice/Build/Products/Release-iphoneos/SportFit.app"
           test -d "$APP"
+          codesign --force --sign - "$APP"
+          codesign --verify --strict "$APP"
           mkdir -p "$RUNNER_TEMP/ipa/Payload"
           cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/SportFit.app"
-          (cd "$RUNNER_TEMP/ipa" && zip -qry "$GITHUB_WORKSPACE/SportFit-unsigned.ipa" Payload)
-          python3 scripts/verify_ipa.py SportFit-unsigned.ipa --expected-commit "$GITHUB_SHA"
-          shasum -a 256 SportFit-unsigned.ipa > SportFit-unsigned.ipa.sha256
-      - name: Upload unsigned iPhone IPA
+          (cd "$RUNNER_TEMP/ipa" && zip -qry "$GITHUB_WORKSPACE/SportFit.ipa" Payload)
+          python3 scripts/verify_ipa.py SportFit.ipa --release --expected-commit "$GITHUB_SHA"
+          shasum -a 256 SportFit.ipa > SportFit.ipa.sha256
+      - name: Upload Release iPhone IPA
         uses: actions/upload-artifact@v4
         with:
-          name: SportFit-unsigned-iphone-${{ github.sha }}
+          name: SportFit-iPhone-${{ github.sha }}
           path: |
-            SportFit-unsigned.ipa
-            SportFit-unsigned.ipa.sha256
+            SportFit.ipa
+            SportFit.ipa.sha256
           if-no-files-found: error
           retention-days: 14
       - name: Preserve simulator test results
@@ -64,21 +67,22 @@ jobs:
         run: |
           xcodegen generate --spec project-healthkit.yml
           xcodebuild -project SportFit.xcodeproj \
-            -scheme SportFit -configuration Debug \
+            -scheme SportFit -configuration Release \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$RUNNER_TEMP/SportFitHealthKit" \
             CODE_SIGNING_ALLOWED=NO SPORTFIT_BUILD_COMMIT="$GITHUB_SHA" build
       - name: Build separate HealthKit device trial (unsigned)
         run: |
           xcodebuild -project SportFit.xcodeproj \
-            -scheme SportFit -configuration Debug \
+            -scheme SportFit -configuration Release \
             -sdk iphoneos -destination 'generic/platform=iOS' \
             -derivedDataPath "$RUNNER_TEMP/SportFitHealthKitDevice" \
-            CODE_SIGNING_ALLOWED=NO SPORTFIT_BUILD_COMMIT="$GITHUB_SHA" build
+            CODE_SIGNING_ALLOWED=NO ENABLE_DEBUG_DYLIB=NO \
+            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" SPORTFIT_BUILD_COMMIT="$GITHUB_SHA" build
       - name: Package and verify HealthKit trial IPA
         run: |
           set -euo pipefail
-          APP="$RUNNER_TEMP/SportFitHealthKitDevice/Build/Products/Debug-iphoneos/SportFit.app"
+          APP="$RUNNER_TEMP/SportFitHealthKitDevice/Build/Products/Release-iphoneos/SportFit.app"
           test -d "$APP"
           codesign --force --sign - --entitlements SportFit/SportFit.entitlements "$APP"
           codesign --verify --strict "$APP"
@@ -87,7 +91,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/healthkit-ipa/Payload"
           cp -R "$APP" "$RUNNER_TEMP/healthkit-ipa/Payload/SportFit.app"
           (cd "$RUNNER_TEMP/healthkit-ipa" && zip -qry "$GITHUB_WORKSPACE/SportFit-HealthKit-trial.ipa" Payload)
-          python3 scripts/verify_ipa.py SportFit-HealthKit-trial.ipa --healthkit --expected-commit "$GITHUB_SHA"
+          python3 scripts/verify_ipa.py SportFit-HealthKit-trial.ipa --healthkit --release --expected-commit "$GITHUB_SHA"
           shasum -a 256 SportFit-HealthKit-trial.ipa > SportFit-HealthKit-trial.ipa.sha256
       - name: Upload HealthKit device trial
         uses: actions/upload-artifact@v4

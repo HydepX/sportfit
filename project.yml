@@ -16,8 +16,6 @@ targets:
       properties:
         SportFitHealthKitEnabled: false
         SportFitBuildCommit: '$(SPORTFIT_BUILD_COMMIT)'
-        NSHealthShareUsageDescription: SportFit читает вес, шаги и пульс, а дополнительные показатели — только по вашему запросу. Данные остаются на устройстве.
-        NSHealthUpdateUsageDescription: SportFit не записывает данные в Apple Здоровье.
     sources:
       - path: SportFit
         excludes:
@@ -33,8 +31,6 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: SportFit
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_NSHealthShareUsageDescription: SportFit использует данные Apple Здоровье только с вашего разрешения для отображения прогресса.
-        INFOPLIST_KEY_NSHealthUpdateUsageDescription: Доступ к записи в Здоровье не используется в первой версии.
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UIFileSharingEnabled: YES

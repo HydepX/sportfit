@@ -14,7 +14,7 @@ spec.loader.exec_module(module)
 
 
 class ArchiveTests(unittest.TestCase):
-    def make(self, path, platform='iPhoneOS', include_catalog=True, healthkit=False):
+    def make(self, path, platform='iPhoneOS', include_catalog=True, healthkit=False, binary_platform=2, debug_library=False):
         with zipfile.ZipFile(path, 'w') as archive:
             base = 'Payload/SportFit.app/'
             archive.writestr(base + 'Info.plist', plistlib.dumps({
@@ -23,7 +23,11 @@ class ArchiveTests(unittest.TestCase):
                 'CFBundleExecutable': 'SportFit', 'SportFitHealthKitEnabled': healthkit,
                 'SportFitBuildCommit': 'test-commit', 'NSHealthShareUsageDescription': 'Test read-only purpose'
             }))
-            archive.writestr(base + 'SportFit', struct.pack('<II', 0xFEEDFACF, 0x0100000C) + b'fixture')
+            binary = struct.pack('<8I', 0xFEEDFACF, 0x0100000C, 0, 2, 1, 24, 0, 0)
+            binary += struct.pack('<6I', 0x32, 24, binary_platform, 17 << 16, 17 << 16, 0)
+            archive.writestr(base + 'SportFit', binary)
+            if debug_library:
+                archive.writestr(base + 'SportFit.debug.dylib', b'fixture')
             if include_catalog:
                 archive.write(ROOT / 'SportFit/Resources/Data/exercises.v1.json', base + 'exercises.v1.json')
             archive.write(ROOT / 'SportFit/Resources/Data/program_12w.v1.json', base + 'program_12w.v1.json')
@@ -75,3 +79,27 @@ class ArchiveTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 module.verify(path, expected_commit='another-commit')
             module.verify(path, expected_commit='test-commit')
+
+    def test_rejects_simulator_binary_even_with_device_plist(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'fixture.ipa'
+            self.make(path, binary_platform=7)
+            with self.assertRaisesRegex(ValueError, 'iOS device binary'):
+                module.verify(path)
+
+    def test_release_rejects_debug_library_packaging(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'fixture.ipa'
+            self.make(path, debug_library=True)
+            with self.assertRaisesRegex(ValueError, 'debug/preview'):
+                module.verify(path, release=True)
+            self.make(path)
+            module.verify(path, release=True)
+
+    def test_rejects_corrupt_executable_commands(self):
+        binary = struct.pack('<8I', 0xFEEDFACF, 0x0100000C, 0, 2, 1, 24, 0, 0)
+        with self.assertRaisesRegex(ValueError, 'Truncated Mach-O commands'):
+            module.verify_executable(binary)
+        binary += struct.pack('<6I', 0x32, 0, 2, 0, 0, 0)
+        with self.assertRaisesRegex(ValueError, 'command size'):
+            module.verify_executable(binary)

@@ -92,7 +92,9 @@ struct SettingsScreen: View {
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("О приложении") {
-                    Text("SportFit · первая версия")
+                    Text("SportFit \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—") · сборка \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—")")
+                    Text("Коммит: \(Bundle.main.object(forInfoDictionaryKey: "SportFitBuildCommit") as? String ?? "неизвестен")")
+                        .font(.caption).textSelection(.enabled)
                     Text("Хранение: только на устройстве. Фото и видео упражнений будут добавлены позже.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }

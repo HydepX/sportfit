@@ -36,7 +36,10 @@ xcodegen generate --spec project.yml
 python3 scripts/test_simulator.py
 ```
 
-GitHub Actions запускается при push и вручную, выполняет тесты и создаёт неподписанный IPA для физического iPhone. Подробности: [установка с Windows через AltStore Classic](docs/INSTALL_WINDOWS.md).
+GitHub Actions запускается при push и вручную, выполняет тесты и создаёт Release IPA
+для физического iPhone без debug/preview-библиотек. `SportFit.ipa` требует персональной
+переподписи AltStore/AltServer. Подробности и альтернативная установка прямо с Windows
+при ошибке 2005: [инструкция](docs/INSTALL_WINDOWS.md).
 
 ## Данные и ограничения
 
