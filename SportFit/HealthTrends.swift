@@ -64,7 +64,7 @@ struct HealthTrendPoint: Identifiable {
 #if SPORTFIT_HEALTHKIT
     private let store = HKHealthStore()
 #endif
-    func load(metric: HealthMetric, period: AnalyticsPeriod) async {
+    func load(metric: HealthMetric, period: AnalyticsPeriod, requestAccess: Bool = false) async {
         guard !loading else { return }
         loading = true
         points = []
@@ -86,8 +86,8 @@ struct HealthTrendPoint: Identifiable {
         do {
             if metric == .sleep {
                 guard let type = HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) else { return }
-                try await store.requestAuthorization(toShare: [], read: [type])
-                let samples = await query(type: type, predicate: predicate)
+                if requestAccess { try await store.requestAuthorization(toShare: [], read: [type]) }
+                let samples = try await query(type: type, predicate: predicate)
                 let asleep = samples.compactMap { $0 as? HKCategorySample }.filter { [1, 3, 4, 5].contains($0.value) }
                 // Split intervals at local midnight, then merge overlaps from stages/sources.
                 var days: [Date: [(Date, Date)]] = [:]
@@ -117,13 +117,14 @@ struct HealthTrendPoint: Identifiable {
                                                   source: "Apple Health · объединённый сон"))
                 }
             } else if let id = metric.quantityIdentifier, let type = HKQuantityType.quantityType(forIdentifier: id) {
-                try await store.requestAuthorization(toShare: [], read: [type])
+                if requestAccess { try await store.requestAuthorization(toShare: [], read: [type]) }
                 if metric.isCumulative {
-                    points = await withCheckedContinuation { continuation in
+                    points = try await withCheckedThrowingContinuation { continuation in
                         let query = HKStatisticsCollectionQuery(quantityType: type, quantitySamplePredicate: predicate,
                             options: .cumulativeSum, anchorDate: SportDate.calendar.startOfDay(for: now),
                             intervalComponents: DateComponents(day: 1))
-                        query.initialResultsHandler = { _, collection, _ in
+                        query.initialResultsHandler = { _, collection, error in
+                            if let error { continuation.resume(throwing: error); return }
                             var values: [HealthTrendPoint] = []
                             collection?.enumerateStatistics(from: start, to: now) { statistics, _ in
                                 if let quantity = statistics.sumQuantity() {
@@ -136,7 +137,7 @@ struct HealthTrendPoint: Identifiable {
                         store.execute(query)
                     }
                 } else {
-                    let samples = await query(type: type, predicate: predicate)
+                    let samples = try await query(type: type, predicate: predicate)
                     points = samples.compactMap { sample in
                         guard let quantity = sample as? HKQuantitySample else { return nil }
                         return HealthTrendPoint(id: quantity.uuid, date: quantity.endDate,
@@ -153,11 +154,12 @@ struct HealthTrendPoint: Identifiable {
 #endif
     }
 #if SPORTFIT_HEALTHKIT
-    private func query(type: HKSampleType, predicate: NSPredicate) async -> [HKSample] {
-        await withCheckedContinuation { continuation in
+    private func query(type: HKSampleType, predicate: NSPredicate) async throws -> [HKSample] {
+        try await withCheckedThrowingContinuation { continuation in
             let query = HKSampleQuery(sampleType: type, predicate: predicate, limit: 5000,
-                                     sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]) { _, samples, _ in
-                continuation.resume(returning: samples ?? [])
+                                     sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]) { _, samples, error in
+                if let error { continuation.resume(throwing: error) }
+                else { continuation.resume(returning: samples ?? []) }
             }
             store.execute(query)
         }
@@ -177,7 +179,7 @@ struct HealthTrendsScreen: View {
             Picker("Период", selection: $period) {
                 ForEach(AnalyticsPeriod.allCases) { Text($0.rawValue).tag($0) }
             }.disabled(store.loading)
-            Button("Обновить") { Task { await store.load(metric: metric, period: period) } }.disabled(store.loading)
+            Button("Подключить показатель и обновить") { Task { await store.load(metric: metric, period: period, requestAccess: true) } }.disabled(store.loading)
             if store.loading { ProgressView() }
             if store.points.count >= 2 {
                 Chart(store.points) { point in

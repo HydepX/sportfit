@@ -8,5 +8,6 @@ targets:
     settings:
       base:
         CODE_SIGN_ENTITLEMENTS: SportFit/SportFit.entitlements
+        INFOPLIST_KEY_SportFitHealthKitEnabled: YES
     entitlements:
       path: SportFit/SportFit.entitlements

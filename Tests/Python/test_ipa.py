@@ -14,13 +14,13 @@ spec.loader.exec_module(module)
 
 
 class ArchiveTests(unittest.TestCase):
-    def make(self, path, platform='iPhoneOS', include_catalog=True):
+    def make(self, path, platform='iPhoneOS', include_catalog=True, healthkit=False):
         with zipfile.ZipFile(path, 'w') as archive:
             base = 'Payload/SportFit.app/'
             archive.writestr(base + 'Info.plist', plistlib.dumps({
                 'CFBundleIdentifier': 'com.hydepx.sportfit',
                 'CFBundleSupportedPlatforms': [platform], 'MinimumOSVersion': '17.0',
-                'CFBundleExecutable': 'SportFit'
+                'CFBundleExecutable': 'SportFit', 'SportFitHealthKitEnabled': healthkit
             }))
             archive.writestr(base + 'SportFit', struct.pack('<II', 0xFEEDFACF, 0x0100000C) + b'fixture')
             if include_catalog:
@@ -47,3 +47,23 @@ class ArchiveTests(unittest.TestCase):
             self.make(path, include_catalog=False)
             with self.assertRaises(KeyError):
                 module.verify(path)
+
+    def test_rejects_healthkit_trial_as_standard(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'fixture.ipa'
+            self.make(path, healthkit=True)
+            with self.assertRaises(ValueError):
+                module.verify(path)
+
+    def test_accepts_explicit_healthkit_variant(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'fixture.ipa'
+            self.make(path, healthkit=True)
+            module.verify(path, healthkit=True)
+
+    def test_rejects_standard_when_trial_requested(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'fixture.ipa'
+            self.make(path)
+            with self.assertRaises(ValueError):
+                module.verify(path, healthkit=True)

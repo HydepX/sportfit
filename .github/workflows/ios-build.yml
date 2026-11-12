@@ -33,7 +33,7 @@ jobs:
             -scheme SportFit -configuration Debug \
             -sdk iphoneos -destination 'generic/platform=iOS' \
             -derivedDataPath "$RUNNER_TEMP/SportFitDevice" \
-            CODE_SIGNING_ALLOWED=NO build
+            CODE_SIGNING_ALLOWED=NO SPORTFIT_BUILD_COMMIT="$GITHUB_SHA" build
       - name: Package and validate unsigned IPA
         run: |
           set -euo pipefail
@@ -67,4 +67,35 @@ jobs:
             -scheme SportFit -configuration Debug \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$RUNNER_TEMP/SportFitHealthKit" \
-            CODE_SIGNING_ALLOWED=NO build
+            CODE_SIGNING_ALLOWED=NO SPORTFIT_BUILD_COMMIT="$GITHUB_SHA" build
+      - name: Build separate HealthKit device trial (unsigned)
+        run: |
+          xcodebuild -project SportFit.xcodeproj \
+            -scheme SportFit -configuration Debug \
+            -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/SportFitHealthKitDevice" \
+            CODE_SIGNING_ALLOWED=NO SPORTFIT_BUILD_COMMIT="$GITHUB_SHA" build
+      - name: Package and verify HealthKit trial IPA
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/SportFitHealthKitDevice/Build/Products/Debug-iphoneos/SportFit.app"
+          test -d "$APP"
+          codesign --force --sign - --entitlements SportFit/SportFit.entitlements "$APP"
+          codesign --verify --strict "$APP"
+          codesign --display --entitlements - "$APP" > "$GITHUB_WORKSPACE/HealthKit-entitlements.plist"
+          python3 -c 'import plistlib; assert plistlib.load(open("HealthKit-entitlements.plist", "rb")).get("com.apple.developer.healthkit") is True'
+          mkdir -p "$RUNNER_TEMP/healthkit-ipa/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/healthkit-ipa/Payload/SportFit.app"
+          (cd "$RUNNER_TEMP/healthkit-ipa" && zip -qry "$GITHUB_WORKSPACE/SportFit-HealthKit-trial.ipa" Payload)
+          python3 scripts/verify_ipa.py SportFit-HealthKit-trial.ipa --healthkit
+          shasum -a 256 SportFit-HealthKit-trial.ipa > SportFit-HealthKit-trial.ipa.sha256
+      - name: Upload HealthKit device trial
+        uses: actions/upload-artifact@v4
+        with:
+          name: SportFit-HealthKit-trial-${{ github.sha }}
+          path: |
+            SportFit-HealthKit-trial.ipa
+            SportFit-HealthKit-trial.ipa.sha256
+            HealthKit-entitlements.plist
+          if-no-files-found: error
+          retention-days: 14

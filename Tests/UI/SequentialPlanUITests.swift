@@ -1,6 +1,22 @@
 import XCTest
 
 final class SequentialPlanUITests: XCTestCase {
+    func testHealthScreenOffersOfflineImportWithoutAutomaticPermissionPrompt() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launch()
+        app.tabBars.buttons["Профиль"].tap()
+        let health = app.buttons["open-health"]
+        reveal(health, app: app)
+        health.tap()
+        let status = app.staticTexts["health-build-status"]
+        XCTAssertTrue(status.waitForExistence(timeout: 10))
+        XCTAssertTrue(status.label.contains("без HealthKit"))
+        XCTAssertFalse(app.buttons["Подключить вес, шаги и пульс"].exists)
+        let importer = app.buttons["import-health-xml"]
+        reveal(importer, app: app)
+        XCTAssertTrue(importer.isHittable)
+    }
     private func reveal(_ element: XCUIElement, app: XCUIApplication, up: Bool = true) {
         for _ in 0..<12 {
             if element.exists && element.isHittable { return }

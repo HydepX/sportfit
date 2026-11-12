@@ -86,9 +86,9 @@ struct SettingsScreen: View {
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("Apple Health") {
-                    NavigationLink("Apple Health и источники") { HealthScreen() }
+                    NavigationLink("Apple Health и источники") { HealthScreen() }.accessibilityIdentifier("open-health")
                     Button("Импортировать измерения JSON") { importingMeasurements = true }
-                    Text("Для доступа к данным Huawei через Apple Здоровье нужен HealthKit. Его проверим на устройстве после решения вопроса бесплатной подписи.")
+                    Text("Прямое чтение требует сборки с HealthKit и проверки подписи на iPhone. Обычная сборка поддерживает локальный импорт Apple Health XML без этого capability.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("О приложении") {

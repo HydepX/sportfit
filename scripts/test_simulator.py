@@ -15,13 +15,13 @@ subprocess.run([
     '-configuration', 'Debug', '-destination', f"platform=iOS Simulator,id={device['udid']}",
     '-derivedDataPath', os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests'),
     '-resultBundlePath', os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests.xcresult'),
-    'CODE_SIGNING_ALLOWED=NO', 'test'
+    'CODE_SIGNING_ALLOWED=NO', 'SPORTFIT_BUILD_COMMIT=' + os.environ.get('GITHUB_SHA', 'local'), 'test'
 ], check=True)
 
 summary = json.loads(subprocess.check_output([
     'xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path',
     os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests.xcresult')
 ]))
-if summary.get('passedTests', 0) < 22 or summary.get('failedTests', 0) != 0 or summary.get('skippedTests', 0) != 0:
+if summary.get('passedTests', 0) < 31 or summary.get('failedTests', 0) != 0 or summary.get('skippedTests', 0) != 0:
     raise SystemExit(f"Unexpected simulator test result counts: {summary}")
 print(f"Verified {summary['totalTestCount']} simulator tests executed")

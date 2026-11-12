@@ -7,7 +7,7 @@ import struct
 import zipfile
 
 
-def verify(path):
+def verify(path, healthkit=False):
     with zipfile.ZipFile(path) as archive:
         bad = archive.testzip()
         if bad:
@@ -18,6 +18,9 @@ def verify(path):
             raise ValueError(f"Unexpected applications: {apps}")
         base = 'Payload/SportFit.app/'
         info = plistlib.loads(archive.read(base + 'Info.plist'))
+        enabled = info.get('SportFitHealthKitEnabled', False) in (True, 'YES', 'true', '1')
+        if enabled != healthkit:
+            raise ValueError('Unexpected HealthKit build variant')
         if info.get('CFBundleIdentifier') != 'com.hydepx.sportfit':
             raise ValueError('Incorrect bundle identifier')
         if info.get('CFBundleSupportedPlatforms') != ['iPhoneOS']:
@@ -54,4 +57,9 @@ def verify(path):
 
 
 if __name__ == '__main__':
-    verify(sys.argv[1])
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path')
+    parser.add_argument('--healthkit', action='store_true')
+    args = parser.parse_args()
+    verify(args.path, healthkit=args.healthkit)
