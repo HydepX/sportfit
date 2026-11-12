@@ -156,7 +156,7 @@ private struct HealthSnapshotRow: View {
                 Text("Последнее изменение: \(changed.formatted(date: .abbreviated, time: .shortened))").font(.caption)
             }
             if snapshot.status == .empty { Text("Нет записей или нет доступа к чтению").font(.caption) }
-            if let error = snapshot.error { Text("Ошибка: \(error)").font(.caption).foregroundStyle(.orange) }
+            if let error = snapshot.error { Text("Последняя ошибка: \(error)").font(.caption).foregroundStyle(.orange) }
         }.padding(.vertical, 5)
     }
 }

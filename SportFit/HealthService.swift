@@ -105,6 +105,7 @@ enum PrivateHealthFile {
                 let loaded = try JSONDecoder().decode(HealthCache.self, from: Data(contentsOf: file))
                 try loaded.validate()
                 cache = loaded
+                for index in cache.snapshots.indices { cache.snapshots[index].status = .notChecked }
             } catch { storageHealthy = false; message = "Кэш не прочитан. Очисти только локальный кэш, затем подключись заново. Данные Apple Health не изменяются." }
         }
     }
@@ -112,19 +113,22 @@ enum PrivateHealthFile {
     func refresh(force: Bool = false, now: Date = Date()) async { await perform(force: force, requestAuthorization: false, now: now) }
     private func perform(force: Bool, requestAuthorization: Bool, now: Date) async {
         guard !loading, storageHealthy else { return }
-        guard buildEnabled else { message = "Эта IPA без HealthKit. Доступен локальный импорт export.xml и ручной ввод."; return }
-        guard available else { message = "Apple Health недоступен на этом устройстве"; return }
+        guard buildEnabled else {
+            for index in cache.snapshots.indices { cache.snapshots[index].status = .notChecked }
+            message = "Эта IPA без HealthKit. Доступен локальный импорт export.xml и ручной ввод."; return
+        }
         guard requestAuthorization || (cache.connectionRequested && cache.shouldRefresh(now: now, force: force)) else { return }
         loading = true
         defer { loading = false }
+        cache.lastAttempt = now
+        cache.lastTimeZone = TimeZone.current.identifier
+        guard available else { failAll("Apple Health недоступен на этом устройстве", now: now); return }
         if requestAuthorization {
             do {
                 try await client.authorize()
                 cache.connectionRequested = true // Request completion, not proof of read permission.
-            } catch { message = "Запрос доступа не выполнен: \(error.localizedDescription)"; return }
+            } catch { failAll("Запрос доступа не выполнен: \(error.localizedDescription)", now: now); return }
         }
-        cache.lastAttempt = now
-        cache.lastTimeZone = TimeZone.current.identifier
         for field in HealthField.allCases {
             guard let index = cache.snapshots.firstIndex(where: { $0.field == field }) else { continue }
             do {
@@ -134,8 +138,16 @@ enum PrivateHealthFile {
             } catch { cache.snapshots[index].failed(error.localizedDescription, now: now) }
         }
         message = "Проверка завершена. Пустой ответ не позволяет отличить отсутствие данных от запрета чтения. Новые значения появляются после записи Huawei Health в Apple Health."
+        persist()
+    }
+    private func failAll(_ reason: String, now: Date) {
+        for index in cache.snapshots.indices { cache.snapshots[index].failed(reason, now: now) }
+        message = reason
+        persist()
+    }
+    private func persist() {
         do { try PrivateHealthFile.write(cache, to: file) }
-        catch { message = "Проверка выполнена, но кэш не сохранён: \(error.localizedDescription)" }
+        catch { message += " Кэш не сохранён: \(error.localizedDescription)" }
     }
     func reset() {
         guard !loading else { return }

@@ -20,7 +20,8 @@ class ArchiveTests(unittest.TestCase):
             archive.writestr(base + 'Info.plist', plistlib.dumps({
                 'CFBundleIdentifier': 'com.hydepx.sportfit',
                 'CFBundleSupportedPlatforms': [platform], 'MinimumOSVersion': '17.0',
-                'CFBundleExecutable': 'SportFit', 'SportFitHealthKitEnabled': healthkit
+                'CFBundleExecutable': 'SportFit', 'SportFitHealthKitEnabled': healthkit,
+                'SportFitBuildCommit': 'test-commit', 'NSHealthShareUsageDescription': 'Test read-only purpose'
             }))
             archive.writestr(base + 'SportFit', struct.pack('<II', 0xFEEDFACF, 0x0100000C) + b'fixture')
             if include_catalog:
@@ -67,3 +68,10 @@ class ArchiveTests(unittest.TestCase):
             self.make(path)
             with self.assertRaises(ValueError):
                 module.verify(path, healthkit=True)
+    def test_rejects_artifact_from_another_commit(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'fixture.ipa'
+            self.make(path)
+            with self.assertRaises(ValueError):
+                module.verify(path, expected_commit='another-commit')
+            module.verify(path, expected_commit='test-commit')

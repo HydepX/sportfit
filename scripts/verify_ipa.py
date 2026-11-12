@@ -7,7 +7,7 @@ import struct
 import zipfile
 
 
-def verify(path, healthkit=False):
+def verify(path, healthkit=False, expected_commit=None):
     with zipfile.ZipFile(path) as archive:
         bad = archive.testzip()
         if bad:
@@ -18,9 +18,13 @@ def verify(path, healthkit=False):
             raise ValueError(f"Unexpected applications: {apps}")
         base = 'Payload/SportFit.app/'
         info = plistlib.loads(archive.read(base + 'Info.plist'))
-        enabled = info.get('SportFitHealthKitEnabled', False) in (True, 'YES', 'true', '1')
-        if enabled != healthkit:
+        enabled = info.get('SportFitHealthKitEnabled')
+        if not isinstance(enabled, bool) or enabled != healthkit:
             raise ValueError('Unexpected HealthKit build variant')
+        if expected_commit is not None and info.get('SportFitBuildCommit') != expected_commit:
+            raise ValueError('Unexpected build commit')
+        if healthkit and not info.get('NSHealthShareUsageDescription'):
+            raise ValueError('Missing HealthKit read purpose string')
         if info.get('CFBundleIdentifier') != 'com.hydepx.sportfit':
             raise ValueError('Incorrect bundle identifier')
         if info.get('CFBundleSupportedPlatforms') != ['iPhoneOS']:
@@ -61,5 +65,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('path')
     parser.add_argument('--healthkit', action='store_true')
+    parser.add_argument('--expected-commit')
     args = parser.parse_args()
-    verify(args.path, healthkit=args.healthkit)
+    verify(args.path, healthkit=args.healthkit, expected_commit=args.expected_commit)

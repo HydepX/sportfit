@@ -2,6 +2,7 @@
 .swiftpm/
 *.xcodeproj/
 DerivedData/
+Generated/
 *.ipa
 *.xcresult/
 .DS_Store

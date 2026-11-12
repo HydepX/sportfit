@@ -69,6 +69,7 @@ import XCTest
         XCTAssertEqual(MeasurementsStore(directory: directory).latest?.weightKg, 80)
         let reloaded = HealthReader(client: client, directory: directory)
         XCTAssertEqual(reloaded.cache.snapshots.first { $0.field == .weight }?.record?.value, 70)
+        XCTAssertEqual(reloaded.cache.snapshots.first { $0.field == .weight }?.status, .notChecked)
         let excluded = try directory.appendingPathComponent("HealthLocal").resourceValues(forKeys: [.isExcludedFromBackupKey])
         XCTAssertEqual(excluded.isExcludedFromBackup, true)
         let backup = SportFitBackup(engine: WorkoutEngine(directory: directory), measurements: manual,
@@ -82,6 +83,7 @@ import XCTest
         await reader.connect()
         XCTAssertTrue(client.queries.isEmpty)
         XCTAssertFalse(reader.cache.connectionRequested)
+        XCTAssertTrue(reader.cache.snapshots.allSatisfy { $0.status == .failed })
         let disabled = MockHealthClient(); disabled.buildEnabled = false
         await HealthReader(client: disabled, directory: directory).connect()
         XCTAssertEqual(disabled.authorizationCalls, 0)
