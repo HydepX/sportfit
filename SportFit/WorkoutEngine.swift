@@ -69,21 +69,36 @@ final class WorkoutEngine: ObservableObject {
         return true
     }
 
-    func start(day: ProgramDay, date: Date, store: FitnessStore) {
+    func start(run: ProgramRun, store: FitnessStore) {
+        guard run.closedAt == nil, let index = run.currentDay, let day = run.workout(on: index) else {
+            notice = "В этот день отдых или уровень закрыт"; return
+        }
+        start(day: day, date: Date(), store: store, run: run, runDayIndex: index)
+    }
+
+    func start(day: ProgramDay, date: Date, store: FitnessStore, run: ProgramRun? = nil, runDayIndex: Int? = nil) {
         guard draft == nil else { notice = "Сначала заверши или удали незавершённую тренировку"; return }
-        guard !history.contains(where: { $0.programId == store.program?.programId && $0.date == SportDate.key(date) }) else {
+        let program = run?.program ?? store.program
+        let alreadySaved = run.map { run in
+            history.contains { $0.runId == run.id && $0.runDayIndex == runDayIndex && $0.isComplete }
+        } ?? history.contains { $0.runId == nil && $0.programId == program?.programId && $0.date == SportDate.key(date) }
+        guard !alreadySaved else {
             notice = "За этот день уже есть результат. Открой его в журнале"; return
         }
+        let sourceDate = run.flatMap { $0.sourceDate(for: runDayIndex ?? -1) } ?? date
         let movements = day.exerciseIds.compactMap { sourceId -> WorkoutMovement? in
-            guard let exercise = store.exercise(store.resolvedExerciseId(sourceId)) else { return nil }
-            return WorkoutMovement(sourceId: sourceId, exercise: exercise, prescription: store.prescription(exercise.id, on: date))
+            let resolved = program?.conditionalSubstitutions?[sourceId]?.fallback ?? sourceId
+            guard let exercise = store.exercise(resolved) else { return nil }
+            return WorkoutMovement(sourceId: sourceId, exercise: exercise, prescription: program?.prescription(exercise.id, on: sourceDate))
         }
-        guard !movements.isEmpty, movements.count == day.exerciseIds.count, let programId = store.program?.programId else {
+        guard !movements.isEmpty, movements.count == day.exerciseIds.count, let programId = program?.programId else {
             notice = "Не удалось сопоставить упражнения с библиотекой"
             return
         }
-        let d = WorkoutDraft(date: SportDate.key(date), programId: programId,
+        var d = WorkoutDraft(date: SportDate.key(date), programId: programId,
                              title: day.name, movements: movements)
+        d.runId = run?.id
+        d.runDayIndex = runDayIndex
         if save(d, file: draftFile) { draft = d }
     }
 
@@ -241,7 +256,7 @@ final class WorkoutEngine: ObservableObject {
             id: d.id, date: d.date, programId: d.programId, title: d.title,
             startedAt: d.startedAt, finishedAt: d.endedAt ?? Date(),
             durationSeconds: d.activeSeconds(), feeling: feeling,
-            finishedEarly: d.finishedEarly, movements: d.movements)
+            finishedEarly: d.finishedEarly, movements: d.movements, runId: d.runId, runDayIndex: d.runDayIndex)
         // Idempotency: if a saved workout is re-opened, keep one result per UUID.
         if !history.contains(where: { $0.id == result.id }) {
             history.append(result)

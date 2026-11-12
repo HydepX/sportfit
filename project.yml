@@ -42,6 +42,16 @@ targets:
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
+  SportFitUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/UI
+    dependencies:
+      - target: SportFit
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   SportFit:
     build:
@@ -50,3 +60,4 @@ schemes:
     test:
       targets:
         - SportFitTests
+        - SportFitUITests

@@ -59,6 +59,8 @@ struct WorkoutDraft: Codable, Identifiable {
     var finishedEarly: Bool
     var pausedPhase: TrainingPhase?
     var endedAt: Date?
+    var runId: UUID?
+    var runDayIndex: Int?
 
     init(date: String, programId: String, title: String, movements: [WorkoutMovement]) {
         id = UUID()
@@ -97,6 +99,8 @@ struct WorkoutResult: Codable, Identifiable {
     let feeling: String?
     let finishedEarly: Bool
     let movements: [WorkoutMovement]
+    var runId: UUID? = nil
+    var runDayIndex: Int? = nil
 
     var isComplete: Bool {
         !finishedEarly && !movements.isEmpty && movements.allSatisfy {

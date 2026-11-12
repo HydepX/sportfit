@@ -63,7 +63,8 @@ struct WorkoutAnalyticsScreen: View {
                 }
             }
             if workouts.isEmpty { Text("За выбранный период результатов пока нет") }
-            Section("Кварталы и версии программ") {
+            Section("Уровни и версии программ") {
+                NavigationLink("Архив уровней") { RunArchiveScreen() }
                 ForEach(Array((store.archivedPrograms + [store.program].compactMap { $0 }).enumerated()), id: \.offset) { _, program in
                     NavigationLink {
                         ProgramReportScreen(program: program)
@@ -92,7 +93,8 @@ struct WorkoutResultScreen: View {
     var body: some View {
         List {
             Text("Выполнено: " + result.finishedAt.formatted(date: .long, time: .shortened))
-            Text("Дата по плану: " + result.date)
+            if let index = result.runDayIndex { Text("День программы: \(index + 1)") }
+            Text((result.runId == nil ? "Дата по плану: " : "Дата начала: ") + result.date)
             Text("Длительность: \(result.durationSeconds / 60) мин · подходов: \(result.totalSets)")
             Text(result.completionLabel)
             ForEach(result.movements) { movement in
@@ -121,7 +123,7 @@ struct ProgramReportScreen: View {
     @EnvironmentObject private var engine: WorkoutEngine
     @EnvironmentObject private var profile: ProfileStore
     let program: TrainingProgram
-    private var results: [WorkoutResult] { engine.history.filter { $0.programId == program.programId } }
+    private var results: [WorkoutResult] { engine.history.filter { $0.runId == nil && $0.programId == program.programId } }
     private var plannedDates: [String] {
         guard let start = SportDate.from(program.startDate) else { return [] }
         return (0..<(program.durationWeeks * 7)).compactMap { offset in
@@ -133,6 +135,7 @@ struct ProgramReportScreen: View {
     }
     var body: some View {
         List {
+            Text("Исторический отчёт прежнего календаря. Последовательные уровни учитываются отдельно в архиве.").font(.footnote)
             Text("\(program.startDate) — \(program.endDate)")
             let completed = Set(results.filter(\.isComplete).map(\.date))
             let due = Set(plannedDates)

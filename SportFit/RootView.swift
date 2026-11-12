@@ -15,9 +15,9 @@ struct RootView: View {
         TabView(selection: $selection) {
             HomeScreen(onWorkout: { selection = 2 })
                 .tabItem { Label("Главная", systemImage: "house") }.tag(0)
-            CalendarScreen(title: "План")
+            ProgramRunScreen(title: "План")
                 .tabItem { Label("План", systemImage: "calendar") }.tag(1)
-            CalendarScreen()
+            ProgramRunScreen(title: "Тренировка")
                 .tabItem { Label("Тренировка", systemImage: "play.circle.fill") }.tag(2)
             ProgressScreen()
                 .tabItem { Label("Прогресс", systemImage: "chart.xyaxis.line") }.tag(3)
@@ -49,6 +49,7 @@ private struct Panel<Content: View>: View {
 struct HomeScreen: View {
     @EnvironmentObject private var store: FitnessStore
     @EnvironmentObject private var measurements: MeasurementsStore
+    @EnvironmentObject private var profile: ProfileStore
     let onWorkout: () -> Void
 
     var body: some View {
@@ -60,11 +61,9 @@ struct HomeScreen: View {
                     Panel {
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Личная программа", systemImage: "person.crop.circle").font(.headline)
-                            Text(store.program.map { "\($0.durationWeeks) недель · \($0.startDate) — \($0.endDate)" } ?? "Нет программы")
+                            Text(profile.activeRun.map { "\($0.title) · закрыто \($0.completedDayCount) из \($0.dayCount) дней" } ?? "Выбери уровень и проходи дни в своём темпе")
                                 .foregroundStyle(.secondary).font(.subheadline)
-                            if let program = store.program {
-                                Text("Программа: \(program.programId)")
-                                    .font(.caption).foregroundStyle(.secondary)
+                            if let program = profile.activeRun?.program ?? store.program {
                                 Text("\(program.phases.count) этапа · индивидуальный план").font(.title3.bold())
                             } else {
                                 Text("Импортируй план тренировок в настройках")
@@ -86,13 +85,13 @@ struct HomeScreen: View {
                     Panel {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Ближайшая тренировка").font(.headline)
-                            if let upcoming = store.nextWorkout(), let day = store.workout(on: upcoming) {
-                                Text(upcoming, format: .dateTime.day().month().weekday()).font(.subheadline)
-                                Text(day.name).font(.title3.bold())
-                                Text("\(day.exerciseIds.count) упражнений, включая разминку и заминку")
+                            if let run = profile.activeRun, let index = run.currentDay {
+                                Text("День \(index + 1)").font(.subheadline)
+                                Text(run.workout(on: index)?.name ?? "Отдых").font(.title3.bold())
+                                Text("После закрытия дня откроется следующий")
                                     .foregroundStyle(.secondary).font(.subheadline)
                             } else {
-                                Text("Сегодня отдых или программа ещё не загружена")
+                                Text("Начни новый уровень или закрой пройденный")
                                     .foregroundStyle(.secondary)
                             }
                             Button(action: onWorkout) {
@@ -103,7 +102,7 @@ struct HomeScreen: View {
                             .foregroundStyle(.black)
                         }
                     }
-                    Text("Данные сохраняются локально. Видео и Apple Health будут подключены отдельно.")
+                    Text("Данные сохраняются локально. Перерыв не создаёт пропусков в программе.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }.padding()
             }

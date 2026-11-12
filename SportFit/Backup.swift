@@ -16,10 +16,11 @@ struct SportFitBackup: Codable {
     let archivedPrograms: [TrainingProgram]?
     let profile: UserProfile?
     let schedule: [ScheduleChange]?
+    let runs: [ProgramRun]?
 
     @MainActor
     init(engine: WorkoutEngine, measurements: MeasurementsStore, store: FitnessStore, profile: ProfileStore) {
-        self.format = "sportfit-backup-v2"
+        self.format = "sportfit-backup-v3"
         self.exportedAt = Date()
         self.workouts = engine.history
         self.activeWorkout = engine.draft
@@ -30,6 +31,7 @@ struct SportFitBackup: Codable {
         self.archivedPrograms = store.archivedPrograms
         self.profile = profile.profile
         self.schedule = profile.changes
+        self.runs = profile.runs
     }
 }
 
@@ -52,7 +54,7 @@ struct BackupEnvelope: Codable {
             return try JSONDecoder().decode(SportFitBackup.self, from: envelope.payload)
         }
         let legacy = try JSONDecoder().decode(SportFitBackup.self, from: data)
-        try DataValidation.require(legacy.format == "sportfit-backup-v1", "Копия v2 должна содержать контрольную сумму")
+        try DataValidation.require(legacy.format == "sportfit-backup-v1", "Копии v2 и v3 должны содержать контрольную сумму")
         return legacy
     }
 }
@@ -71,7 +73,7 @@ struct SportFitBackupDocument: FileDocument {
             throw CocoaError(.fileReadCorruptFile)
         }
         let decoded = try BackupEnvelope.decode(bytes)
-        guard ["sportfit-backup-v1", "sportfit-backup-v2"].contains(decoded.format) else {
+        guard ["sportfit-backup-v1", "sportfit-backup-v2", "sportfit-backup-v3"].contains(decoded.format) else {
             throw CocoaError(.fileReadUnknown)
         }
         backup = decoded
@@ -94,8 +96,8 @@ struct SportFitBackupDocument: FileDocument {
     }
 
     static func validate(_ backup: SportFitBackup, fallback: ExerciseCatalog?) throws {
-        try DataValidation.require(["sportfit-backup-v1", "sportfit-backup-v2"].contains(backup.format), "Неизвестная версия копии")
-        if backup.format == "sportfit-backup-v2" {
+        try DataValidation.require(["sportfit-backup-v1", "sportfit-backup-v2", "sportfit-backup-v3"].contains(backup.format), "Неизвестная версия копии")
+        if backup.format != "sportfit-backup-v1" {
             try DataValidation.require(backup.catalog != nil && backup.program != nil && backup.profile != nil &&
                                        backup.archivedPrograms != nil && backup.schedule != nil, "Копия v2 неполна")
         }
@@ -103,6 +105,16 @@ struct SportFitBackupDocument: FileDocument {
             throw DataValidation.Failure(message: "Необходим каталог упражнений")
         }
         try DataValidation.catalog(catalog)
+        if backup.format == "sportfit-backup-v3" {
+            try DataValidation.require(backup.runs != nil, "Копия v3 не содержит уровни")
+        }
+        let runs = backup.runs ?? []
+        try ProgramRun.validate(runs, catalog: catalog)
+        func runReferenceValid(_ id: UUID?, _ index: Int?) -> Bool {
+            if id == nil { return index == nil }
+            guard let id, let index, let run = runs.first(where: { $0.id == id }) else { return false }
+            return run.workout(on: index) != nil
+        }
         for plan in (backup.archivedPrograms ?? []) + [backup.program].compactMap({ $0 }) {
             try DataValidation.program(plan, catalog: catalog)
         }
@@ -129,13 +141,25 @@ struct SportFitBackupDocument: FileDocument {
         }
         for workout in backup.workouts {
             try DataValidation.require(SportDate.from(workout.date) != nil && workout.durationSeconds >= 0 &&
-                                       workout.finishedAt >= workout.startedAt && movementsValid(workout.movements),
+                                       workout.finishedAt >= workout.startedAt && movementsValid(workout.movements) &&
+                                       runReferenceValid(workout.runId, workout.runDayIndex),
                                        "Повреждённая тренировка в копии")
+        }
+        for run in runs {
+            for day in run.days where day.outcome == .completed || day.outcome == .partial {
+                let results = run.results(on: day.dayIndex, history: backup.workouts)
+                try DataValidation.require(day.outcome == .completed ? results.contains(where: \.isComplete) : !results.isEmpty,
+                                           "Закрытый день не содержит результата")
+            }
         }
         if let draft = backup.activeWorkout {
             try DataValidation.require(SportDate.from(draft.date) != nil && draft.movements.indices.contains(draft.currentIndex) &&
                                        movementsValid(draft.movements) && draft.elapsedPausedSeconds >= 0 &&
-                                       !backup.workouts.contains(where: { $0.id == draft.id }), "Некорректный черновик")
+                                       !backup.workouts.contains(where: { $0.id == draft.id }) &&
+                                       runReferenceValid(draft.runId, draft.runDayIndex), "Некорректный черновик")
+            if let id = draft.runId, let run = runs.first(where: { $0.id == id }) {
+                try DataValidation.require(run.closedAt == nil && run.currentDay == draft.runDayIndex, "Черновик относится к закрытому дню")
+            }
         }
         if let profile = backup.profile {
             try DataValidation.require(profile.heightCm.map { $0.isFinite && (50...250).contains($0) } ?? true, "Некорректный рост")
@@ -152,6 +176,7 @@ struct SportFitBackupDocument: FileDocument {
         try validate(backup, fallback: store.catalog)
         let encoder = JSONEncoder()
         var files: [String: Data] = [
+            "program_runs.v1.json": try encoder.encode(backup.runs ?? []),
             "workout_history.v1.json": try encoder.encode(backup.workouts),
             "active_workout.v1.json": try encoder.encode(backup.activeWorkout),
             "body_measurements.v1.json": try encoder.encode(backup.manualMeasurements),

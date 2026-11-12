@@ -102,7 +102,7 @@ struct WorkoutPlayer: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showDiscard = true } label: {
                         Image(systemName: "ellipsis.circle")
-                    }
+                    }.accessibilityLabel("Управление тренировкой")
                 }
             }
             .confirmationDialog("Управление тренировкой", isPresented: $showDiscard) {
