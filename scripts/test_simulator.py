@@ -15,7 +15,7 @@ subprocess.run([
     '-configuration', 'Release', '-destination', f"platform=iOS Simulator,id={device['udid']}",
     '-derivedDataPath', os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests'),
     '-resultBundlePath', os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests.xcresult'),
-    'CODE_SIGNING_ALLOWED=NO', 'ENABLE_DEBUG_DYLIB=NO',
+    'CODE_SIGNING_ALLOWED=NO', 'ENABLE_DEBUG_DYLIB=NO', 'ENABLE_TESTABILITY=YES',
     'CURRENT_PROJECT_VERSION=' + os.environ.get('GITHUB_RUN_NUMBER', '2'),
     'SPORTFIT_BUILD_COMMIT=' + os.environ.get('GITHUB_SHA', 'local'), 'test'
 ], check=True)
