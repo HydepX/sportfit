@@ -220,9 +220,9 @@ struct TrainingSummary: Codable {
         let ordinary = movements.filter { !$0.isTimed && $0.prescription?.mode != "breath_cycles" }
         let measured = unique.filter { $0.totalSets > 0 }
         func movementKey(_ movement: WorkoutMovement) -> String { movement.exerciseId + "|" + (movement.prescription?.mode ?? (movement.isTimed ? "duration" : "repetitions")) }
-        let progressMovements: [WorkoutMovement] = unique.flatMap { result in
+        let progressMovements: [WorkoutMovement] = unique.flatMap { result -> [WorkoutMovement] in
             let groups = Dictionary(grouping: result.movements.filter { !$0.sets.isEmpty && (exerciseId.isEmpty || $0.exerciseId == exerciseId) }, by: movementKey)
-            return groups.keys.sorted().compactMap { key in
+            return groups.keys.sorted().compactMap { key -> WorkoutMovement? in
                 guard let group = groups[key], var combined = group.first else { return nil }
                 combined.sets = group.flatMap(\.sets); return combined
             }

@@ -105,6 +105,8 @@ struct ReportBuilderScreen: View {
     @State private var quarter = (SportDate.calendar.component(.month, from: Date()) - 1) / 3 + 1
     @State private var privacy = ReportPrivacy.metrics
     @State private var addingGoal = false
+    @State private var editingGoal: QuarterGoal?
+    @State private var deletingGoal: UUID?
     @State private var saved = false
     private var start: Date { run.map { SportDate.calendar.startOfDay(for: $0.startedAt) } ?? SportDate.calendar.date(from: DateComponents(year: year, month: (quarter - 1) * 3 + 1, day: 1))! }
     private var end: Date {
@@ -128,7 +130,17 @@ struct ReportBuilderScreen: View {
             ReportPrivacyPicker(privacy: $privacy)
             Section("Мои цели") {
                 ForEach(journal.data.goals.filter { $0.scope == scope }) { goal in
-                    VStack(alignment: .leading) { Text(goal.metric.rawValue); Text("\(goal.direction.rawValue) \(goal.target.formatted())").font(.caption) }
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(goal.metric.rawValue)
+                        Text("\(goal.direction.rawValue) \(goal.target.formatted())").font(.caption)
+                        if let source = goal.source { Text(source == "manual" ? "Источник: вручную" : "Источник: " + source).font(.caption) }
+                        if run.map({ $0.closedAt == nil }) ?? (end >= Date()) {
+                            HStack {
+                                Button("Исправить цель") { editingGoal = goal }.buttonStyle(.bordered)
+                                Button("Удалить цель", role: .destructive) { deletingGoal = goal.id }.buttonStyle(.bordered)
+                            }
+                        }
+                    }
                 }
                 if run.map({ $0.closedAt == nil }) ?? (end >= Date()) { Button("Добавить числовую цель") { addingGoal = true } }
                 Text("Цели задаёшь самостоятельно; пропущенные измерения означают «оценка недоступна». Цель выполнения плана оценивается только для уровня.").font(.footnote)
@@ -143,6 +155,16 @@ struct ReportBuilderScreen: View {
             if let error = journal.error { Text(error).foregroundStyle(.orange) }
         }.navigationTitle("Итоги и цели")
             .sheet(isPresented: $addingGoal) { GoalEditor(scope: scope, allowAdherence: run != nil, start: start) }
+            .sheet(item: $editingGoal) { GoalEditor(scope: scope, allowAdherence: run != nil, start: start, initial: $0) }
+            .alert("Удалить цель периода?", isPresented: Binding(get: { deletingGoal != nil }, set: { if !$0 { deletingGoal = nil } })) {
+                Button("Удалить цель", role: .destructive) {
+                    if let id = deletingGoal { journal.change { $0.goals.removeAll { $0.id == id } } }
+                    deletingGoal = nil; saved = false
+                }
+                Button("Отмена", role: .cancel) { deletingGoal = nil }
+            } message: { Text("Сохранённые отчёты сохранят прежнюю цель как часть своего снимка.") }
+            .onChange(of: addingGoal) { _, value in if !value { saved = false } }
+            .onChange(of: editingGoal?.id) { _, value in if value == nil { saved = false } }
             .onChange(of: privacy) { _, _ in saved = false }.onChange(of: year) { _, _ in saved = false }.onChange(of: quarter) { _, _ in saved = false }
     }
 }
@@ -242,6 +264,7 @@ struct GoalEditor: View {
     let scope: String
     let allowAdherence: Bool
     let start: Date
+    var initial: QuarterGoal? = nil
     @State private var metric = GoalMetric.weight
     @State private var direction = GoalDirection.atMost
     @State private var value: Double?
@@ -258,12 +281,16 @@ struct GoalEditor: View {
                 TextField("Целевое значение", value: $value, format: .number).keyboardType(.decimalPad)
                 Button("Сохранить цель") {
                     guard let value, metric.valid(value) else { journal.error = "Проверь целевое значение и единицы"; return }
-                    let baseline = metric.bodyMetric.flatMap { selected in measurements.entries.filter { $0.measuredAt <= Date() && $0.measuredAt >= start && $0.source == source }.compactMap { selected.value($0) }.first } ?? (metric.bodyMetric == nil ? 0 : nil)
-                    if journal.saveGoal(QuarterGoal(scope: scope, metric: metric, direction: direction, target: value, baseline: baseline, source: metric.bodyMetric == nil ? nil : source)) { dismiss() }
+                    var baseline = metric.bodyMetric.flatMap { selected in measurements.entries.filter { $0.measuredAt <= Date() && $0.measuredAt >= start && $0.source == source }.compactMap { selected.value($0) }.first } ?? (metric.bodyMetric == nil ? 0 : nil)
+                    if let initial, initial.metric == metric && (initial.source ?? "manual") == source { baseline = initial.baseline }
+                    var goal = QuarterGoal(scope: scope, metric: metric, direction: direction, target: value, baseline: baseline, source: metric.bodyMetric == nil ? nil : source)
+                    if let initial { goal.id = initial.id; goal.createdAt = initial.createdAt }
+                    if journal.saveGoal(goal) { dismiss() }
                 }
                 Text("Приложение не назначает цели. Укажи согласованное значение самостоятельно. Замеры цели берутся только из выбранного источника, XML не подмешивается. Без исходного измерения процент продвижения не вычисляется.").font(.footnote)
                 if let error = journal.error { Text(error).foregroundStyle(.orange) }
             }.navigationTitle("Цель периода").toolbar { ToolbarItem(placement: .cancellationAction) { Button("Отмена") { dismiss() } } }
+                .onAppear { if let initial { metric = initial.metric; direction = initial.direction; value = initial.target; source = initial.source ?? "manual" } }
         }
     }
 }

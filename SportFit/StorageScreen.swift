@@ -50,6 +50,7 @@ struct StorageScreen: View {
     @State private var document: ExportDocument?
     @State private var deleting: LocalBackupItem?
     @State private var message = ""
+    @State private var exportFilename = "sportfit-backup"
     private var healthy: Bool { engine.canExport && measurements.canExport && store.canExport && profile.canExport && journal.canExport }
     var body: some View {
         List {
@@ -77,7 +78,7 @@ struct StorageScreen: View {
                         Text(ByteCountFormatter.string(fromByteCount: Int64(item.bytes), countStyle: .file)).font(.caption)
                         HStack {
                             Button("Сохранить во «Файлы»") {
-                                do { let data = try Data(contentsOf: item.url); _ = try BackupEnvelope.decode(data); document = ExportDocument(data: data); exporting = true }
+                                do { let data = try Data(contentsOf: item.url); _ = try BackupEnvelope.decode(data); document = ExportDocument(data: data); exportFilename = item.url.deletingPathExtension().lastPathComponent; exporting = true }
                                 catch { message = error.localizedDescription }
                             }.buttonStyle(.bordered)
                             Button("Восстановить") {
@@ -96,7 +97,7 @@ struct StorageScreen: View {
             }.font(.footnote)
             if !message.isEmpty { Text(message).accessibilityIdentifier("storage-message") }
         }.navigationTitle("Данные и копии").onAppear { refresh() }
-            .fileExporter(isPresented: $exporting, document: document, contentType: .json, defaultFilename: "sportfit-backup-" + SportDate.key(Date())) { result in
+            .fileExporter(isPresented: $exporting, document: document, contentType: .json, defaultFilename: exportFilename) { result in
                 if case .failure(let error) = result { message = error.localizedDescription }
             }
             .alert("Восстановить выбранную копию?", isPresented: $restoring) {
