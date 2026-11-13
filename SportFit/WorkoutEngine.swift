@@ -134,8 +134,10 @@ final class WorkoutEngine: ObservableObject {
             let seconds = movement.plannedSeconds.flatMap { (1...3600).contains($0) ? $0 : nil }
             $0.exerciseSecondsLeft = seconds
             $0.restAfterLastSet = movement.sets.count >= (movement.prescription?.sets ?? 1)
-            if $0.phase == .active, $0.restAfterLastSet {
-                $0.phase = .rest; $0.restEndsAt = nil; $0.restSecondsLeft = 0; $0.restWaitsForUser = true
+            if $0.restAfterLastSet, $0.phase == .active || ($0.phase == .paused && $0.pausedPhase == .active) {
+                if $0.phase == .paused { $0.pausedPhase = .rest } else { $0.phase = .rest }
+                $0.restEndsAt = nil; $0.restSecondsLeft = 0; $0.restWaitsForUser = true
+                $0.exerciseEndsAt = nil; $0.exerciseSecondsLeft = nil
             } else if $0.phase == .active { $0.exerciseEndsAt = seconds.map { Date().addingTimeInterval(Double($0)) } }
         }
         if draft?.phase == .prepare { begin() }

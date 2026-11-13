@@ -101,12 +101,24 @@ import XCTest
         engine.discard()
         engine.start(day: ProgramDay(dayOfWeek: "test", name: "Legacy", exerciseIds: ["wu_breath"]), date: try XCTUnwrap(SportDate.from("2026-11-09")), store: store)
         engine.begin(); engine.complete(reps: nil, weight: nil, seconds: 23)
+        let original = try JSONEncoder().encode(engine.draft)
         let id = engine.draft?.id
-        engine.enableGuidedMode()
-        XCTAssertEqual(engine.draft?.id, id)
-        XCTAssertEqual(engine.draft?.phase, .rest)
-        XCTAssertEqual(engine.draft?.completedSetCount, 1)
-        XCTAssertEqual(engine.draft?.movements[0].sets.first?.seconds, 23)
+        for paused in [false, true] {
+            try original.write(to: directory.appendingPathComponent("active_workout.v1.json"))
+            engine.reload()
+            if paused { engine.pause() }
+            engine.enableGuidedMode()
+            XCTAssertEqual(engine.draft?.id, id)
+            if paused {
+                XCTAssertEqual(engine.draft?.phase, .paused)
+                XCTAssertEqual(engine.draft?.pausedPhase, .rest)
+                engine.resume()
+            }
+            XCTAssertEqual(engine.draft?.phase, .rest)
+            engine.tick(now: Date().addingTimeInterval(300))
+            XCTAssertEqual(engine.draft?.completedSetCount, 1)
+            XCTAssertEqual(engine.draft?.movements[0].sets.first?.seconds, 23)
+        }
     }
     func testGuidedStartStillRequiresExplicitMedicalClearance() async throws {
         let (engine, store, directory) = try setup(); defer { try? FileManager.default.removeItem(at: directory) }
