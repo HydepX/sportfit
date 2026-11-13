@@ -124,8 +124,11 @@ struct ReportBuilderScreen: View {
             history: engine.history, measurements: measurements.entries, xml: imported.records, journal: journal.data, name: profile.profile.name, privacy: privacy)
     }
     var body: some View {
+        controls.modifier(ReportInputTracker(saved: $saved, closedAt: currentRun?.closedAt, closedDays: currentRun?.days.count))
+    }
+    private var form: some View {
         let current = report
-        List {
+        return List {
             if run == nil {
                 Stepper("Год: \(year)", value: $year, in: 2000...2100)
                 Picker("Квартал", selection: $quarter) { ForEach(1...4, id: \.self) { Text("Квартал \($0)").tag($0) } }
@@ -157,7 +160,10 @@ struct ReportBuilderScreen: View {
             }
             ReportExportControls(report: current)
             if let error = journal.error { Text(error).foregroundStyle(.orange) }
-        }.navigationTitle("Итоги и цели")
+        }
+    }
+    private var controls: some View {
+        form.navigationTitle("Итоги и цели")
             .sheet(isPresented: $addingGoal) { GoalEditor(scope: scope, allowAdherence: run != nil, start: start) }
             .sheet(item: $editingGoal) { GoalEditor(scope: scope, allowAdherence: run != nil, start: start, initial: $0) }
             .alert("Удалить цель периода?", isPresented: Binding(get: { deletingGoal != nil }, set: { if !$0 { deletingGoal = nil } })) {
@@ -170,14 +176,28 @@ struct ReportBuilderScreen: View {
             .onChange(of: addingGoal) { _, value in if !value { saved = false } }
             .onChange(of: editingGoal?.id) { _, value in if value == nil { saved = false } }
             .onChange(of: privacy) { _, _ in saved = false }.onChange(of: year) { _, _ in saved = false }.onChange(of: quarter) { _, _ in saved = false }
+    }
+}
+
+
+private struct ReportInputTracker: ViewModifier {
+    @EnvironmentObject private var measurements: MeasurementsStore
+    @EnvironmentObject private var imported: HealthImportStore
+    @EnvironmentObject private var journal: JournalStore
+    @EnvironmentObject private var engine: WorkoutEngine
+    @Binding var saved: Bool
+    let closedAt: Date?
+    let closedDays: Int?
+    func body(content: Content) -> some View {
+        content
             .onChange(of: measurements.entries) { _, _ in saved = false }
             .onChange(of: imported.records) { _, _ in saved = false }
             .onChange(of: journal.data.activity) { _, _ in saved = false }
             .onChange(of: journal.data.goals) { _, _ in saved = false }
             .onChange(of: journal.data.notes) { _, _ in saved = false }
             .onChange(of: engine.history.count) { _, _ in saved = false }
-            .onChange(of: currentRun?.closedAt) { _, _ in saved = false }
-            .onChange(of: currentRun?.days.count) { _, _ in saved = false }
+            .onChange(of: closedAt) { _, _ in saved = false }
+            .onChange(of: closedDays) { _, _ in saved = false }
     }
 }
 
