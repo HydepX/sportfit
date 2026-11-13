@@ -189,8 +189,8 @@ struct WorkoutPlayer: View {
     private func summary(_ draft: WorkoutDraft) -> some View {
         VStack(alignment: .leading, spacing: 18) {
             Label("Итоги занятия", systemImage: "checkmark.seal.fill").font(.title.bold())
-            Text("\(draft.completedSetCount) подходов · \(draft.skippedCount) пропущено")
-            Text("Время без пауз: \(draft.activeSeconds() / 60) мин")
+            Text("Подходов: \(draft.completedSetCount) · пропущено: \(draft.skippedCount)")
+            Text("Время без пауз: \(timeString(draft.activeSeconds()))")
             Text("Проверь результаты перед сохранением. Исправления попадут в статистику; назначения программы останутся прежними.").font(.footnote).foregroundStyle(.secondary)
             Picker("Самочувствие", selection: $feeling) { ForEach(["Сложно", "Как раз", "Легко"], id: \.self) { Text($0) } }.pickerStyle(.segmented)
             ForEach(draft.movements) { movement in
@@ -222,6 +222,7 @@ struct WorkoutPlayer: View {
         return draft.movements.indices.contains(index) ? draft.movements[index] : nil
     }
     private func movementForSet(_ id: UUID) -> WorkoutMovement? { draft?.movements.first { $0.sets.contains { $0.id == id } } }
+    private func timeString(_ seconds: Int) -> String { String(format: "%02d:%02d", seconds / 60, seconds % 60) }
     private func actualLabel(_ actual: ActualSet) -> String {
         actual.seconds.map { "Выполнено: \($0) сек" } ?? "Выполнено: \(actual.reps ?? 0) × \((actual.weightKg ?? 0).formatted()) кг"
     }
