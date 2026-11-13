@@ -159,4 +159,19 @@ final class InsightsTests: XCTestCase {
         XCTAssertNil(TrainingSummary.make([first]).exercises.first?.volumeChangePercent)
         XCTAssertNil(TrainingSummary.make([try workout(weight: 0), last]).exercises.first?.volumeChangePercent)
     }
+    func testFullReportIncludesExistingWorkoutNotesAndRedactionRemovesThem() throws {
+        let original = try workout()
+        var movements = original.movements; movements[0].skipped = true; movements[0].skipReason = "PRIVATE SKIP"
+        let saved = WorkoutResult(id: original.id, date: original.date, programId: original.programId, title: original.title,
+            startedAt: original.startedAt, finishedAt: original.finishedAt, durationSeconds: original.durationSeconds,
+            feeling: "PRIVATE FEELING", finishedEarly: false, movements: movements)
+        let report = QuarterReport.make(title: "test", scope: "test", start: date("2026-11-01"), end: date("2026-11-30"), run: nil,
+            history: [saved], measurements: [], xml: [], journal: JournalData(), name: "test", privacy: .full, now: date("2026-11-12"))
+        XCTAssertTrue(report.notes.contains { $0.text == "PRIVATE FEELING" })
+        XCTAssertTrue(report.notes.contains { $0.text.contains("PRIVATE SKIP") })
+        for mode in [ReportPrivacy.metrics, .training] {
+            let json = String(decoding: try report.redacted(mode).json(), as: UTF8.self)
+            XCTAssertFalse(json.contains("PRIVATE FEELING")); XCTAssertFalse(json.contains("PRIVATE SKIP"))
+        }
+    }
 }

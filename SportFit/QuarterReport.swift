@@ -98,7 +98,23 @@ struct QuarterReport: Codable, Identifiable {
             else { current = plan?.adherencePercent }
             return GoalEvaluation(goal: goal, current: current)
         }
-        let notes = privacy == .full ? journal.notes.filter { note in run.map { note.runId == $0.id } ?? included(note.date) } : []
+        var notes: [DayNote] = []
+        if privacy == .full {
+            notes = journal.notes.filter { note in run.map { note.runId == $0.id } ?? included(note.date) }
+            for workout in workouts {
+                if let feeling = workout.feeling, !feeling.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    notes.append(DayNote(runId: workout.runId, dayIndex: workout.runDayIndex, date: workout.finishedAt,
+                                         reason: "Самочувствие после занятия", text: feeling))
+                }
+                for movement in workout.movements where movement.skipped {
+                    if let reason = movement.skipReason, !reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        notes.append(DayNote(runId: workout.runId, dayIndex: workout.runDayIndex, date: workout.finishedAt,
+                                             reason: "Пропуск упражнения", text: movement.title + ": " + reason))
+                    }
+                }
+            }
+            notes.sort { $0.date < $1.date }
+        }
         return QuarterReport(format: "sportfit-quarter-report-v1", id: UUID(), createdAt: now, title: privacy == .full ? title : "Отчёт SportFit", scope: scope,
             start: start, end: end, privacy: privacy, isFinal: run.map { $0.closedAt != nil } ?? (end < now), profileName: privacy == .full ? name : nil,
             body: body, activity: activity, training: training, plan: plan, goals: goals, notes: notes,
