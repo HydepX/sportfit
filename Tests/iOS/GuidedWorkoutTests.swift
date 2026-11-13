@@ -136,4 +136,17 @@ import XCTest
         XCTAssertEqual(engine.draft?.phase, .active)
     }
 
+    func testManualNextDoesNotInventRemainingSets() async throws {
+        let (engine, store, directory) = try setup(); defer { try? FileManager.default.removeItem(at: directory) }
+        engine.discard()
+        engine.start(day: ProgramDay(dayOfWeek: "test", name: "Manual next", exerciseIds: ["press_floor"]), date: try XCTUnwrap(SportDate.from("2026-11-16")), store: store, guided: true)
+        engine.completePlanned()
+        engine.nextExercise()
+        let result = try XCTUnwrap(engine.finish(feeling: nil))
+        XCTAssertEqual(result.totalSets, 1)
+        XCTAssertEqual(result.movements[0].prescription?.sets, 2)
+        XCTAssertFalse(result.isComplete)
+        XCTAssertEqual(WorkoutEngine(directory: directory).history.first?.totalSets, 1)
+    }
+
 }

@@ -27,15 +27,15 @@ struct WorkoutMovement: Codable, Identifiable {
     var skipReason: String? = nil
 
     var plannedSeconds: Int? {
-        if let seconds = prescription?.targetSeconds { return seconds }
         guard isTimed else { return nil }
+        if let seconds = prescription?.targetSeconds { return seconds }
         let values = target.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
         guard values.count == 1, let value = values.first else { return nil }
         return target.localizedCaseInsensitiveContains("мин") ? value * 60 : value
     }
     var plannedReps: Int? {
-        if let reps = prescription?.targetReps { return reps }
         guard !isTimed else { return nil }
+        if let reps = prescription?.targetReps { return reps }
         let values = target.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
         return values.count == 1 ? values.first : nil
     }

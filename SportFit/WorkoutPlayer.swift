@@ -49,7 +49,7 @@ struct WorkoutPlayer: View {
                     Button("Отмена", role: .cancel) { engine.resume() }
                 } message: { Text("Последний результат этого подхода в черновике будет заменён новым выполнением. Остальные подходы сохранятся.") }
                 .sheet(item: $editingSet, onDismiss: finishEditing) { actual in
-                    SetEditor(actual: actual, timed: actual.seconds != nil) { reps, kg, seconds in
+                    SetEditor(actual: actual, timed: movementForSet(actual.id)?.isTimed ?? current?.isTimed ?? false) { reps, kg, seconds in
                         if engine.draft?.movements.contains(where: { $0.sets.contains(where: { $0.id == actual.id }) }) == true {
                             engine.editSet(actual.id, reps: reps, weight: kg, seconds: seconds)
                         } else { engine.complete(reps: reps, weight: kg, seconds: seconds) }
@@ -139,6 +139,11 @@ struct WorkoutPlayer: View {
                 Button("Изменить результат") { edit(actual) }.accessibilityIdentifier("edit-rest-result")
                 Button("Повторить этот подход") { engine.pause(); restart = true }.font(.footnote)
             }
+            if !draft.restAfterLastSet {
+                Button(draft.currentIndex + 1 < draft.movements.count ? "Перейти к следующему упражнению" : "Перейти к итогам") { engine.nextExercise() }
+                    .font(.footnote).accessibilityIdentifier("advance-exercise-from-rest")
+                Text("Оставшиеся подходы сохранятся как невыполненные.").font(.caption).foregroundStyle(.secondary)
+            }
             Divider()
             if let next = nextMovement(draft) {
                 Text(draft.restAfterLastSet ? "Следующее упражнение" : "Следующий подход").font(.caption).foregroundStyle(.secondary)
@@ -216,6 +221,7 @@ struct WorkoutPlayer: View {
         let index = draft.restAfterLastSet ? draft.currentIndex + 1 : draft.currentIndex
         return draft.movements.indices.contains(index) ? draft.movements[index] : nil
     }
+    private func movementForSet(_ id: UUID) -> WorkoutMovement? { draft?.movements.first { $0.sets.contains { $0.id == id } } }
     private func actualLabel(_ actual: ActualSet) -> String {
         actual.seconds.map { "Выполнено: \($0) сек" } ?? "Выполнено: \(actual.reps ?? 0) × \((actual.weightKg ?? 0).formatted()) кг"
     }
