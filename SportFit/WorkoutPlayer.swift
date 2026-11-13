@@ -23,7 +23,9 @@ struct WorkoutPlayer: View {
     private var navigationContent: some View {
             content
                 .background(background)
-                .safeAreaInset(edge: .bottom) { if let draft { controls(draft).padding().background(background) } }
+                .safeAreaInset(edge: .bottom) {
+                    if let draft { VStack { controls(draft) }.padding().background(background, ignoresSafeAreaEdges: []) }
+                }
                 .navigationTitle("SportFit").navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) { Button("Закрыть") { engine.pause(); dismiss() } }

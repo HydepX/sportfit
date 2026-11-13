@@ -287,13 +287,14 @@ private struct RunDayScreen: View {
         }.navigationTitle("День \(index + 1)")
             .safeAreaInset(edge: .bottom) {
                 if canStart || matchingDraft {
-                    Button(matchingDraft ? "Продолжить тренировку" : "Начать тренировку") {
-                        if engine.draft == nil { engine.start(run: liveRun, store: store, guided: true) }
-                        showingPlayer = matchingDraft
-                    }.buttonStyle(SportPrimaryButton())
-                        .disabled(!engine.canExport || !store.canExport || !profile.canExport || (engine.draft != nil && !matchingDraft))
-                        .padding().background(Color(red: 0.035, green: 0.055, blue: 0.086))
-                        .accessibilityIdentifier("day-start-workout")
+                    VStack {
+                        Button(matchingDraft ? "Продолжить тренировку" : "Начать тренировку") {
+                            if engine.draft == nil { engine.start(run: liveRun, store: store, guided: true) }
+                            showingPlayer = matchingDraft
+                        }.buttonStyle(SportPrimaryButton())
+                            .disabled(!engine.canExport || !store.canExport || !profile.canExport || (engine.draft != nil && !matchingDraft))
+                            .accessibilityIdentifier("day-start-workout")
+                    }.padding().background(Color(red: 0.035, green: 0.055, blue: 0.086), ignoresSafeAreaEdges: [])
                 }
             }
             .fullScreenCover(isPresented: $showingPlayer) { WorkoutPlayer() }
