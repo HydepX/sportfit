@@ -51,7 +51,7 @@ private struct LegacyDraftButton: View {
                 Button("Продолжить прежний черновик") { showing = true }.buttonStyle(.bordered)
                 Text("Заверши её перед запуском уровня. Старые результаты останутся в журнале.").font(.footnote)
             }
-            .sheet(isPresented: $showing) { WorkoutPlayer() }
+            .fullScreenCover(isPresented: $showing) { WorkoutPlayer() }
         }
     }
 }
@@ -134,7 +134,7 @@ private struct RunContent: View {
             }
             NavigationLink(active ? "Цели и предварительный отчёт" : "Итоговый отчёт уровня") { ReportBuilderScreen(run: run) }
         }
-        .sheet(isPresented: $showingPlayer) { WorkoutPlayer() }
+        .fullScreenCover(isPresented: $showingPlayer) { WorkoutPlayer() }
         .alert("Закрыть день с неполным результатом?", isPresented: $confirmDay) {
             Button("Закрыть день и перейти дальше", role: .destructive) {
                 profile.closeDay(history: engine.history, draft: engine.draft, allowIncomplete: true)
@@ -164,7 +164,7 @@ private struct RunContent: View {
                 Text("\(day.exerciseIds.count) упражнений").foregroundStyle(.secondary)
                 if run.outcome(on: index, history: engine.history) != .completed {
                     Button(run.results(on: index, history: engine.history).isEmpty ? "Начать тренировку" : "Повторить тренировку") {
-                        engine.start(run: run, store: store)
+                        engine.start(run: run, store: store, guided: true)
                         showingPlayer = engine.draft != nil
                     }.buttonStyle(SportPrimaryButton()).disabled(!store.canExport || !profile.canExport)
                         .accessibilityIdentifier("start-workout")
@@ -255,8 +255,13 @@ private struct RunWeekSection: View {
 private struct RunDayScreen: View {
     @EnvironmentObject private var store: FitnessStore
     @EnvironmentObject private var engine: WorkoutEngine
+    @EnvironmentObject private var profile: ProfileStore
     let run: ProgramRun
     let index: Int
+    @State private var showingPlayer = false
+    private var liveRun: ProgramRun { profile.runs.first { $0.id == run.id } ?? run }
+    private var matchingDraft: Bool { engine.draft?.runId == run.id && engine.draft?.runDayIndex == index }
+    private var canStart: Bool { liveRun.closedAt == nil && liveRun.currentDay == index && liveRun.workout(on: index) != nil && liveRun.outcome(on: index, history: engine.history) != .completed }
     var body: some View {
         List {
             Text(run.title)
@@ -280,6 +285,18 @@ private struct RunDayScreen: View {
                 if run.results(on: index, history: engine.history).isEmpty { Text("Сохранённых тренировок нет") }
             }
         }.navigationTitle("День \(index + 1)")
+            .safeAreaInset(edge: .bottom) {
+                if canStart || matchingDraft {
+                    Button(matchingDraft ? "Продолжить тренировку" : "Начать тренировку") {
+                        if engine.draft == nil { engine.start(run: liveRun, store: store, guided: true) }
+                        showingPlayer = matchingDraft
+                    }.buttonStyle(SportPrimaryButton())
+                        .disabled(!engine.canExport || !store.canExport || !profile.canExport || (engine.draft != nil && !matchingDraft))
+                        .padding().background(Color(red: 0.035, green: 0.055, blue: 0.086))
+                        .accessibilityIdentifier("day-start-workout")
+                }
+            }
+            .fullScreenCover(isPresented: $showingPlayer) { WorkoutPlayer() }
     }
     @ViewBuilder private func exerciseRow(_ id: String, position: Int, date: Date) -> some View {
         let resolved = run.program.conditionalSubstitutions?[id]?.fallback ?? id
@@ -289,8 +306,6 @@ private struct RunDayScreen: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("\(position + 1). \(exercise.title)").font(.headline)
                     Text(rule?.repetitions ?? exercise.suggestedRepsFromSource ?? "Назначения не указаны")
-                    if let sets = rule?.sets { Text("\(sets) подходов").font(.caption) }
-                    if let rest = rule?.restSeconds { Text("Отдых: \(rest) сек").font(.caption) }
                     if rule?.requiresClearance == true { Text(rule?.clearanceNote ?? "Нужно разрешение врача").font(.caption).foregroundStyle(.yellow) }
                 }
             }

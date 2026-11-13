@@ -26,6 +26,20 @@ struct WorkoutMovement: Codable, Identifiable {
     var skipped: Bool = false
     var skipReason: String? = nil
 
+    var plannedSeconds: Int? {
+        if let seconds = prescription?.targetSeconds { return seconds }
+        guard isTimed else { return nil }
+        let values = target.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
+        guard values.count == 1, let value = values.first else { return nil }
+        return target.localizedCaseInsensitiveContains("мин") ? value * 60 : value
+    }
+    var plannedReps: Int? {
+        if let reps = prescription?.targetReps { return reps }
+        guard !isTimed else { return nil }
+        let values = target.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
+        return values.count == 1 ? values.first : nil
+    }
+
     init(sourceId: String, exercise: Exercise, prescription: ExercisePrescription? = nil) {
         id = UUID()
         self.sourceId = sourceId
@@ -61,6 +75,12 @@ struct WorkoutDraft: Codable, Identifiable {
     var endedAt: Date?
     var runId: UUID?
     var runDayIndex: Int?
+    // Optional fields keep pre-existing v1 drafts readable without changing sets.
+    var guided: Bool?
+    var exerciseEndsAt: Date?
+    var exerciseSecondsLeft: Int?
+    var autoplaySuspended: Bool?
+    var restWaitsForUser: Bool?
 
     init(date: String, programId: String, title: String, movements: [WorkoutMovement]) {
         id = UUID()

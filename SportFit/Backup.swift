@@ -166,7 +166,9 @@ struct SportFitBackupDocument: FileDocument {
         }
         if let draft = backup.activeWorkout {
             try DataValidation.require(SportDate.from(draft.date) != nil && draft.movements.indices.contains(draft.currentIndex) &&
-                                       movementsValid(draft.movements) && draft.elapsedPausedSeconds >= 0 &&
+                                       movementsValid(draft.movements) && draft.elapsedPausedSeconds.isFinite && draft.elapsedPausedSeconds >= 0 &&
+                                       (draft.exerciseSecondsLeft.map { (0...3600).contains($0) } ?? true) &&
+                                       (draft.exerciseEndsAt.map { $0.timeIntervalSinceReferenceDate.isFinite } ?? true) &&
                                        !backup.workouts.contains(where: { $0.id == draft.id }) &&
                                        runReferenceValid(draft.runId, draft.runDayIndex), "Некорректный черновик")
             if let id = draft.runId, let run = runs.first(where: { $0.id == id }) {

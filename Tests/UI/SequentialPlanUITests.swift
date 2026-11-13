@@ -36,10 +36,8 @@ final class SequentialPlanUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["current-program-day"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.staticTexts["current-program-day"].label, "Сейчас · День 1")
         app.buttons["start-workout"].tap()
-        let begin = app.buttons["Начать упражнение"]
-        XCTAssertTrue(begin.waitForExistence(timeout: 10))
-        reveal(begin, app: app)
-        begin.tap()
+        XCTAssertTrue(app.staticTexts["exercise-countdown"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["Начать упражнение"].exists)
         let pause = app.buttons["Пауза"]
         reveal(pause, app: app)
         pause.tap()

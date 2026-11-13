@@ -1,312 +1,245 @@
 import SwiftUI
+import UIKit
 
 struct WorkoutPlayer: View {
     @EnvironmentObject private var store: FitnessStore
     @EnvironmentObject private var engine: WorkoutEngine
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @State private var editingSet: ActualSet?
+    @State private var resumeAfterEditing = false
+    @State private var showTechnique = false
     @State private var showOrder = false
-    @State private var repsText = ""
-    @State private var weightText = "0"
-    @State private var secondsText = ""
+    @State private var restart = false
     @State private var feeling = "Как раз"
     @State private var skipSheet = false
-    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
+    private let ticker = Timer.publish(every: 0.25, on: .main, in: .common).autoconnect()
+    private let background = Color(red: 0.035, green: 0.055, blue: 0.086)
     private var draft: WorkoutDraft? { engine.draft }
     private var current: WorkoutMovement? {
         guard let d = draft, d.movements.indices.contains(d.currentIndex) else { return nil }
         return d.movements[d.currentIndex]
     }
+    private var navigationContent: some View {
+            content
+                .background(background)
+                .safeAreaInset(edge: .bottom) { if let draft { controls(draft).padding().background(background) } }
+                .navigationTitle("SportFit").navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) { Button("Закрыть") { engine.pause(); dismiss() } }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink { WorkoutActions(closePlayer: { dismiss() }) } label: { Image(systemName: "ellipsis.circle") }
+                            .accessibilityLabel("Управление тренировкой").accessibilityIdentifier("workout-actions")
+                    }
+                }
 
+    }
+    private var presentedContent: some View {
+        navigationContent
+                .confirmationDialog("Причина пропуска", isPresented: $skipSheet) {
+                    ForEach(["Не подошло по самочувствию", "Слишком сложно", "Недостаточно времени", "Нет инвентаря", "Другая причина"], id: \.self) { reason in
+                        Button(reason) { engine.skip(reason: reason) }
+                    }
+                    Button("Отмена", role: .cancel) { engine.resume() }
+                }
+                .confirmationDialog("Повторить подход заново?", isPresented: $restart) {
+                    Button("Повторить подход") { engine.restartCurrentSet() }
+                    Button("Отмена", role: .cancel) { engine.resume() }
+                } message: { Text("Последний результат этого подхода в черновике будет заменён новым выполнением. Остальные подходы сохранятся.") }
+                .sheet(item: $editingSet, onDismiss: finishEditing) { actual in
+                    SetEditor(actual: actual, timed: actual.seconds != nil) { reps, kg, seconds in
+                        if engine.draft?.movements.contains(where: { $0.sets.contains(where: { $0.id == actual.id }) }) == true {
+                            engine.editSet(actual.id, reps: reps, weight: kg, seconds: seconds)
+                        } else { engine.complete(reps: reps, weight: kg, seconds: seconds) }
+                    }
+                }
+                .sheet(isPresented: $showTechnique) {
+                    NavigationStack {
+                        if let current, let exercise = store.exercise(current.exerciseId) {
+                            ExerciseDetailScreen(exercise: exercise).toolbar { Button("Готово") { showTechnique = false } }
+                        }
+                    }
+                }
+                .sheet(isPresented: $showOrder) { orderScreen }
+
+    }
     var body: some View {
         NavigationStack {
-            Group {
-                if let draft, let movement = current {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            HStack {
-                                Text("Упражнение \(draft.currentIndex + 1) из \(draft.movements.count)")
-                                Spacer()
-                                Text(phaseTitle(draft.phase)).foregroundStyle(.mint)
-                            }.font(.caption.bold()).foregroundStyle(.secondary)
-
-                            ProgressView(value: Double(draft.currentIndex + 1),
-                                         total: Double(max(1, draft.movements.count)))
-                                .tint(.mint)
-
-                            ExerciseMediaView(exerciseId: movement.exerciseId)
-
-                            Text(movement.title).font(.title2.bold()).multilineTextAlignment(.center)
-                            Text("План: " + movement.target).foregroundStyle(.secondary)
-                            if let rest = movement.prescription?.restSeconds { Text("Отдых между подходами: \(rest) сек").font(.caption) }
-                            if let load = movement.prescription?.load { Text(load).font(.footnote).foregroundStyle(.yellow) }
-                            if movement.sourceId != movement.exerciseId {
-                                Text("Используется щадящая замена: \(movement.sourceId) → \(movement.exerciseId)")
-                                    .font(.footnote).foregroundStyle(.yellow)
-                                    .multilineTextAlignment(.center)
-                            }
-                            Text("Выполнено подходов: \(movement.sets.count)")
-                                .font(.subheadline).foregroundStyle(.mint)
-
-                            if let exercise = store.exercise(movement.exerciseId) {
-                                NavigationLink {
-                                    ExerciseDetailScreen(exercise: exercise)
-                                } label: {
-                                    Label("Посмотреть технику", systemImage: "info.circle")
-                                }.tint(.mint)
-                            }
-
-                            if let rule = movement.prescription {
-                                if let count = rule.sets { Text("План: \(count) подходов") }
-                                if let progression = rule.progression { Text(progression).font(.footnote) }
-                            } else {
-                                Text("Подходы и прогрессия не заданы в JSON. Не увеличивай нагрузку без согласованного плана.").font(.footnote).foregroundStyle(.secondary)
-                            }
-                            if draft.phase != .summary {
-                                ForEach(movement.sets) { actual in
-                                    HStack {
-                                        Text(actual.seconds.map { "\($0) сек" } ?? "\(actual.reps ?? 0) × \((actual.weightKg ?? 0).formatted()) кг")
-                                        Spacer()
-                                        Button("Исправить") { editingSet = actual }
-                                        Button(role: .destructive) { engine.deleteSet(actual.id) } label: {
-                                            Image(systemName: "trash")
-                                        }.accessibilityLabel("Удалить подход")
-                                    }
-                                }
-                                if draft.phase == .prepare {
-                                    Button("Порядок упражнений") { showOrder = true }
-                                }
-                            }
-                            phaseContent(draft: draft, movement: movement)
-                        }
-                        .padding(18)
-                    }
-                } else {
-                    ContentUnavailableView("Нет активной тренировки",
-                        systemImage: "figure.strengthtraining.traditional")
-                }
-            }
-            .background(Color(red: 0.035, green: 0.055, blue: 0.086))
-            .navigationTitle("SportFit")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Закрыть") {
-                        engine.pause()
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        WorkoutActions(closePlayer: { dismiss() })
-                    } label: { Image(systemName: "ellipsis.circle") }
-                    .accessibilityLabel("Управление тренировкой")
-                    .accessibilityIdentifier("workout-actions")
-                }
-            }
-            .confirmationDialog("Причина пропуска", isPresented: $skipSheet) {
-                ForEach(["Не подошло по самочувствию", "Слишком сложно",
-                         "Недостаточно времени", "Нет инвентаря", "Другая причина"], id: \.self) { reason in
-                    Button(reason) { engine.skip(reason: reason) }
-                }
-                Button("Отмена", role: .cancel) {}
-            }
-            .sheet(item: $editingSet) { actual in
-                SetEditor(actual: actual, timed: current?.isTimed ?? false) { reps, kg, seconds in
-                    engine.editSet(actual.id, reps: reps, weight: kg, seconds: seconds)
-                }
-            }
-            .sheet(isPresented: $showOrder) {
-                NavigationStack {
-                    List {
-                        ForEach(Array((draft?.movements ?? []).enumerated()), id: \.element.id) { index, movement in
-                            HStack {
-                                Text(movement.title)
-                                Spacer()
-                                Button { engine.reorder(from: index, to: index - 1) } label: { Image(systemName: "arrow.up") }
-                                    .disabled(index == 0).accessibilityLabel("Переместить выше")
-                                Button { engine.reorder(from: index, to: index + 1) } label: { Image(systemName: "arrow.down") }
-                                    .disabled(index == (draft?.movements.count ?? 0) - 1).accessibilityLabel("Переместить ниже")
-                            }.buttonStyle(.borderless)
-                        }
-                    }.navigationTitle("Порядок упражнений")
-                        .toolbar { Button("Готово") { showOrder = false } }
-                }
-            }
-            .interactiveDismissDisabled(draft?.phase != .paused && draft?.phase != .summary)
-            .scrollDismissesKeyboard(.interactively)
-            .onReceive(ticker) { _ in
-                engine.tick()
-            }
-            .onChange(of: draft?.currentIndex) { _, _ in loadInputDefaults() }
-            .onAppear { loadInputDefaults() }
-            .alert("SportFit", isPresented: Binding(
-                get: { engine.notice != nil },
-                set: { if !$0 { engine.notice = nil } }
-            )) {
-                Button("Понятно") { engine.notice = nil }
-            } message: {
-                Text(engine.notice ?? "")
-            }
-        }
-        .tint(.mint)
+            presentedContent
+                .interactiveDismissDisabled(draft?.phase != .paused && draft?.phase != .summary)
+                .onReceive(ticker) { _ in if scenePhase == .active { engine.tick() } }
+                .onChange(of: scenePhase) { _, phase in if phase == .background { engine.suspendAutoplay() } }
+                .onAppear { engine.enableGuidedMode() }
+                .onChange(of: draft?.phase, initial: true) { _, phase in UIApplication.shared.isIdleTimerDisabled = phase == .active || phase == .rest }
+                .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+                .alert("SportFit", isPresented: Binding(get: { engine.notice != nil }, set: { if !$0 { engine.notice = nil } })) {
+                    Button("Понятно") { engine.notice = nil }
+                } message: { Text(engine.notice ?? "") }
+        }.tint(.mint)
     }
-
-    @ViewBuilder private func phaseContent(draft: WorkoutDraft, movement: WorkoutMovement) -> some View {
-        switch draft.phase {
-        case .prepare:
-            Text("Подготовься к выполнению упражнения")
-                .foregroundStyle(.secondary)
-            if movement.prescription?.requiresClearance == true && movement.clearanceConfirmed != true {
+    @ViewBuilder private var content: some View {
+        if let draft, let movement = current {
+            ScrollView {
+                VStack(spacing: 18) {
+                    if draft.phase == .summary { summary(draft) }
+                    else {
+                        HStack {
+                            Text("Упражнение \(draft.currentIndex + 1) из \(draft.movements.count)")
+                            Spacer()
+                            Text("Подход \(movement.sets.count + (draft.phase == .rest || draft.pausedPhase == .rest ? 0 : 1)) из \(movement.prescription?.sets ?? 1)")
+                        }.font(.caption).foregroundStyle(.secondary)
+                        ProgressView(value: Double(draft.currentIndex), total: Double(max(1, draft.movements.count))).tint(.mint)
+                        if draft.phase == .rest { rest(draft, movement) }
+                        else if draft.phase == .paused { paused(draft, movement) }
+                        else { exercise(draft, movement) }
+                    }
+                }.padding(18)
+            }
+        } else { ContentUnavailableView("Нет активной тренировки", systemImage: "figure.strengthtraining.traditional") }
+    }
+    private func exercise(_ draft: WorkoutDraft, _ movement: WorkoutMovement) -> some View {
+        VStack(spacing: 16) {
+            Text(movement.title).font(.title2.bold()).multilineTextAlignment(.center).accessibilityIdentifier("player-exercise-title")
+            ExerciseMediaView(exerciseId: movement.exerciseId).id(movement.id)
+            Text("По плану: " + movement.target).foregroundStyle(.secondary)
+            if draft.phase == .active {
+                if movement.isTimed { PlayerClock(resting: false) }
+                else { Text(movement.plannedReps.map { "× \($0)" } ?? "В своём темпе").font(.system(size: 64, weight: .bold, design: .rounded)).accessibilityIdentifier("planned-reps") }
+                Text(movement.isTimed ? "После отсчёта откроется отдых" : "Когда закончишь подход, нажми «Выполнено»").font(.footnote).foregroundStyle(.secondary)
+                Button("Начать подход заново") { engine.restartCurrentSet() }.accessibilityIdentifier("restart-active-set")
+            } else if movement.prescription?.requiresClearance == true && movement.clearanceConfirmed != true {
                 Text(movement.prescription?.clearanceNote ?? "Нужно разрешение врача").foregroundStyle(.yellow)
-                Button("Разрешение врача есть — начать") { engine.begin(clearanceConfirmed: true) }
-                    .buttonStyle(SportPrimaryButton())
-                Button("Пропустить без замены") { engine.skip(reason: "Нет подтверждённого разрешения врача") }
-            } else {
-                Button("Начать упражнение") { engine.begin() }.buttonStyle(SportPrimaryButton())
             }
-            movementControls()
+            if let load = movement.prescription?.load { Text(load).font(.footnote).foregroundStyle(.yellow) }
+            if let progression = movement.prescription?.progression { Text(progression).font(.footnote).foregroundStyle(.secondary) }
+            if movement.sourceId != movement.exerciseId { Text("Щадящая замена из программы: \(movement.sourceId) → \(movement.exerciseId)").font(.footnote) }
+            Button("Посмотреть технику") { engine.pause(); showTechnique = true }
+            Button("Пропустить упражнение") { engine.pause(); skipSheet = true }.font(.footnote)
+            if draft.phase == .prepare { Button("Порядок упражнений") { showOrder = true } }
+        }
+    }
+    private func rest(_ draft: WorkoutDraft, _ movement: WorkoutMovement) -> some View {
+        VStack(spacing: 18) {
+            Label("Отдых", systemImage: "cup.and.saucer.fill").font(.title.bold()).accessibilityIdentifier("rest-screen")
+            PlayerClock(resting: true)
+            HStack { ForEach([15, 30, 60], id: \.self) { seconds in
+                Button("+\(seconds) сек") { engine.extendRest(seconds) }.buttonStyle(.bordered).accessibilityIdentifier("extend-rest-\(seconds)")
+            } }
+            if draft.restEndsAt == nil { Text("Отдых в плане не задан. Перейди дальше, когда будешь готов.").font(.footnote).foregroundStyle(.secondary) }
+            if let actual = movement.sets.last {
+                Text(movement.title).font(.headline).multilineTextAlignment(.center)
+                Text(actualLabel(actual)).foregroundStyle(.secondary).accessibilityIdentifier("rest-result")
+                Button("Изменить результат") { edit(actual) }.accessibilityIdentifier("edit-rest-result")
+                Button("Повторить этот подход") { engine.pause(); restart = true }.font(.footnote)
+            }
+            Divider()
+            if let next = nextMovement(draft) {
+                Text(draft.restAfterLastSet ? "Следующее упражнение" : "Следующий подход").font(.caption).foregroundStyle(.secondary)
+                Text(next.title).font(.title3.bold()).multilineTextAlignment(.center)
+                Text(next.target).foregroundStyle(.secondary)
+                ExerciseMediaView(exerciseId: next.exerciseId).id(next.id)
+            } else { Text("Дальше — итоги занятия").font(.headline) }
+        }.padding().frame(maxWidth: .infinity).background(.mint.opacity(0.08), in: RoundedRectangle(cornerRadius: 24))
+    }
+    private func paused(_ draft: WorkoutDraft, _ movement: WorkoutMovement) -> some View {
+        VStack(spacing: 22) {
+            Image(systemName: "pause.circle.fill").font(.system(size: 64)).foregroundStyle(.mint)
+            Text("Тренировка приостановлена").font(.title2.bold())
+            Text(movement.title).font(.headline).multilineTextAlignment(.center)
+            if draft.pausedPhase == .rest { PlayerClock(resting: true) }
+            else if movement.isTimed { PlayerClock(resting: false) }
+            Text("Таймер остановлен. Результаты и черновик сохранены.").font(.footnote).foregroundStyle(.secondary)
+            ForEach(movement.sets) { actual in Button("Изменить: " + actualLabel(actual)) { edit(actual) } }
+        }
+    }
+    @ViewBuilder private func controls(_ draft: WorkoutDraft) -> some View {
+        switch draft.phase {
         case .active:
-            WorkoutClock(resting: false)
-            if movement.isTimed {
-                VStack(alignment: .leading) {
-                    Text("Фактическая длительность, сек").font(.caption)
-                    TextField("Секунды", text: $secondsText).keyboardType(.numberPad)
-                        .textFieldStyle(.roundedBorder)
-                }
-            } else {
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text(current?.prescription?.mode == "repetitions_per_side" ? "Фактически на каждую сторону" : current?.prescription?.mode == "breath_cycles" ? "Фактически дыхательных циклов" : "Фактически повторений").font(.caption)
-                        TextField("Количество", text: $repsText).keyboardType(.numberPad)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                    VStack(alignment: .leading) {
-                        Text("Вес, кг").font(.caption)
-                        TextField("Вес", text: $weightText).keyboardType(.decimalPad)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                }
+            HStack(spacing: 12) {
+                Button { engine.pause() } label: { Label("Пауза", systemImage: "pause.fill") }.buttonStyle(.bordered).accessibilityIdentifier("pause-workout")
+                Button(current?.isTimed == true ? "Закончить раньше" : "Выполнено") { finishSet() }.buttonStyle(SportPrimaryButton()).accessibilityIdentifier("complete-current-set")
             }
-            Text("Запиши сколько получилось: например, 4 повтора вместо 5 по плану. План от этого не изменится.")
-                .font(.caption).foregroundStyle(.secondary)
-            Button("✓ Подход выполнен") {
-                let reps = Int(repsText)
-                let kg = Double(weightText.replacingOccurrences(of: ",", with: "."))
-                engine.complete(reps: movement.isTimed ? nil : reps,
-                                weight: movement.isTimed ? nil : kg,
-                                seconds: movement.isTimed ? Int(secondsText) : nil)
-            }.buttonStyle(SportPrimaryButton())
-            Button(draft.currentIndex == draft.movements.count - 1 ? "Завершить занятие" : "Следующее упражнение") {
-                engine.nextExercise()
-            }
-            .buttonStyle(.bordered)
-            HStack {
-                Button("Пауза") { engine.pause() }
-                Spacer()
-                Button("Пропустить") { skipSheet = true }
-            }.font(.subheadline).foregroundStyle(.mint)
-            movementControls()
         case .rest:
-            Text("Отдых").font(.headline)
-            WorkoutClock(resting: true)
-            HStack {
-                ForEach([15, 30, 60], id: \.self) { value in
-                    Button("+\(value) сек") { engine.extendRest(value) }
-                        .buttonStyle(.bordered)
-                }
+            HStack(spacing: 12) {
+                Button { engine.pause() } label: { Label("Пауза", systemImage: "pause.fill") }.buttonStyle(.bordered)
+                Button(draft.restAfterLastSet ? "Дальше" : "Следующий подход") { engine.continueAfterRest() }.buttonStyle(SportPrimaryButton()).accessibilityIdentifier("continue-after-rest")
             }
-            Button(movement.sets.count < (movement.prescription?.sets ?? 0)
-                   ? "Следующий подход (\(movement.sets.count + 1) из \(movement.prescription?.sets ?? 0))"
-                   : "Добавить дополнительный подход") { engine.addAnotherSet() }
-                .buttonStyle(.bordered)
-            Button(draft.currentIndex == draft.movements.count - 1 ? "Завершить занятие" : "Следующее упражнение") { engine.nextExercise() }
-                .buttonStyle(SportPrimaryButton())
-            Button("Пауза") { engine.pause() }.foregroundStyle(.mint)
         case .paused:
-            Text("Тренировка приостановлена").font(.title3.bold())
-            Text("Выполненные подходы и черновик сохранены.")
-                .foregroundStyle(.secondary)
-            Button("▶ Продолжить") { engine.resume() }
-                .buttonStyle(SportPrimaryButton())
-            movementControls()
-        case .summary:
-            Label(draft.finishedEarly || draft.movements.contains(where: { $0.skipped || $0.sets.isEmpty }) ? "Частичное занятие" : "Итог занятия", systemImage: "checkmark.seal.fill")
-                .font(.title2.bold()).foregroundStyle(.mint)
-            Text("\(draft.completedSetCount) подходов · \(draft.skippedCount) пропущено")
-                .foregroundStyle(.secondary)
-            Text("Время занятия без пауз: \(timeString(draft.activeSeconds()))")
-            Text("Как ты себя чувствуешь?").font(.headline)
-            Picker("Самочувствие", selection: $feeling) {
-                ForEach(["Сложно", "Как раз", "Легко"], id: \.self) { option in
-                    Text(option)
-                }
-            }.pickerStyle(.segmented)
-            Button("Сохранить результат") {
-                if engine.finish(feeling: feeling) != nil {
-                    dismiss()
-                }
+            Button("▶ Продолжить") { engine.resume() }.buttonStyle(SportPrimaryButton()).accessibilityIdentifier("resume-workout")
+        case .prepare:
+            Button(current?.prescription?.requiresClearance == true && current?.clearanceConfirmed != true ? "Разрешение врача есть — начать" : "Начать упражнение") {
+                engine.begin(clearanceConfirmed: true)
             }.buttonStyle(SportPrimaryButton())
+        case .summary:
+            Button("Сохранить результат") { if engine.finish(feeling: feeling) != nil { dismiss() } }.buttonStyle(SportPrimaryButton())
         }
     }
-
-    private func movementControls() -> some View {
-        HStack {
-            Button { engine.move(by: -1) } label: {
-                Label("Назад", systemImage: "chevron.left")
-            }
-            Spacer()
-            Button { engine.move(by: 1) } label: {
-                Label("Далее", systemImage: "chevron.right")
+    private func summary(_ draft: WorkoutDraft) -> some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Label("Итоги занятия", systemImage: "checkmark.seal.fill").font(.title.bold())
+            Text("\(draft.completedSetCount) подходов · \(draft.skippedCount) пропущено")
+            Text("Время без пауз: \(draft.activeSeconds() / 60) мин")
+            Text("Проверь результаты перед сохранением. Исправления попадут в статистику; назначения программы останутся прежними.").font(.footnote).foregroundStyle(.secondary)
+            Picker("Самочувствие", selection: $feeling) { ForEach(["Сложно", "Как раз", "Легко"], id: \.self) { Text($0) } }.pickerStyle(.segmented)
+            ForEach(draft.movements) { movement in
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(movement.title).font(.headline)
+                    Text("План: " + movement.target).font(.caption).foregroundStyle(.secondary)
+                    if movement.skipped { Text("Пропущено: " + (movement.skipReason ?? "Причина не указана")).font(.caption) }
+                    ForEach(movement.sets) { actual in
+                        HStack { Text(actualLabel(actual)); Spacer(); Button("Изменить") { edit(actual) }.accessibilityIdentifier("edit-summary-set") }
+                    }
+                    if movement.sets.isEmpty { Text("Подходы не записаны").font(.caption).foregroundStyle(.secondary) }
+                }.padding().frame(maxWidth: .infinity, alignment: .leading).background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
             }
         }
-        .font(.subheadline)
-        .disabled(draft == nil)
-        .padding(.top, 6)
     }
-
-    private func loadInputDefaults() {
+    private var orderScreen: some View {
+        NavigationStack {
+            List { ForEach(Array((draft?.movements ?? []).enumerated()), id: \.element.id) { index, movement in
+                HStack {
+                    Text(movement.title); Spacer()
+                    Button { engine.reorder(from: index, to: index - 1) } label: { Image(systemName: "arrow.up") }.disabled(index == 0).accessibilityLabel("Переместить выше")
+                    Button { engine.reorder(from: index, to: index + 1) } label: { Image(systemName: "arrow.down") }.disabled(index == (draft?.movements.count ?? 0) - 1).accessibilityLabel("Переместить ниже")
+                }.buttonStyle(.borderless)
+            } }.navigationTitle("Порядок упражнений").toolbar { Button("Готово") { showOrder = false } }
+        }
+    }
+    private func nextMovement(_ draft: WorkoutDraft) -> WorkoutMovement? {
+        let index = draft.restAfterLastSet ? draft.currentIndex + 1 : draft.currentIndex
+        return draft.movements.indices.contains(index) ? draft.movements[index] : nil
+    }
+    private func actualLabel(_ actual: ActualSet) -> String {
+        actual.seconds.map { "Выполнено: \($0) сек" } ?? "Выполнено: \(actual.reps ?? 0) × \((actual.weightKg ?? 0).formatted()) кг"
+    }
+    private func edit(_ actual: ActualSet) {
+        resumeAfterEditing = draft?.phase == .rest || draft?.phase == .active
+        if resumeAfterEditing { engine.pause() }
+        editingSet = actual
+    }
+    private func finishEditing() { if resumeAfterEditing { engine.resume() }; resumeAfterEditing = false }
+    private func finishSet() {
         guard let movement = current else { return }
-        if let rule = movement.prescription, let mode = rule.mode {
-            repsText = mode == "duration" ? "" : rule.targetReps.map { String($0) } ?? ""
-            secondsText = rule.targetSeconds.map { String($0) } ?? ""
-            weightText = "0"
-            return
-        }
-        let fromSource = movement.target
-        let nums = fromSource.split(whereSeparator: { !$0.isNumber })
-        let first = nums.first.flatMap { Int($0) }
-        repsText = first.map { String($0) } ?? ""
-        secondsText = first.map { String(max(1, fromSource.contains("мин") ? $0 * 60 : $0)) } ?? ""
-        weightText = "0"
-    }
-
-    private func phaseTitle(_ phase: TrainingPhase) -> String {
-        switch phase {
-        case .prepare: return "Подготовка"
-        case .active: return "Выполнение"
-        case .rest: return "Отдых"
-        case .paused: return "Пауза"
-        case .summary: return "Итог"
-        }
-    }
-    private func timeString(_ seconds: Int) -> String {
-        String(format: "%02d:%02d", seconds / 60, seconds % 60)
+        if movement.isTimed || movement.plannedReps == nil {
+            let elapsed = movement.plannedSeconds.map { max(1, $0 - (engine.exerciseRemaining() ?? $0)) }
+            let actual = ActualSet(reps: movement.isTimed ? nil : movement.plannedReps, weightKg: movement.isTimed ? nil : 0,
+                                   seconds: movement.isTimed ? (elapsed ?? 1) : nil, completedAt: Date())
+            edit(actual)
+        } else { engine.completePlanned() }
     }
 }
 
-/// A second updates only the clock, not the player hierarchy or an open menu.
-private struct WorkoutClock: View {
+private struct PlayerClock: View {
     @EnvironmentObject private var engine: WorkoutEngine
     let resting: Bool
     @State private var now = Date()
-    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    private let ticker = Timer.publish(every: 0.25, on: .main, in: .common).autoconnect()
     var body: some View {
-        let seconds = resting ? engine.restRemaining(now: now) : (engine.draft?.activeSeconds(now: now) ?? 0)
-        Text(String(format: "%02d:%02d", seconds / 60, seconds % 60))
-            .font(.system(size: resting ? 64 : 56, weight: .bold, design: .rounded))
-            .monospacedDigit()
+        let draft = engine.draft
+        let seconds = resting ? (draft?.phase == .paused ? draft?.restSecondsLeft ?? 0 : engine.restRemaining(now: now)) : engine.exerciseRemaining(now: now)
+        Text(seconds.map { String(format: "%02d:%02d", $0 / 60, $0 % 60) } ?? "Без таймера")
+            .font(.system(size: 64, weight: .bold, design: .rounded)).monospacedDigit()
+            .accessibilityIdentifier(resting ? "rest-countdown" : "exercise-countdown")
             .onReceive(ticker) { now = $0 }
     }
 }
@@ -328,6 +261,7 @@ private struct WorkoutActions: View {
                 .font(.footnote).foregroundStyle(.secondary)
         }
         .navigationTitle("Действия")
+        .onAppear { engine.pause() }
         .alert("Удалить незавершённую тренировку?", isPresented: $confirmDiscard) {
             Button("Удалить черновик", role: .destructive) {
                 engine.discard()
@@ -362,10 +296,10 @@ private struct SetEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                if timed { TextField("Секунды", text: $seconds).keyboardType(.numberPad) }
+                if timed { TextField("Секунды", text: $seconds).keyboardType(.numberPad).accessibilityIdentifier("set-seconds") }
                 else {
-                    TextField("Повторы", text: $reps).keyboardType(.numberPad)
-                    TextField("Вес, кг", text: $kg).keyboardType(.decimalPad)
+                    TextField("Повторы", text: $reps).keyboardType(.numberPad).accessibilityIdentifier("set-reps")
+                    TextField("Вес, кг", text: $kg).keyboardType(.decimalPad).accessibilityIdentifier("set-weight")
                 }
                 if invalid { Text("Проверь введённые значения").foregroundStyle(.red) }
                 Button("Сохранить") {
@@ -375,7 +309,7 @@ private struct SetEditor: View {
                         invalid = true; return
                     }
                     save(Int(reps), weight, Int(seconds)); dismiss()
-                }
+                }.accessibilityIdentifier("save-set-edit")
             }.navigationTitle("Исправить подход")
                 .toolbar { Button("Отмена") { dismiss() } }
                 .onAppear {
