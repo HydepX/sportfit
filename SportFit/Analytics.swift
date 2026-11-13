@@ -80,6 +80,8 @@ struct WorkoutAnalyticsScreen: View {
                     Text("Повторы: \(exercise.firstReps) → \(exercise.lastReps); секунды: \(exercise.firstSeconds) → \(exercise.lastSeconds)").font(.caption)
                     if let first = exercise.firstWeight, let last = exercise.lastWeight { Text("Максимальный вес подхода: \(first.formatted()) → \(last.formatted()) кг") }
                     if let first = exercise.firstVolume, let last = exercise.lastVolume { Text("Записанный объём: \(first.formatted()) → \(last.formatted()) кг·повт") }
+                    if let change = exercise.volumeChangePercent { Text("Изменение внешнего объёма: \(change.formatted(.number.precision(.fractionLength(1))))%").font(.caption) }
+                    if let change = exercise.weightChangePercent { Text("Изменение максимального веса: \(change.formatted(.number.precision(.fractionLength(1))))%").font(.caption) }
                     if exercise.sessions < 2 { Text("Для сравнения нужны две записи упражнения").font(.caption) }
                 }
             }

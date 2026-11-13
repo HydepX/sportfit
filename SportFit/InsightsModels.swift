@@ -194,6 +194,14 @@ struct ExerciseProgress: Codable, Identifiable {
     let lastReps: Int
     let firstSeconds: Int
     let lastSeconds: Int
+    var volumeChangePercent: Double? {
+        guard sessions > 1, let firstVolume, let lastVolume, firstVolume > 0 else { return nil }
+        return (lastVolume - firstVolume) / firstVolume * 100
+    }
+    var weightChangePercent: Double? {
+        guard sessions > 1, let firstWeight, let lastWeight, firstWeight > 0 else { return nil }
+        return (lastWeight - firstWeight) / firstWeight * 100
+    }
 }
 
 struct TrainingSummary: Codable {

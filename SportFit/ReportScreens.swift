@@ -27,7 +27,8 @@ enum ReportExporter {
             lines += ["", title]
             if changes.isEmpty { lines.append("Нет данных в этом режиме экспорта") }
             for change in changes {
-                let delta = change.count < 2 ? "сравнение недоступно: один замер" : "изменение \(change.difference.formatted(.number.precision(.fractionLength(0...2))))"
+                let unit = change.metric == MeasurementMetric.fat.rawValue ? " п.п." : ""
+                let delta = change.count < 2 ? "сравнение недоступно: один замер" : "изменение \(change.difference.formatted(.number.precision(.fractionLength(0...2))))\(unit)"
                 lines.append("\(change.metric) · \(change.source): \(change.first.value.formatted()) → \(change.last.value.formatted()); \(delta); наблюдений \(change.count)")
                 lines.append("\(change.first.date.formatted(date: .abbreviated, time: .omitted)) — \(change.last.date.formatted(date: .abbreviated, time: .omitted))")
                 lines.append("Среднее по наблюдениям: \(change.average.formatted()); минимум \(change.minimum.formatted()), максимум \(change.maximum.formatted())")
@@ -38,6 +39,8 @@ enum ReportExporter {
             lines.append("\(exercise.title) · \(exercise.mode) · занятий \(exercise.sessions): повторения \(exercise.firstReps) → \(exercise.lastReps), секунды \(exercise.firstSeconds) → \(exercise.lastSeconds)")
             if let first = exercise.firstWeight, let last = exercise.lastWeight { lines.append("Максимальный внешний вес подхода: \(first.formatted()) → \(last.formatted()) кг") }
             if let first = exercise.firstVolume, let last = exercise.lastVolume { lines.append("Записанный внешний объём: \(first.formatted()) → \(last.formatted()) кг·повт") }
+            if let change = exercise.volumeChangePercent { lines.append("Изменение записанного внешнего объёма: \(change.formatted(.number.precision(.fractionLength(1))))%") }
+            if let change = exercise.weightChangePercent { lines.append("Изменение максимального веса подхода: \(change.formatted(.number.precision(.fractionLength(1))))%") }
         }
         lines += ["", "ЦЕЛИ"]
         if report.goals.isEmpty { lines.append("Числовые цели не заданы") }
@@ -225,6 +228,7 @@ struct ReportSummaryContent: View {
                     Text(exercise.title)
                     Text("\(exercise.mode) · \(exercise.sessions) записей · повторы \(exercise.firstReps) → \(exercise.lastReps) · секунды \(exercise.firstSeconds) → \(exercise.lastSeconds)").font(.caption)
                     if let first = exercise.firstWeight, let last = exercise.lastWeight { Text("Максимальный внешний вес: \(first.formatted()) → \(last.formatted()) кг").font(.caption) }
+                    if let change = exercise.volumeChangePercent { Text("Изменение внешнего объёма: \(change.formatted(.number.precision(.fractionLength(1))))%").font(.caption) }
                 }
             }
         }

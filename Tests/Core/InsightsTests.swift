@@ -146,4 +146,17 @@ final class InsightsTests: XCTestCase {
         XCTAssertEqual(InsightMath.weekKey(date("2026-12-31")), InsightMath.weekKey(date("2027-01-01")))
         XCTAssertNotEqual(InsightMath.weekKey(date("2027-01-01")), InsightMath.weekKey(date("2027-01-04")))
     }
+    func testLoadChangeComparesDistinctSessionsAndNeverDividesByZero() throws {
+        let first = try workout(reps: 4, weight: 2)
+        var movements = first.movements
+        movements[0].sets = [ActualSet(reps: 8, weightKg: 3, seconds: nil, completedAt: first.finishedAt.addingTimeInterval(3600))]
+        let last = WorkoutResult(id: UUID(), date: first.date, programId: first.programId, title: first.title,
+            startedAt: first.startedAt.addingTimeInterval(3600), finishedAt: first.finishedAt.addingTimeInterval(3660),
+            durationSeconds: 60, feeling: nil, finishedEarly: false, movements: movements)
+        let progress = try XCTUnwrap(TrainingSummary.make([last, first]).exercises.first)
+        XCTAssertEqual(try XCTUnwrap(progress.volumeChangePercent), 200, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(progress.weightChangePercent), 50, accuracy: 0.001)
+        XCTAssertNil(TrainingSummary.make([first]).exercises.first?.volumeChangePercent)
+        XCTAssertNil(TrainingSummary.make([try workout(weight: 0), last]).exercises.first?.volumeChangePercent)
+    }
 }
