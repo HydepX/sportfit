@@ -111,15 +111,16 @@ struct ReportBuilderScreen: View {
     @State private var editingGoal: QuarterGoal?
     @State private var deletingGoal: UUID?
     @State private var saved = false
-    private var start: Date { run.map { SportDate.calendar.startOfDay(for: $0.startedAt) } ?? SportDate.calendar.date(from: DateComponents(year: year, month: (quarter - 1) * 3 + 1, day: 1))! }
+    private var currentRun: ProgramRun? { run.flatMap { original in profile.runs.first { $0.id == original.id } ?? original } }
+    private var start: Date { currentRun.map { SportDate.calendar.startOfDay(for: $0.startedAt) } ?? SportDate.calendar.date(from: DateComponents(year: year, month: (quarter - 1) * 3 + 1, day: 1))! }
     private var end: Date {
-        if let run { return run.closedAt ?? Date() }
+        if let run = currentRun { return run.closedAt ?? Date() }
         let boundary = SportDate.calendar.date(byAdding: .month, value: 3, to: start)!
         return Date(timeIntervalSinceReferenceDate: boundary.timeIntervalSinceReferenceDate.nextDown)
     }
     private var scope: String { run.map { "run:" + $0.id.uuidString } ?? "quarter:\(year)-Q\(quarter)" }
     private var report: QuarterReport {
-        QuarterReport.make(title: run?.title ?? "\(year) · квартал \(quarter)", scope: scope, start: start, end: end, run: run,
+        QuarterReport.make(title: currentRun?.title ?? "\(year) · квартал \(quarter)", scope: scope, start: start, end: end, run: currentRun,
             history: engine.history, measurements: measurements.entries, xml: imported.records, journal: journal.data, name: profile.profile.name, privacy: privacy)
     }
     var body: some View {
@@ -137,7 +138,7 @@ struct ReportBuilderScreen: View {
                         Text(goal.metric.rawValue)
                         Text("\(goal.direction.rawValue) \(goal.target.formatted())").font(.caption)
                         if let source = goal.source { Text(source == "manual" ? "Источник: вручную" : "Источник: " + source).font(.caption) }
-                        if run.map({ $0.closedAt == nil }) ?? (end >= Date()) {
+                        if currentRun.map({ $0.closedAt == nil }) ?? (end >= Date()) {
                             HStack {
                                 Button("Исправить цель") { editingGoal = goal }.buttonStyle(.bordered)
                                 Button("Удалить цель", role: .destructive) { deletingGoal = goal.id }.buttonStyle(.bordered)
@@ -145,7 +146,7 @@ struct ReportBuilderScreen: View {
                         }
                     }
                 }
-                if run.map({ $0.closedAt == nil }) ?? (end >= Date()) { Button("Добавить числовую цель") { addingGoal = true } }
+                if currentRun.map({ $0.closedAt == nil }) ?? (end >= Date()) { Button("Добавить числовую цель") { addingGoal = true } }
                 Text("Цели задаёшь самостоятельно; пропущенные измерения означают «оценка недоступна». Цель выполнения плана оценивается только для уровня.").font(.footnote)
             }
             ReportSummaryContent(report: current)
@@ -169,6 +170,14 @@ struct ReportBuilderScreen: View {
             .onChange(of: addingGoal) { _, value in if !value { saved = false } }
             .onChange(of: editingGoal?.id) { _, value in if value == nil { saved = false } }
             .onChange(of: privacy) { _, _ in saved = false }.onChange(of: year) { _, _ in saved = false }.onChange(of: quarter) { _, _ in saved = false }
+            .onChange(of: measurements.entries) { _, _ in saved = false }
+            .onChange(of: imported.records) { _, _ in saved = false }
+            .onChange(of: journal.data.activity) { _, _ in saved = false }
+            .onChange(of: journal.data.goals) { _, _ in saved = false }
+            .onChange(of: journal.data.notes) { _, _ in saved = false }
+            .onChange(of: engine.history.count) { _, _ in saved = false }
+            .onChange(of: currentRun?.closedAt) { _, _ in saved = false }
+            .onChange(of: currentRun?.days.count) { _, _ in saved = false }
     }
 }
 

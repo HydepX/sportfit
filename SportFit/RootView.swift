@@ -18,6 +18,7 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var selection = 0
     @State private var progressDestination: String?
+    @State private var dataEpoch = UUID()
 
     var body: some View {
         TabView(selection: $selection) {
@@ -32,6 +33,7 @@ struct RootView: View {
             SettingsScreen()
                 .tabItem { Label("Профиль", systemImage: "person.crop.circle") }.tag(4)
         }
+        .id(dataEpoch)
         .tint(Palette.accent)
         .background(Palette.background)
         .task { await synchronize() }
@@ -40,6 +42,11 @@ struct RootView: View {
         .onReceive(engine.$draft) { _ in Task { await synchronize() } }
         .onReceive(journal.$data) { _ in Task { await synchronize() } }
         .onReceive(measurements.$entries) { _ in Task { await synchronize() } }
+        .onReceive(NotificationCenter.default.publisher(for: .sportfitDataRestored)) { notification in
+            guard let folder = notification.object as? URL, folder == store.directory else { return }
+            selection = 0; progressDestination = nil; dataEpoch = UUID()
+            store.message = "Данные восстановлены. Напоминания выключены до явного включения."
+        }
         .onChange(of: reminders.destination, initial: true) { _, target in
             guard let target else { return }
             if target == "plan" { selection = 1 }

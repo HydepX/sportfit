@@ -1,6 +1,6 @@
 import Foundation
 
-struct BodyMeasurement: Codable, Identifiable {
+struct BodyMeasurement: Codable, Identifiable, Equatable {
     let id: UUID
     var measuredAt: Date
     var weightKg: Double

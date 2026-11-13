@@ -37,6 +37,12 @@ final class InsightsFlowUITests: XCTestCase {
         let create = app.buttons["create-local-backup"]; reveal(create, app: app); create.tap()
         let message = app.staticTexts["storage-message"]; reveal(message, app: app)
         XCTAssertTrue(message.label.contains("Локальная копия создана"))
+        app.swipeDown(); app.swipeDown(); app.swipeDown()
+        let restore = app.buttons["Восстановить"].firstMatch; reveal(restore, app: app); restore.tap()
+        let confirmation = app.alerts["Восстановить выбранную копию?"]
+        XCTAssertTrue(confirmation.waitForExistence(timeout: 10)); confirmation.buttons["Восстановить"].tap()
+        let success = app.alerts["SportFit"]; XCTAssertTrue(success.waitForExistence(timeout: 10)); success.buttons["OK"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Главная"].isSelected)
         app.terminate(); app.launch(); app.tabBars.buttons["Профиль"].tap()
         let reminders = app.buttons["open-reminders"]; reveal(reminders, app: app); reminders.tap()
         let enabled = app.switches["enable-reminders"]; XCTAssertTrue(enabled.waitForExistence(timeout: 10))

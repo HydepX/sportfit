@@ -3,6 +3,10 @@ import CryptoKit
 import SwiftUI
 import UniformTypeIdentifiers
 
+extension Notification.Name {
+    static let sportfitDataRestored = Notification.Name("SportFit.dataRestored")
+}
+
 /// User-owned local export. No upload is performed by this code.
 struct SportFitBackup: Codable {
     let format: String
@@ -210,5 +214,6 @@ struct SportFitBackupDocument: FileDocument {
         profile.reload()
         engine.reload()
         journal?.reload()
+        NotificationCenter.default.post(name: .sportfitDataRestored, object: store.directory)
     }
 }

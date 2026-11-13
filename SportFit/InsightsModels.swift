@@ -45,7 +45,7 @@ enum ActivityMetric: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-struct ActivityEntry: Codable, Identifiable {
+struct ActivityEntry: Codable, Identifiable, Equatable {
     var id = UUID()
     var date: Date
     var metric: ActivityMetric
@@ -55,7 +55,7 @@ struct ActivityEntry: Codable, Identifiable {
     var valid: Bool { date <= Date() && recordedAt.timeIntervalSince1970.isFinite && metric.valid(value) }
 }
 
-struct DayNote: Codable, Identifiable {
+struct DayNote: Codable, Identifiable, Equatable {
     var id = UUID()
     var runId: UUID?
     var dayIndex: Int?
@@ -84,7 +84,7 @@ enum GoalMetric: String, Codable, CaseIterable, Identifiable {
     }
 }
 enum GoalDirection: String, Codable, CaseIterable { case atMost = "Не больше", atLeast = "Не меньше" }
-struct QuarterGoal: Codable, Identifiable {
+struct QuarterGoal: Codable, Identifiable, Equatable {
     var id = UUID()
     var scope: String
     var metric: GoalMetric
