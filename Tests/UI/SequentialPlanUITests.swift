@@ -13,6 +13,8 @@ final class SequentialPlanUITests: XCTestCase {
         XCTAssertTrue(status.waitForExistence(timeout: 10))
         XCTAssertTrue(status.label.contains("без HealthKit"))
         XCTAssertFalse(app.buttons["Подключить вес, шаги и пульс"].exists)
+        XCTAssertFalse(app.staticTexts["Проверка на iPhone"].exists)
+        XCTAssertFalse(app.staticTexts["Прямое чтение Apple Health"].exists)
         let importer = app.buttons["import-health-xml"]
         reveal(importer, app: app)
         XCTAssertTrue(importer.isHittable)

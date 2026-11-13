@@ -14,8 +14,8 @@ struct HealthScreen: View {
 
     var body: some View {
         List {
-            Section("Подключение") {
-                Text("WATCH FIT 2 / Scale 3 → Huawei Health → Apple «Здоровье» → SportFit")
+            Section(reader.buildEnabled ? "Подключение" : "Локальный импорт") {
+                Text(reader.buildEnabled ? "WATCH FIT 2 / Scale 3 → Huawei Health → Apple «Здоровье» → SportFit" : "Данные Huawei уже в Apple «Здоровье» можно перенести локальным export.xml.")
                 Text(reader.buildEnabled ? "Сборка с HealthKit · подпись и чтение проверяются на этом iPhone" : "Сборка без HealthKit · доступны импорт и ручные замеры")
                     .accessibilityIdentifier("health-build-status")
                 if reader.buildEnabled {
@@ -24,31 +24,35 @@ struct HealthScreen: View {
                     Button("Обновить сейчас") { Task { await reader.refresh(force: true) } }
                         .disabled(reader.loading || !reader.cache.connectionRequested)
                 }
-                if reader.loading { ProgressView("Проверяем три показателя") }
-                if let attempted = reader.cache.lastAttempt {
-                    Text("Последняя проверка: \(attempted.formatted(date: .abbreviated, time: .shortened))").font(.caption)
-                } else { Text("Прямое чтение ещё не проверено").font(.caption) }
-                Text(reader.message).font(.footnote)
-                Text("Обновление при открытии экрана и возвращении в приложение — не чаще раза в 5 минут. Кнопка обновляет сразу. Фоновая синхронизация и передача с часов в реальном времени не выполняются.")
-                    .font(.footnote).foregroundStyle(.secondary)
-            }
-            Section("Прямое чтение Apple Health") {
-                ForEach(reader.cache.snapshots, id: \.field) { snapshot in
-                    HealthSnapshotRow(snapshot: snapshot)
+                if reader.buildEnabled {
+                    if reader.loading { ProgressView("Проверяем три показателя") }
+                    if let attempted = reader.cache.lastAttempt {
+                        Text("Последняя проверка: \(attempted.formatted(date: .abbreviated, time: .shortened))").font(.caption)
+                    } else { Text("Прямое чтение ещё не проверено").font(.caption) }
+                    Text(reader.message).font(.footnote)
+                    Text("Обновление при открытии экрана и возвращении в приложение — не чаще раза в 5 минут. Кнопка обновляет сразу. Фоновая синхронизация и передача с часов в реальном времени не выполняются.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
-                Text("Пульс — последнее измерение, не поток с часов. Пустой ответ не различает отсутствие записей и запрет чтения. Запрос доступа сам по себе не подтверждает разрешение.")
-                    .font(.footnote).foregroundStyle(.secondary)
             }
-            Section("Проверка на iPhone") {
-                Text("Сборка: \(Bundle.main.object(forInfoDictionaryKey: "SportFitBuildCommit") as? String ?? "неизвестна")")
-                    .font(.caption).textSelection(.enabled)
-                ForEach(reader.cache.snapshots, id: \.field) { snapshot in
-                    LabeledContent(snapshot.field.title, value: diagnostic(snapshot.status))
+            if reader.buildEnabled {
+                Section("Прямое чтение Apple Health") {
+                    ForEach(reader.cache.snapshots, id: \.field) { snapshot in
+                        HealthSnapshotRow(snapshot: snapshot)
+                    }
+                    Text("Пульс — последнее измерение, не поток с часов. Пустой ответ не различает отсутствие записей и запрет чтения. Запрос доступа сам по себе не подтверждает разрешение.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
-                Text("Для проверки подключи три категории, затем обнови экран. Если записи прочитаны, сравни дату и источник с Apple «Здоровье». Достаточно сообщить результат по категориям — значения, XML и медицинские записи присылать не нужно.")
-                    .font(.footnote)
+                Section("Проверка на iPhone") {
+                    Text("Сборка: \(Bundle.main.object(forInfoDictionaryKey: "SportFitBuildCommit") as? String ?? "неизвестна")")
+                        .font(.caption).textSelection(.enabled)
+                    ForEach(reader.cache.snapshots, id: \.field) { snapshot in
+                        LabeledContent(snapshot.field.title, value: diagnostic(snapshot.status))
+                    }
+                    Text("Для проверки подключи три категории, затем обнови экран. Если записи прочитаны, сравни дату и источник с Apple «Здоровье». Достаточно сообщить результат по категориям — значения, XML и медицинские записи присылать не нужно.")
+                        .font(.footnote)
+                }
             }
-            Section("Импорт из файла · отдельно от прямого чтения") {
+            Section("Импорт из файла") {
                 Button("Импортировать export.xml Apple Health") { importing = true }
                     .disabled(imported.importing).accessibilityIdentifier("import-health-xml")
                 if imported.importing { ProgressView("Читаем файл на устройстве") }
@@ -79,9 +83,11 @@ struct HealthScreen: View {
                 NavigationLink("Открыть мои замеры") { MeasurementsScreen() }
                 Text("Ручные значения, прямое чтение и XML показываются отдельно. Они не складываются, не усредняются и не перезаписывают друг друга.").font(.footnote)
             }
-            Section("Дополнительные показатели") {
-                NavigationLink("Динамика и дополнительные разрешения") { HealthTrendsScreen() }
-                Text("Вес, шаги и пульс запрашиваются вместе только по кнопке подключения. Остальные категории запрашиваются отдельно, когда ты явно подключаешь выбранный показатель.").font(.footnote)
+            if reader.buildEnabled {
+                Section("Дополнительные показатели") {
+                    NavigationLink("Динамика и дополнительные разрешения") { HealthTrendsScreen() }
+                    Text("Вес, шаги и пульс запрашиваются вместе только по кнопке подключения. Остальные категории запрашиваются отдельно, когда ты явно подключаешь выбранный показатель.").font(.footnote)
+                }
             }
             Section("Локальные данные") {
                 Button("Очистить кэш прямого чтения", role: .destructive) { clearing = "cache" }
