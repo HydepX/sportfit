@@ -120,12 +120,17 @@ struct WorkoutPlayer: View {
     }
     private func rest(_ draft: WorkoutDraft, _ movement: WorkoutMovement) -> some View {
         VStack(spacing: 18) {
-            Label("Отдых", systemImage: "cup.and.saucer.fill").font(.title.bold()).accessibilityIdentifier("rest-screen")
+            HStack { Image(systemName: "cup.and.saucer.fill"); Text("Отдых").accessibilityIdentifier("rest-screen") }.font(.title.bold())
             PlayerClock(resting: true)
             HStack { ForEach([15, 30, 60], id: \.self) { seconds in
                 Button("+\(seconds) сек") { engine.extendRest(seconds) }.buttonStyle(.bordered).accessibilityIdentifier("extend-rest-\(seconds)")
             } }
-            if draft.restEndsAt == nil { Text("Отдых в плане не задан. Перейди дальше, когда будешь готов.").font(.footnote).foregroundStyle(.secondary) }
+            if draft.restEndsAt == nil {
+                Text((movement.prescription?.restSeconds ?? movement.sourceRestSeconds) == 0
+                     ? "По плану отдых — 0 секунд. Перейди дальше, когда будешь готов."
+                     : "Отдых в программе не указан. Перейди дальше, когда будешь готов.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
             if let actual = movement.sets.last {
                 Text(movement.title).font(.headline).multilineTextAlignment(.center)
                 Text(actualLabel(actual)).foregroundStyle(.secondary).accessibilityIdentifier("rest-result")

@@ -21,6 +21,9 @@ import XCTest
         for _ in 0..<5 { engine.tick(now: end.addingTimeInterval(300)) }
         XCTAssertEqual(engine.draft?.completedSetCount, 1)
         XCTAssertEqual(engine.draft?.currentIndex, 0)
+        engine.pause(); engine.resume()
+        XCTAssertEqual(engine.draft?.phase, .rest)
+        XCTAssertNil(engine.draft?.restEndsAt)
         engine.continueAfterRest(now: end.addingTimeInterval(300))
         XCTAssertEqual(engine.draft?.currentIndex, 1)
         XCTAssertEqual(engine.draft?.phase, .active)
@@ -117,7 +120,7 @@ import XCTest
     func testRestAdvancesThroughPrescribedSetsBeforeChangingExercise() async throws {
         let (engine, store, directory) = try setup(); defer { try? FileManager.default.removeItem(at: directory) }
         engine.discard()
-        engine.start(day: ProgramDay(dayOfWeek: "test", name: "Multiple sets", exerciseIds: ["press_floor", "wu_neck"]), date: try XCTUnwrap(SportDate.from("2026-12-07")), store: store, guided: true)
+        engine.start(day: ProgramDay(dayOfWeek: "test", name: "Multiple sets", exerciseIds: ["press_floor", "wu_neck"]), date: try XCTUnwrap(SportDate.from("2026-11-16")), store: store, guided: true)
         let count = try XCTUnwrap(engine.draft?.movements[0].prescription?.sets)
         XCTAssertGreaterThan(count, 1)
         var now = Date()
