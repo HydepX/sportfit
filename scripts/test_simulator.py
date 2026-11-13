@@ -20,6 +20,7 @@ device, runtime = candidates[0]
 subprocess.run([
     'xcodebuild', '-project', 'SportFit.xcodeproj', '-scheme', 'SportFit',
     '-configuration', 'Release', '-destination', f"platform=iOS Simulator,id={device['udid']}",
+    '-parallel-testing-enabled', 'NO',
     '-derivedDataPath', os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests'),
     '-resultBundlePath', os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), 'SportFitTests.xcresult'),
     'CODE_SIGNING_ALLOWED=NO', 'ENABLE_DEBUG_DYLIB=NO', 'ENABLE_TESTABILITY=YES',
@@ -41,12 +42,17 @@ print(f"Verified {summary['totalTestCount']} simulator tests executed")
 # Use an isolated simulator for a real install/migrate/reinstall sequence.
 bundle = 'com.hydepx.sportfit'
 app = Path(os.environ.get('RUNNER_TEMP', '/tmp')) / 'SportFitTests/Build/Products/Release-iphonesimulator/SportFit.app'
+print('Upgrade probe: shutting down completed test simulators', flush=True)
+subprocess.run(['xcrun', 'simctl', 'shutdown', 'all'], check=True)
 upgrade_device = subprocess.check_output([
     'xcrun', 'simctl', 'create', 'SportFit Upgrade Verification', device['deviceTypeIdentifier'], runtime
 ], text=True).strip()
+print('Upgrade probe: booting isolated device', flush=True)
 subprocess.run(['xcrun', 'simctl', 'boot', upgrade_device], check=True)
 subprocess.run(['xcrun', 'simctl', 'bootstatus', upgrade_device, '-b'], check=True)
-subprocess.run(['xcrun', 'simctl', 'install', upgrade_device, str(app)], check=True)
+print('Upgrade probe: installing application', flush=True)
+subprocess.run(['xcrun', 'simctl', 'install', upgrade_device, str(app)], check=True, timeout=300)
+print('Upgrade probe: preparing legacy history', flush=True)
 container = Path(subprocess.check_output(['xcrun', 'simctl', 'get_app_container', upgrade_device, bundle, 'data'], text=True).strip())
 documents = container / 'Documents'
 documents.mkdir(exist_ok=True)
@@ -65,6 +71,7 @@ fixture = {
 (documents / 'workout_history.v1.json').write_text(json.dumps([fixture]))
 (documents / 'sportfit-upgrade-probe.txt').write_text('Synthetic simulator installation preservation probe')
 subprocess.run(['xcrun', 'simctl', 'launch', upgrade_device, bundle], check=True)
+print('Upgrade probe: waiting for SQLite migration and automatic backup', flush=True)
 
 def migrated(folder):
     database = folder / 'workout_history.sqlite'
@@ -92,7 +99,8 @@ else:
 subprocess.run(['xcrun', 'simctl', 'terminate', upgrade_device, bundle], check=True)
 before = {str(path.relative_to(documents)): hashlib.sha256(path.read_bytes()).hexdigest()
           for path in documents.rglob('*') if path.is_file()}
-subprocess.run(['xcrun', 'simctl', 'install', upgrade_device, str(app)], check=True)
+print('Upgrade probe: reinstalling without deleting data', flush=True)
+subprocess.run(['xcrun', 'simctl', 'install', upgrade_device, str(app)], check=True, timeout=300)
 after_container = Path(subprocess.check_output(['xcrun', 'simctl', 'get_app_container', upgrade_device, bundle, 'data'], text=True).strip())
 after_documents = after_container / 'Documents'
 after = {str(path.relative_to(after_documents)): hashlib.sha256(path.read_bytes()).hexdigest()

@@ -17,6 +17,7 @@ jobs:
       - run: python3 -m unittest discover -s Tests/Python -v
   build:
     runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Install XcodeGen
