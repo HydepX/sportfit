@@ -86,7 +86,7 @@ import XCTest
         engine.start(run: try XCTUnwrap(profile.activeRun), store: store)
         let measurements = MeasurementsStore(directory: directory)
         let backup = SportFitBackup(engine: engine, measurements: measurements, store: store, profile: profile)
-        XCTAssertEqual(backup.format, "sportfit-backup-v3")
+        XCTAssertEqual(backup.format, "sportfit-backup-v4")
         let decoded = try BackupEnvelope.decode(BackupEnvelope.encode(backup))
         engine.discard()
         profile.closeRun(draft: nil, allowIncomplete: true)

@@ -15,9 +15,20 @@ struct WorkoutAnalyticsScreen: View {
         workouts.flatMap(\.movements).filter { exerciseId.isEmpty || $0.exerciseId == exerciseId }.flatMap(\.sets)
     }
     var body: some View {
+        let summary = TrainingSummary.make(workouts, exerciseId: exerciseId)
+        let daySets = Dictionary(grouping: workouts, by: { SportDate.key($0.finishedAt) }).map { day, results in
+            (day: day, sets: results.flatMap(\.movements).filter { exerciseId.isEmpty || $0.exerciseId == exerciseId }.reduce(0) { $0 + $1.sets.count })
+        }.sorted { $0.day < $1.day }
         List {
             Picker("Период", selection: $period) {
                 ForEach(AnalyticsPeriod.allCases) { Text($0.rawValue).tag($0) }
+            }
+            if !daySets.isEmpty {
+                Section("Подходы по дням завершения занятий") {
+                    Chart(daySets, id: \.day) { item in
+                        if let date = SportDate.from(item.day) { BarMark(x: .value("День", date, unit: .day), y: .value("Подходы", item.sets)).foregroundStyle(.mint) }
+                    }.frame(height: 180)
+                }
             }
             Picker("Упражнение", selection: $exerciseId) {
                 Text("Все").tag("")
@@ -25,10 +36,28 @@ struct WorkoutAnalyticsScreen: View {
             }
             Section("Реальные результаты") {
                 LabeledContent("Занятий с результатами", value: String(workouts.filter { $0.totalSets > 0 }.count))
+                LabeledContent("Полностью выполненных дней", value: "\(summary.completeSessions)")
+                LabeledContent("Частично выполненных дней", value: "\(summary.partialSessions)")
                 LabeledContent("Досрочно завершено", value: String(workouts.filter(\.finishedEarly).count))
-                LabeledContent("Подходов", value: String(sets.count))
-                LabeledContent("Время, мин", value: String(workouts.reduce(0) { $0 + $1.durationSeconds } / 60))
+                LabeledContent("Подходов", value: "\(summary.sets)")
+                LabeledContent("Повторений", value: "\(summary.reps)")
+                LabeledContent("Дыхательных циклов", value: "\(summary.breathCycles)")
+                LabeledContent("Времени упражнений, сек", value: "\(summary.timedSeconds)")
+                LabeledContent("Время занятий без пауз, мин", value: "\(summary.durationSeconds / 60)")
+                LabeledContent("Дней с подходами", value: "\(summary.activeDays)")
+                LabeledContent("Активных недель", value: "\(summary.activeWeeks)")
+                LabeledContent("Внешний объём, кг·повт", value: summary.externalVolumeKg.formatted(.number.precision(.fractionLength(0...1))))
                 LabeledContent("Пропущено упражнений", value: String(workouts.reduce(0) { $0 + $1.skippedCount }))
+                Text("Время включает разминку, упражнение и отдых, исключает ручную паузу. Объём = записанные повторы × внешний вес, без массы тела и домножения сторон. При фильтре упражнения время относится ко всему занятию. Это описание записанной работы, а не оценка силы.").font(.footnote)
+            }
+            if let run = profile.activeRun {
+                let plan = RunPlanSummary(run: run, history: engine.history)
+                Section("Текущий уровень") {
+                    LabeledContent("План выполнен", value: "\(plan.completed) / \(plan.planned)")
+                    ProgressView(value: Double(plan.completed), total: Double(max(1, plan.planned)))
+                    Text("Подряд полностью закрыто занятий: \(plan.consecutiveCompleted). Отдых не прерывает эту последовательность; пропуски не штрафуются.").font(.footnote)
+                    NavigationLink("Цели и отчёт уровня") { ReportBuilderScreen(run: run) }
+                }
             }
             if !exerciseId.isEmpty && sets.count > 1 {
                 Section("Рабочий вес, кг") {
@@ -45,6 +74,15 @@ struct WorkoutAnalyticsScreen: View {
                 }
             }
             if workouts.isEmpty { Text("За выбранный период результатов пока нет") }
+            ForEach(summary.exercises) { exercise in
+                Section(exercise.title) {
+                    Text("\(exercise.mode) · \(exercise.sessions) записей")
+                    Text("Повторы: \(exercise.firstReps) → \(exercise.lastReps); секунды: \(exercise.firstSeconds) → \(exercise.lastSeconds)").font(.caption)
+                    if let first = exercise.firstWeight, let last = exercise.lastWeight { Text("Максимальный вес подхода: \(first.formatted()) → \(last.formatted()) кг") }
+                    if let first = exercise.firstVolume, let last = exercise.lastVolume { Text("Записанный объём: \(first.formatted()) → \(last.formatted()) кг·повт") }
+                    if exercise.sessions < 2 { Text("Для сравнения нужны две записи упражнения").font(.caption) }
+                }
+            }
             Section("Уровни и версии программ") {
                 NavigationLink("Архив уровней") { RunArchiveScreen() }
                 ForEach(Array((store.archivedPrograms + [store.program].compactMap { $0 }).enumerated()), id: \.offset) { _, program in

@@ -9,7 +9,14 @@ private enum Palette {
 
 struct RootView: View {
     @EnvironmentObject private var store: FitnessStore
+    @EnvironmentObject private var engine: WorkoutEngine
+    @EnvironmentObject private var measurements: MeasurementsStore
+    @EnvironmentObject private var profile: ProfileStore
+    @EnvironmentObject private var journal: JournalStore
+    @EnvironmentObject private var reminders: ReminderService
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selection = 0
+    @State private var progressDestination: String?
 
     var body: some View {
         TabView(selection: $selection) {
@@ -19,13 +26,25 @@ struct RootView: View {
                 .tabItem { Label("План", systemImage: "calendar") }.tag(1)
             ProgramRunScreen(title: "Тренировка")
                 .tabItem { Label("Тренировка", systemImage: "play.circle.fill") }.tag(2)
-            ProgressScreen()
+            ProgressScreen(destination: $progressDestination)
                 .tabItem { Label("Прогресс", systemImage: "chart.xyaxis.line") }.tag(3)
             SettingsScreen()
                 .tabItem { Label("Профиль", systemImage: "person.crop.circle") }.tag(4)
         }
         .tint(Palette.accent)
         .background(Palette.background)
+        .task { await synchronize() }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await synchronize() } } }
+        .onReceive(profile.$runs) { _ in Task { await synchronize() } }
+        .onReceive(engine.$draft) { _ in Task { await synchronize() } }
+        .onReceive(journal.$data) { _ in Task { await synchronize() } }
+        .onReceive(measurements.$entries) { _ in Task { await synchronize() } }
+        .onChange(of: reminders.destination, initial: true) { _, target in
+            guard let target else { return }
+            if target == "plan" { selection = 1 }
+            else { selection = 3; progressDestination = target == "progress" ? nil : target }
+            reminders.destination = nil
+        }
         .alert("SportFit", isPresented: Binding(
             get: { store.message != nil },
             set: { if !$0 { store.message = nil } }
@@ -34,6 +53,23 @@ struct RootView: View {
         } message: {
             Text(store.message ?? "")
         }
+    }
+    private func synchronize() async {
+        if journal.canExport && engine.canExport && measurements.canExport {
+            for run in profile.runs where run.closedAt != nil {
+                let scope = "run:" + run.id.uuidString
+                if !journal.data.reports.contains(where: { $0.scope == scope && $0.isFinal }) {
+                    let imported = HealthImportStore(directory: store.directory)
+                    let report = QuarterReport.make(title: run.title, scope: scope, start: SportDate.calendar.startOfDay(for: run.startedAt), end: run.closedAt!, run: run,
+                        history: engine.history, measurements: measurements.entries, xml: imported.records, journal: journal.data, name: profile.profile.name, privacy: .full)
+                    _ = journal.saveReport(report)
+                }
+            }
+        }
+        await reminders.refresh(settings: journal.data.reminders, run: profile.activeRun ?? profile.runs.last,
+            draft: engine.draft, measurements: measurements.entries, history: engine.history)
+        do { try BackupVault.automatic(engine: engine, measurements: measurements, store: store, profile: profile, journal: journal) }
+        catch { journal.error = "Автоматическая копия не создана: \(error.localizedDescription)" }
     }
 }
 

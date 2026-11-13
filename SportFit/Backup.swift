@@ -17,10 +17,11 @@ struct SportFitBackup: Codable {
     let profile: UserProfile?
     let schedule: [ScheduleChange]?
     let runs: [ProgramRun]?
+    let journal: JournalData?
 
     @MainActor
-    init(engine: WorkoutEngine, measurements: MeasurementsStore, store: FitnessStore, profile: ProfileStore) {
-        self.format = "sportfit-backup-v3"
+    init(engine: WorkoutEngine, measurements: MeasurementsStore, store: FitnessStore, profile: ProfileStore, journal: JournalStore? = nil) {
+        self.format = "sportfit-backup-v4"
         self.exportedAt = Date()
         self.workouts = engine.history
         self.activeWorkout = engine.draft
@@ -32,6 +33,7 @@ struct SportFitBackup: Codable {
         self.profile = profile.profile
         self.schedule = profile.changes
         self.runs = profile.runs
+        self.journal = (journal ?? JournalStore(directory: store.directory)).data
     }
 }
 
@@ -44,7 +46,9 @@ struct BackupEnvelope: Codable {
     }
     static func encode(_ backup: SportFitBackup) throws -> Data {
         let payload = try JSONEncoder().encode(backup)
-        return try JSONEncoder().encode(BackupEnvelope(format: "sportfit-envelope-v1", sha256: checksum(payload), payload: payload))
+        let bytes = try JSONEncoder().encode(BackupEnvelope(format: "sportfit-envelope-v1", sha256: checksum(payload), payload: payload))
+        try DataValidation.require(bytes.count <= 100 * 1024 * 1024, "Копия превышает поддерживаемые 100 МБ")
+        return bytes
     }
     static func decode(_ data: Data) throws -> SportFitBackup {
         // Legacy v1 exports had no checksum. Preserve the ability to recover them.
@@ -54,7 +58,7 @@ struct BackupEnvelope: Codable {
             return try JSONDecoder().decode(SportFitBackup.self, from: envelope.payload)
         }
         let legacy = try JSONDecoder().decode(SportFitBackup.self, from: data)
-        try DataValidation.require(legacy.format == "sportfit-backup-v1", "Копии v2 и v3 должны содержать контрольную сумму")
+        try DataValidation.require(legacy.format == "sportfit-backup-v1", "Копии v2–v4 должны содержать контрольную сумму")
         return legacy
     }
 }
@@ -73,7 +77,7 @@ struct SportFitBackupDocument: FileDocument {
             throw CocoaError(.fileReadCorruptFile)
         }
         let decoded = try BackupEnvelope.decode(bytes)
-        guard ["sportfit-backup-v1", "sportfit-backup-v2", "sportfit-backup-v3"].contains(decoded.format) else {
+        guard ["sportfit-backup-v1", "sportfit-backup-v2", "sportfit-backup-v3", "sportfit-backup-v4"].contains(decoded.format) else {
             throw CocoaError(.fileReadUnknown)
         }
         backup = decoded
@@ -88,6 +92,8 @@ struct SportFitBackupDocument: FileDocument {
     static func read(_ url: URL, store: FitnessStore) throws -> SportFitBackup {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? Int.max
+        try DataValidation.require(size <= 100 * 1024 * 1024, "Копия превышает 100 МБ")
         let data = try Data(contentsOf: url)
         try DataValidation.require(data.count <= 100 * 1024 * 1024, "Копия превышает 100 МБ")
         let backup = try BackupEnvelope.decode(data)
@@ -96,7 +102,7 @@ struct SportFitBackupDocument: FileDocument {
     }
 
     static func validate(_ backup: SportFitBackup, fallback: ExerciseCatalog?) throws {
-        try DataValidation.require(["sportfit-backup-v1", "sportfit-backup-v2", "sportfit-backup-v3"].contains(backup.format), "Неизвестная версия копии")
+        try DataValidation.require(["sportfit-backup-v1", "sportfit-backup-v2", "sportfit-backup-v3", "sportfit-backup-v4"].contains(backup.format), "Неизвестная версия копии")
         if backup.format != "sportfit-backup-v1" {
             try DataValidation.require(backup.catalog != nil && backup.program != nil && backup.profile != nil &&
                                        backup.archivedPrograms != nil && backup.schedule != nil, "Копия v2 неполна")
@@ -105,9 +111,11 @@ struct SportFitBackupDocument: FileDocument {
             throw DataValidation.Failure(message: "Необходим каталог упражнений")
         }
         try DataValidation.catalog(catalog)
-        if backup.format == "sportfit-backup-v3" {
+        if backup.format == "sportfit-backup-v3" || backup.format == "sportfit-backup-v4" {
             try DataValidation.require(backup.runs != nil, "Копия v3 не содержит уровни")
         }
+        if backup.format == "sportfit-backup-v4" { try DataValidation.require(backup.journal != nil, "Копия v4 не содержит дневник") }
+        try backup.journal?.validate()
         let runs = backup.runs ?? []
         try ProgramRun.validate(runs, catalog: catalog)
         func runReferenceValid(_ id: UUID?, _ index: Int?) -> Bool {
@@ -172,10 +180,18 @@ struct SportFitBackupDocument: FileDocument {
     }
 
     static func restore(_ backup: SportFitBackup, engine: WorkoutEngine, measurements: MeasurementsStore,
-                        store: FitnessStore, profile: ProfileStore) throws {
+                        store: FitnessStore, profile: ProfileStore, journal: JournalStore? = nil) throws {
         try validate(backup, fallback: store.catalog)
+        let currentJournal = journal ?? JournalStore(directory: store.directory)
+        if engine.canExport && measurements.canExport && store.canExport && profile.canExport && currentJournal.canExport {
+            try BackupVault.save(SportFitBackup(engine: engine, measurements: measurements, store: store, profile: profile, journal: currentJournal), directory: store.directory, kind: "before-restore")
+        }
         let encoder = JSONEncoder()
+        var restoredJournal = backup.journal ?? JournalData()
+        // OS permission and delivery are not portable to another device.
+        restoredJournal.reminders.enabled = false
         var files: [String: Data] = [
+            "journal.v1.json": try encoder.encode(restoredJournal),
             "program_runs.v1.json": try encoder.encode(backup.runs ?? []),
             "workout_history.v1.json": try encoder.encode(backup.workouts),
             WorkoutDatabase.filename: try WorkoutDatabase.image(backup.workouts),
@@ -193,5 +209,6 @@ struct SportFitBackupDocument: FileDocument {
         measurements.reload()
         profile.reload()
         engine.reload()
+        journal?.reload()
     }
 }

@@ -6,6 +6,8 @@ struct SportFitApp: App {
     @StateObject private var engine = WorkoutEngine()
     @StateObject private var measurements = MeasurementsStore()
     @StateObject private var profile = ProfileStore()
+    @StateObject private var journal = JournalStore()
+    @StateObject private var reminders = ReminderService()
 
     var body: some Scene {
         WindowGroup {
@@ -14,6 +16,8 @@ struct SportFitApp: App {
                 .environmentObject(engine)
                 .environmentObject(measurements)
                 .environmentObject(profile)
+                .environmentObject(journal)
+                .environmentObject(reminders)
                 .preferredColorScheme(.dark)
         }
     }

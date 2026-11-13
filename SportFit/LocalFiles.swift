@@ -4,7 +4,13 @@ import Foundation
 /// The previous files are kept as a local pre-restore backup until the next restore.
 enum LocalFiles {
     static var directory: URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var location = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        do {
+            try FileManager.default.createDirectory(at: location, withIntermediateDirectories: true)
+            var options = URLResourceValues(); options.isExcludedFromBackup = true
+            try location.setResourceValues(options)
+        } catch { recoveryError = "Не удалось подготовить локальное хранилище без автоматической облачной копии: \(error.localizedDescription)" }
+        return location
     }
     static var recoveryError: String?
     static func url(_ name: String) -> URL { directory.appendingPathComponent(name) }

@@ -20,7 +20,7 @@ final class MeasurementsStore: ObservableObject {
         guard FileManager.default.fileExists(atPath: fileURL.path) else { entries = []; return }
         do {
             let values = try JSONDecoder().decode([BodyMeasurement].self, from: Data(contentsOf: fileURL))
-            try DataValidation.require(values.allSatisfy(Self.valid), "Некорректные сохранённые измерения")
+            try DataValidation.require(values.allSatisfy(Self.valid) && Set(values.map(\.id)).count == values.count, "Некорректные или повторяющиеся сохранённые измерения")
             entries = values.sorted { $0.measuredAt < $1.measuredAt }
         } catch {
             storageHealthy = false
@@ -32,12 +32,18 @@ final class MeasurementsStore: ObservableObject {
 
     func update(_ entry: BodyMeasurement) -> Bool {
         guard Self.valid(entry) else { error = "Проверь значения измерений"; return false }
+        guard !entries.contains(where: { $0.id != entry.id && Self.key($0) == Self.key(entry) }) else { error = "Такой замер уже сохранён. Открой его для исправления."; return false }
         let previous = entries
         if let i = entries.firstIndex(where: { $0.id == entry.id }) { entries[i] = entry }
         else { entries.append(entry) }
         entries.sort { $0.measuredAt < $1.measuredAt }
         if !persist() { entries = previous; return false }
         return true
+    }
+
+    private static func key(_ entry: BodyMeasurement) -> String {
+        let optional = [entry.waistCm, entry.bodyFatPercent, entry.heightCm, entry.chestCm, entry.hipsCm, entry.muscleMassKg].map { $0.map { String($0) } ?? "" }
+        return ([String(entry.measuredAt.timeIntervalSince1970), entry.source, String(entry.weightKg)] + optional).map { "\($0.utf8.count):\($0)" }.joined()
     }
 
     static func valid(_ entry: BodyMeasurement) -> Bool {
@@ -58,7 +64,17 @@ final class MeasurementsStore: ObservableObject {
                                    "Некорректные измерения")
         let previous = entries
         let known = Set(entries.map(\.id))
-        entries += imported.filter { !known.contains($0.id) }
+        let encoder = JSONEncoder(); encoder.outputFormatting = .sortedKeys
+        for entry in imported {
+            if let existing = entries.first(where: { $0.id == entry.id }) {
+                let old = try encoder.encode(existing), new = try encoder.encode(entry)
+                try DataValidation.require(old == new, "ID замера уже существует с другим содержимым; импорт отменён")
+            }
+        }
+        var keys = Set(entries.map(Self.key))
+        for entry in imported where !known.contains(entry.id) {
+            if keys.insert(Self.key(entry)).inserted { entries.append(entry) }
+        }
         entries.sort { $0.measuredAt < $1.measuredAt }
         if !persist() { entries = previous; throw DataValidation.Failure(message: error ?? "Ошибка записи") }
     }
@@ -70,12 +86,7 @@ final class MeasurementsStore: ObservableObject {
             error = "Проверь вес (20–400 кг), талию (30–250 см) и жир (1–75%)."
             return false
         }
-        let previous = entries
-        entries.append(BodyMeasurement(date: date, weightKg: weightKg, waistCm: waistCm,
-                                       bodyFatPercent: bodyFatPercent))
-        entries.sort { $0.measuredAt < $1.measuredAt }
-        if !persist() { entries = previous; return false }
-        return true
+        return update(BodyMeasurement(date: date, weightKg: weightKg, waistCm: waistCm, bodyFatPercent: bodyFatPercent))
     }
 
     func delete(_ id: UUID) {
@@ -91,6 +102,7 @@ final class MeasurementsStore: ObservableObject {
             return false
         }
         do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             try JSONEncoder().encode(entries).write(to: fileURL, options: .atomic)
             return true
         } catch {
@@ -294,7 +306,7 @@ private struct NewMeasurementSheet: View {
                         }
                         var updated = entry ?? BodyMeasurement(date: measuredAt, weightKg: weightValue,
                                                                waistCm: waistValue, bodyFatPercent: fatValue)
-                        if entry != nil && updated.source != "manual" {
+                        if entry != nil && updated.source != "manual" && !updated.source.hasPrefix("manual (") {
                             updated.source = "manual (исправлено; исходный: \(updated.source))"
                         }
                         updated.measuredAt = measuredAt

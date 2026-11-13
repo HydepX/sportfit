@@ -5,6 +5,7 @@ struct ProgressScreen: View {
     @EnvironmentObject private var store: FitnessStore
     @EnvironmentObject private var engine: WorkoutEngine
     @EnvironmentObject private var measurements: MeasurementsStore
+    @Binding var destination: String?
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -28,12 +29,16 @@ struct ProgressScreen: View {
                         }.padding().background(.white.opacity(0.07),
                                                 in: RoundedRectangle(cornerRadius: 18))
                     }.buttonStyle(.plain)
-                    NavigationLink("Статистика и отчёты") { WorkoutAnalyticsScreen() }
+                    NavigationLink("Статистика и отчёты") { InsightsScreen() }.accessibilityIdentifier("open-insights")
                     Text("Журнал тренировок").font(.title2.bold())
                     WorkoutHistoryView()
                 }.padding()
             }.background(Color(red: 0.035, green: 0.055, blue: 0.086))
                 .navigationTitle("Прогресс")
+                .navigationDestination(item: $destination) { target in
+                    if target == "measurements" { MeasurementsScreen() }
+                    else { ReportsScreen() }
+                }
         }
     }
 }
@@ -43,6 +48,7 @@ struct SettingsScreen: View {
     @EnvironmentObject private var engine: WorkoutEngine
     @EnvironmentObject private var measurements: MeasurementsStore
     @EnvironmentObject private var profile: ProfileStore
+    @EnvironmentObject private var journal: JournalStore
     @State private var importingBackup = false
     @State private var importingMeasurements = false
     @State private var pendingBackup: SportFitBackup?
@@ -58,9 +64,11 @@ struct SettingsScreen: View {
                 Section("Профиль") {
                     NavigationLink("Личные данные и цели") { ProfileEditor() }
                     NavigationLink("Библиотека упражнений") { LibraryScreen() }
-                    NavigationLink("Архив и отчёты программ") { WorkoutAnalyticsScreen() }
+                    NavigationLink("Архив и отчёты программ") { ReportsScreen() }
+                    NavigationLink("Напоминания") { RemindersScreen() }.accessibilityIdentifier("open-reminders")
+                    NavigationLink("Данные и резервные копии") { StorageScreen() }.accessibilityIdentifier("open-storage")
                 }
-                Section("Данные квартальной программы") {
+                Section("Данные программы") {
                     Label(store.catalog == nil ? "Каталог не загружен" : "Каталог: \(store.catalog?.exercises.count ?? 0) упражнений",
                           systemImage: "books.vertical")
                     Button("Импортировать exercises.v1.json") { importingCatalog = true }
@@ -72,17 +80,17 @@ struct SettingsScreen: View {
                 }
                 Section("Резервная копия") {
                     Button("Экспортировать мои данные") {
-                        guard store.canExport && engine.canExport && measurements.canExport && profile.canExport else {
+                        guard store.canExport && engine.canExport && measurements.canExport && profile.canExport && journal.canExport else {
                             store.message = "Часть файлов не прочитана. Не создавай неполную копию; сохрани исходные файлы перед восстановлением."
                             return
                         }
                         backupDocument = SportFitBackupDocument(
                             backup: SportFitBackup(engine: engine, measurements: measurements,
-                                                   store: store, profile: profile))
+                                                   store: store, profile: profile, journal: journal))
                         exportingBackup = true
                     }
                     Button("Восстановить из резервной копии") { importingBackup = true }
-                    Text("Копия v3 включает уровни и закрытые дни, каталог, программы и их архив, профиль, прежние переносы, историю, черновик и ручные замеры. Кэш Apple Health и импорт XML не входят в эту копию. Восстановление заменяет данные после подтверждения; предыдущие файлы сохраняются локально. Копии могут содержать личные данные — храни их в надёжном месте.")
+                    Text("Копия v4 включает историю, черновик, уровни и программы, профиль, замеры, ручную активность, цели, заметки и отчёты. Кэш Apple Health и XML не входят; отчёты могут содержать их сводки. Восстановление заменяет данные после подтверждения и выключает напоминания. Храни внешнюю копию локально вне приложения.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("Apple Health") {
@@ -117,12 +125,12 @@ struct SettingsScreen: View {
                 Button("Восстановить", role: .destructive) {
                     guard let backup = pendingBackup else { return }
                     do {
-                        try BackupRestore.restore(backup, engine: engine, measurements: measurements, store: store, profile: profile)
+                        try BackupRestore.restore(backup, engine: engine, measurements: measurements, store: store, profile: profile, journal: journal)
                         store.message = "Резервная копия восстановлена"
                     } catch { store.message = "Восстановление не завершено: \(error.localizedDescription)" }
                     pendingBackup = nil
                 }
-            } message: { Text("Текущие результаты, замеры и незавершённая тренировка будут заменены содержимым выбранной копии. Сначала экспортируй текущие данные.") }
+            } message: { Text(pendingBackup.map { "Копия от \($0.exportedAt.formatted()): \($0.workouts.count) тренировок, \($0.manualMeasurements.count) замеров, \($0.runs?.count ?? 0) уровней. Текущие данные заменятся; если они читаются, перед заменой будет сохранена локальная копия." } ?? "") }
             .fileImporter(isPresented: $importingCatalog,
                           allowedContentTypes: [.json], allowsMultipleSelection: false) { result in
                 if case .success(let urls) = result, let url = urls.first {
@@ -136,7 +144,7 @@ struct SettingsScreen: View {
                 }
             }
             .fileExporter(isPresented: $exportingBackup, document: backupDocument,
-                          contentType: .json, defaultFilename: "sportfit-backup") { result in
+                          contentType: .json, defaultFilename: "sportfit-backup-" + SportDate.key(Date())) { result in
                 if case .failure(let error) = result {
                     store.message = "Не удалось экспортировать копию: \(error.localizedDescription)"
                 }

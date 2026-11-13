@@ -132,6 +132,7 @@ private struct RunContent: View {
             } else {
                 Text("Уровень закрыт. Результаты и незавершённые дни сохранены в архиве.").foregroundStyle(.secondary)
             }
+            NavigationLink(active ? "Цели и предварительный отчёт" : "Итоговый отчёт уровня") { ReportBuilderScreen(run: run) }
         }
         .sheet(isPresented: $showingPlayer) { WorkoutPlayer() }
         .alert("Закрыть день с неполным результатом?", isPresented: $confirmDay) {
@@ -186,6 +187,7 @@ private struct RunContent: View {
                 }.buttonStyle(SportPrimaryButton()).accessibilityIdentifier("close-rest-day")
             }
             NavigationLink("Упражнения и результаты дня") { RunDayScreen(run: run, index: index) }
+            NavigationLink("Заметка или причина пропуска") { NoteEditor(runId: run.id, dayIndex: index) }
         }.padding().background(Color.mint.opacity(0.14), in: RoundedRectangle(cornerRadius: 22))
     }
 }

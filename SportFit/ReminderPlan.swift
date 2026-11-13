@@ -54,6 +54,12 @@ enum ReminderPlan {
             let earliest = max(now.addingTimeInterval(60), draft.startedAt.addingTimeInterval(86400))
             result.append(LocalReminder(id: "sportfit.unfinished.\(draft.id)", date: earliest, title: "Есть сохранённая тренировка",
                 body: "Можно продолжить или завершить её, когда будет удобно. Пропуск не выставляется.", destination: "plan"))
+        } else if settings.unfinished, let run, run.closedAt == nil,
+                  let last = run.days.last(where: { run.workout(on: $0.dayIndex) != nil }), last.outcome == .skipped || last.outcome == .partial {
+            let nextDay = calendar.date(byAdding: .day, value: 1, to: last.closedAt) ?? now
+            let date = max(now.addingTimeInterval(60), calendar.date(bySettingHour: settings.hour, minute: settings.minute, second: 0, of: nextDay) ?? nextDay)
+            result.append(LocalReminder(id: "sportfit.unfinished.\(run.id).\(last.dayIndex)", date: date, title: "План можно продолжить",
+                body: "После частичного занятия или пропуска следующий день остаётся доступным. Продолжай в удобном темпе.", destination: "plan"))
         }
         if settings.completion, let run, run.currentDay == nil || run.closedAt != nil {
             result.append(LocalReminder(id: "sportfit.complete.\(run.id)", date: now.addingTimeInterval(5), title: "Итоги уровня",

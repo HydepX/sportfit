@@ -91,11 +91,12 @@ struct QuarterGoal: Codable, Identifiable {
     var direction: GoalDirection
     var target: Double
     var baseline: Double?
+    var source: String? = nil
     var createdAt = Date()
 }
 
 struct MetricPoint: Codable, Identifiable {
-    var id: String { "\(date.timeIntervalSince1970):\(source)" }
+    var id: String { "\(date.timeIntervalSince1970):\(source):\(value)" }
     let date: Date
     let value: Double
     let source: String
@@ -106,11 +107,19 @@ struct MetricChange: Codable {
     let first: MetricPoint
     let last: MetricPoint
     let count: Int
+    let average: Double
+    let minimum: Double
+    let maximum: Double
     var difference: Double { last.value - first.value }
     var percent: Double? { first.value != 0 ? difference / first.value * 100 : nil }
 }
 
 enum InsightMath {
+    static func weekKey(_ date: Date) -> String {
+        var calendar = Calendar(identifier: .iso8601); calendar.timeZone = .current
+        let c = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        return "\(c.yearForWeekOfYear ?? 0):\(c.weekOfYear ?? 0)"
+    }
     static func daily(_ points: [MetricPoint], average: Bool) -> [MetricPoint] {
         Dictionary(grouping: points, by: { SportDate.key($0.date) + "|" + $0.source }).values.compactMap { group in
             guard let last = group.max(by: { $0.date < $1.date }) else { return nil }
@@ -137,7 +146,8 @@ enum InsightMath {
         Dictionary(grouping: points, by: \.source).sorted { $0.key < $1.key }.compactMap { source, values in
             let sorted = values.sorted { $0.date < $1.date }
             guard let first = sorted.first, let last = sorted.last else { return nil }
-            return MetricChange(metric: metric, source: source, first: first, last: last, count: sorted.count)
+            return MetricChange(metric: metric, source: source, first: first, last: last, count: sorted.count,
+                                average: sorted.reduce(0) { $0 + $1.value } / Double(sorted.count), minimum: sorted.map(\.value).min()!, maximum: sorted.map(\.value).max()!)
         }
     }
     static func body(_ entries: [BodyMeasurement], metric: MeasurementMetric, xml: [HealthRecord] = []) -> [MetricPoint] {
@@ -199,15 +209,25 @@ struct TrainingSummary: Codable {
     let activeDays: Int
     let activeWeeks: Int
     let exercises: [ExerciseProgress]
-    static func make(_ history: [WorkoutResult]) -> TrainingSummary {
-        let unique = Dictionary(history.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.sorted { $0.finishedAt < $1.finishedAt }
+    static func make(_ history: [WorkoutResult], exerciseId: String = "") -> TrainingSummary {
+        let unique = Dictionary(history.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }).values.filter {
+            exerciseId.isEmpty || $0.movements.contains { $0.exerciseId == exerciseId && !$0.sets.isEmpty }
+        }.sorted { $0.finishedAt < $1.finishedAt }
         func key(_ result: WorkoutResult) -> String { result.runId.map { "\($0):\(result.runDayIndex ?? -1)" } ?? "\(result.programId):\(result.date)" }
         let sessions = Dictionary(grouping: unique, by: key)
         let complete = sessions.values.filter { $0.contains(where: \.isComplete) }.count
-        let movements = unique.flatMap(\.movements)
+        let movements = unique.flatMap(\.movements).filter { exerciseId.isEmpty || $0.exerciseId == exerciseId }
         let ordinary = movements.filter { !$0.isTimed && $0.prescription?.mode != "breath_cycles" }
         let measured = unique.filter { $0.totalSets > 0 }
-        let exerciseGroups = Dictionary(grouping: movements.filter { !$0.sets.isEmpty }, by: { $0.exerciseId + "|" + ($0.prescription?.mode ?? ($0.isTimed ? "duration" : "repetitions")) })
+        func movementKey(_ movement: WorkoutMovement) -> String { movement.exerciseId + "|" + (movement.prescription?.mode ?? (movement.isTimed ? "duration" : "repetitions")) }
+        let progressMovements: [WorkoutMovement] = unique.flatMap { result in
+            let groups = Dictionary(grouping: result.movements.filter { !$0.sets.isEmpty && (exerciseId.isEmpty || $0.exerciseId == exerciseId) }, by: movementKey)
+            return groups.keys.sorted().compactMap { key in
+                guard let group = groups[key], var combined = group.first else { return nil }
+                combined.sets = group.flatMap(\.sets); return combined
+            }
+        }
+        let exerciseGroups = Dictionary(grouping: progressMovements, by: movementKey)
         let exercises: [ExerciseProgress] = exerciseGroups.keys.sorted().compactMap { key in
             guard let items = exerciseGroups[key], let first = items.first, let last = items.last else { return nil }
             let mode = first.prescription?.mode ?? (first.isTimed ? "duration" : "repetitions")
@@ -224,7 +244,7 @@ struct TrainingSummary: Codable {
             durationSeconds: unique.reduce(0) { $0 + $1.durationSeconds },
             externalVolumeKg: ordinary.flatMap(\.sets).reduce(0) { $0 + Double($1.reps ?? 0) * ($1.weightKg ?? 0) },
             activeDays: Set(measured.map { SportDate.key($0.finishedAt) }).count,
-            activeWeeks: Set(measured.map { result in let c = SportDate.calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: result.finishedAt); return "\(c.yearForWeekOfYear ?? 0):\(c.weekOfYear ?? 0)" }).count,
+            activeWeeks: Set(measured.map { InsightMath.weekKey($0.finishedAt) }).count,
             exercises: exercises)
     }
 }

@@ -12,10 +12,14 @@ struct GoalEvaluation: Codable, Identifiable {
     let current: Double?
     let achieved: Bool?
     let progressPercent: Double?
+    let source: String?
     init(goal: QuarterGoal, current: Double?) {
         id = goal.id; metric = goal.metric; direction = goal.direction; target = goal.target; self.current = current
+        source = goal.metric.bodyMetric == nil ? nil : (goal.source ?? "manual")
         achieved = current.map { goal.direction == .atMost ? $0 <= goal.target : $0 >= goal.target }
-        if let current, let baseline = goal.baseline, baseline != goal.target {
+        if achieved == true { progressPercent = 100 }
+        else if let current, let baseline = goal.baseline, baseline != goal.target,
+                !(goal.direction == .atMost ? baseline <= goal.target : baseline >= goal.target) {
             progressPercent = min(100, max(0, (current - baseline) / (goal.target - baseline) * 100))
         } else { progressPercent = nil }
     }
@@ -33,7 +37,7 @@ struct RunPlanSummary: Codable {
         planned = run.workoutCount
         var completed = 0, partial = 0, skipped = 0
         for index in 0..<run.dayCount where run.workout(on: index) != nil {
-            switch run.outcome(on: index, history: history) {
+            switch run.days.first(where: { $0.dayIndex == index })?.outcome {
             case .completed: completed += 1
             case .partial: partial += 1
             case .skipped: skipped += 1
@@ -61,6 +65,7 @@ struct QuarterReport: Codable, Identifiable {
     let start: Date
     let end: Date
     let privacy: ReportPrivacy
+    let isFinal: Bool
     let profileName: String?
     let body: [MetricChange]
     let activity: [MetricChange]
@@ -88,14 +93,14 @@ struct QuarterReport: Codable, Identifiable {
             let current: Double?
             if let metric = goal.metric.bodyMetric {
                 // Goals use manual/imported BodyMeasurement only; XML never silently replaces them.
-                current = measurements.filter { included($0.measuredAt) }.sorted { $0.measuredAt < $1.measuredAt }.compactMap { metric.value($0) }.last
+                current = measurements.filter { included($0.measuredAt) && $0.source == (goal.source ?? "manual") }.sorted { $0.measuredAt < $1.measuredAt }.compactMap { metric.value($0) }.last
             } else if goal.metric == .workouts { current = Double(plan?.completed ?? training.completeSessions) }
             else { current = plan?.adherencePercent }
             return GoalEvaluation(goal: goal, current: current)
         }
         let notes = privacy == .full ? journal.notes.filter { note in run.map { note.runId == $0.id } ?? included(note.date) } : []
-        return QuarterReport(format: "sportfit-quarter-report-v1", id: UUID(), createdAt: now, title: title, scope: scope,
-            start: start, end: end, privacy: privacy, profileName: privacy == .full ? name : nil,
+        return QuarterReport(format: "sportfit-quarter-report-v1", id: UUID(), createdAt: now, title: privacy == .full ? title : "Отчёт SportFit", scope: scope,
+            start: start, end: end, privacy: privacy, isFinal: run.map { $0.closedAt != nil } ?? (end < now), profileName: privacy == .full ? name : nil,
             body: body, activity: activity, training: training, plan: plan, goals: goals, notes: notes,
             limitations: ["Нет измерения — нет значения; пропуски не заменяются нулями.",
                 "Изменение нагрузки не является медицинской оценкой или назначением следующей программы.",
@@ -106,6 +111,13 @@ struct QuarterReport: Codable, Identifiable {
     func json() throws -> Data {
         let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]; encoder.dateEncodingStrategy = .iso8601
         return try encoder.encode(self)
+    }
+    func redacted(_ selected: ReportPrivacy) -> QuarterReport {
+        QuarterReport(format: format, id: id, createdAt: createdAt, title: selected == .full ? title : "Отчёт SportFit", scope: selected == .full ? scope : "summary",
+            start: start, end: end, privacy: selected, isFinal: isFinal, profileName: selected == .full ? profileName : nil,
+            body: selected == .training ? [] : body, activity: selected == .training ? [] : activity,
+            training: training, plan: plan, goals: selected == .training ? goals.filter { $0.metric.bodyMetric == nil } : goals,
+            notes: selected == .full ? notes : [], limitations: limitations)
     }
 }
 

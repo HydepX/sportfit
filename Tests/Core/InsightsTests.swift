@@ -127,4 +127,23 @@ final class InsightsTests: XCTestCase {
         XCTAssertThrowsError(try settings.validate())
         XCTAssertTrue(ReminderPlan.make(settings: settings, run: nil, draft: nil, latestMeasurement: nil, history: []).isEmpty)
     }
+    func testGoalAlreadyAchievedDoesNotShowContradictoryProgress() {
+        let goal = QuarterGoal(scope: "test", metric: .weight, direction: .atMost, target: 70, baseline: 60)
+        XCTAssertEqual(GoalEvaluation(goal: goal, current: 65).progressPercent, 100)
+        XCTAssertEqual(GoalEvaluation(goal: goal, current: 75).achieved, false)
+        XCTAssertNil(GoalEvaluation(goal: goal, current: 75).progressPercent)
+    }
+    func testBodyGoalNeverUsesAnotherMeasurementSource() {
+        var imported = BodyMeasurement(date: date("2026-11-10"), weightKg: 65, waistCm: nil, bodyFatPercent: nil)
+        imported.source = "different-source"
+        var journal = JournalData(); journal.goals = [QuarterGoal(scope: "test", metric: .weight, direction: .atMost, target: 70, source: "manual")]
+        let report = QuarterReport.make(title: "PRIVATE TITLE", scope: "test", start: date("2026-11-01"), end: date("2026-11-30"), run: nil,
+            history: [], measurements: [imported], xml: [], journal: journal, name: "private", privacy: .metrics, now: date("2026-11-12"))
+        XCTAssertNil(report.goals.first?.current); XCTAssertNil(report.goals.first?.achieved)
+        XCTAssertEqual(report.title, "Отчёт SportFit")
+    }
+    func testWeekKeysUseISOWeeksAcrossNewYear() {
+        XCTAssertEqual(InsightMath.weekKey(date("2026-12-31")), InsightMath.weekKey(date("2027-01-01")))
+        XCTAssertNotEqual(InsightMath.weekKey(date("2027-01-01")), InsightMath.weekKey(date("2027-01-04")))
+    }
 }
