@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 
 struct HealthScreen: View {
     @StateObject private var reader = HealthReader()
-    @StateObject private var imported = HealthImportStore()
+    @EnvironmentObject private var imported: HealthImportStore
     @EnvironmentObject private var measurements: MeasurementsStore
     @Environment(\.scenePhase) private var scenePhase
     @State private var importing = false

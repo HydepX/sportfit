@@ -14,6 +14,7 @@ struct RootView: View {
     @EnvironmentObject private var profile: ProfileStore
     @EnvironmentObject private var journal: JournalStore
     @EnvironmentObject private var reminders: ReminderService
+    @EnvironmentObject private var imported: HealthImportStore
     @Environment(\.scenePhase) private var scenePhase
     @State private var selection = 0
     @State private var progressDestination: String?
@@ -59,7 +60,6 @@ struct RootView: View {
             for run in profile.runs where run.closedAt != nil {
                 let scope = "run:" + run.id.uuidString
                 if !journal.data.reports.contains(where: { $0.scope == scope && $0.isFinal }) {
-                    let imported = HealthImportStore(directory: store.directory)
                     let report = QuarterReport.make(title: run.title, scope: scope, start: SportDate.calendar.startOfDay(for: run.startedAt), end: run.closedAt!, run: run,
                         history: engine.history, measurements: measurements.entries, xml: imported.records, journal: journal.data, name: profile.profile.name, privacy: .full)
                     _ = journal.saveReport(report)

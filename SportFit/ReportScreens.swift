@@ -102,7 +102,7 @@ struct ReportBuilderScreen: View {
     @EnvironmentObject private var measurements: MeasurementsStore
     @EnvironmentObject private var profile: ProfileStore
     @EnvironmentObject private var journal: JournalStore
-    @StateObject private var imported = HealthImportStore()
+    @EnvironmentObject private var imported: HealthImportStore
     let run: ProgramRun?
     @State private var year = SportDate.calendar.component(.year, from: Date())
     @State private var quarter = (SportDate.calendar.component(.month, from: Date()) - 1) / 3 + 1

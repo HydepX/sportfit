@@ -28,7 +28,7 @@ struct InsightPeriodPicker: View {
 
 struct BodyInsightsScreen: View {
     @EnvironmentObject private var measurements: MeasurementsStore
-    @StateObject private var imported = HealthImportStore()
+    @EnvironmentObject private var imported: HealthImportStore
     @State private var period = AnalyticsPeriod.quarter
     @State private var metric = MeasurementMetric.weight
     @State private var source = ""
@@ -96,7 +96,7 @@ struct MetricChangeView: View {
 
 struct ActivityInsightsScreen: View {
     @EnvironmentObject private var journal: JournalStore
-    @StateObject private var imported = HealthImportStore()
+    @EnvironmentObject private var imported: HealthImportStore
     @State private var period = AnalyticsPeriod.week
     @State private var metric = ActivityMetric.steps
     @State private var source = ""
