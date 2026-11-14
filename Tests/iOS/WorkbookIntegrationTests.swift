@@ -48,6 +48,25 @@ import XCTest
         XCTAssertFalse(current.canExport)
         XCTAssertEqual(try Data(contentsOf: file), original)
     }
+    func testRestoringOldBackupKeepsItsHistoryWithoutReturningRemovedPlanToSelection() async throws {
+        let folder = try directory(); defer { try? FileManager.default.removeItem(at: folder) }
+        let oldStore = LegacyFixture.store(directory: folder), engine = WorkoutEngine(directory: folder)
+        let profile = ProfileStore(directory: folder), measurements = MeasurementsStore(directory: folder), journal = JournalStore(directory: folder)
+        profile.startRun(title: "Old backup", program: try XCTUnwrap(oldStore.program), catalog: try XCTUnwrap(oldStore.catalog), draft: nil)
+        engine.start(run: try XCTUnwrap(profile.activeRun), store: oldStore)
+        engine.begin(); engine.complete(reps: nil, weight: nil, seconds: 13); engine.pause()
+        let draftID = try XCTUnwrap(engine.draft?.id)
+        let oldBackup = try BackupEnvelope.decode(BackupEnvelope.encode(SportFitBackup(engine: engine, measurements: measurements, store: oldStore, profile: profile, journal: journal)))
+        let current = FitnessStore(directory: folder)
+        engine.reload(); profile.reload(); journal.reload()
+        try BackupRestore.restore(oldBackup, engine: engine, measurements: measurements, store: current, profile: profile, journal: journal)
+        XCTAssertEqual(current.program?.programId, PlanReplacement.programID)
+        XCTAssertTrue(current.archivedPrograms.isEmpty); XCTAssertNil(profile.activeRun); XCTAssertNil(engine.draft)
+        XCTAssertEqual(journal.data.retiredDrafts?.first?.id, draftID)
+        XCTAssertEqual(journal.data.retiredDrafts?.first?.movements[0].sets[0].seconds, 13)
+        XCTAssertTrue(current.canExport)
+        try BackupRestore.validate(SportFitBackup(engine: engine, measurements: measurements, store: current, profile: profile, journal: journal), fallback: current.catalog)
+    }
     func testTwoSidesCountDownSeparatelyAndPersistOnPause() async throws {
         let folder = try directory(); defer { try? FileManager.default.removeItem(at: folder) }
         let store = FitnessStore(directory: folder), engine = WorkoutEngine(directory: folder)

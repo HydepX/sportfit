@@ -14,7 +14,7 @@ spec.loader.exec_module(module)
 
 
 class ArchiveTests(unittest.TestCase):
-    def make(self, path, platform='iPhoneOS', include_catalog=True, healthkit=False, binary_platform=2, debug_library=False):
+    def make(self, path, platform='iPhoneOS', include_catalog=True, healthkit=False, binary_platform=2, debug_library=False, include_photos=True):
         with zipfile.ZipFile(path, 'w') as archive:
             base = 'Payload/SportFit.app/'
             archive.writestr(base + 'Info.plist', plistlib.dumps({
@@ -32,8 +32,9 @@ class ArchiveTests(unittest.TestCase):
                 archive.write(ROOT / 'SportFit/Resources/Data/exercises.v1.json', base + 'exercises.v1.json')
             archive.write(ROOT / 'SportFit/Resources/Data/program_12w.v1.json', base + 'program_12w.v1.json')
             archive.write(ROOT / 'SportFit/Resources/Data/program_12w_with_sets.v2.json', base + 'program_12w_with_sets.v2.json')
-            for asset in ['technique_coded.jpg', 'technique_numbered.jpg']:
-                archive.writestr(base + 'media/' + asset, b'\x89PNG\r\n\x1a\nsynthetic-archive-fixture')
+            if include_photos:
+                for asset in ['technique_coded.jpg', 'technique_numbered.jpg']:
+                    archive.writestr(base + 'media/' + asset, b'\x89PNG\r\n\x1a\nsynthetic-archive-fixture')
 
     def test_valid_archive_structure(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -53,6 +54,13 @@ class ArchiveTests(unittest.TestCase):
             path = Path(temp) / 'fixture.ipa'
             self.make(path, include_catalog=False)
             with self.assertRaises(KeyError):
+                module.verify(path)
+
+    def test_rejects_package_without_original_technique_images(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'fixture.ipa'
+            self.make(path, include_photos=False)
+            with self.assertRaisesRegex(ValueError, 'Missing original technique collage'):
                 module.verify(path)
 
     def test_rejects_healthkit_trial_as_standard(self):

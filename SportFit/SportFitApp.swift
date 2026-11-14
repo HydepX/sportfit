@@ -10,6 +10,12 @@ struct SportFitApp: App {
     @StateObject private var reminders = ReminderService()
     @StateObject private var imported = HealthImportStore()
 
+    init() {
+        // Replace the bundled plan before the other stores read runs and drafts.
+        let preparedStore = FitnessStore()
+        _store = StateObject(wrappedValue: preparedStore)
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()
