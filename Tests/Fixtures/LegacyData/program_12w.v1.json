@@ -1,0 +1,370 @@
+{
+  "schema_version": "1.0.0",
+  "program_id": "fitness_12w_2026_11_09",
+  "start_date": "2026-11-09",
+  "end_date": "2027-01-31",
+  "duration_weeks": 12,
+  "days_of_week": [
+    "monday",
+    "wednesday",
+    "friday",
+    "sunday"
+  ],
+  "phases": [
+    {
+      "phase_id": "phase_1",
+      "week_start": 1,
+      "week_end": 4,
+      "title": "1–4 · Привыкание",
+      "subtitle": "Техника, дыхание, мягкая адаптация",
+      "days": [
+        {
+          "day_of_week": "Пн",
+          "name": "A · Базовые движения",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "shoulder_circles",
+            "ankle_pump",
+            "press_floor",
+            "sit_to_stand",
+            "row_seated",
+            "lateral",
+            "bicep",
+            "breathing",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Ср",
+          "name": "B · Осанка и руки",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "neck",
+            "toe_moves",
+            "scap_retract",
+            "glute_bridge_light",
+            "rear_fly",
+            "hammer",
+            "triceps_lying",
+            "pelvic_tilt",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Пт",
+          "name": "C · Жим и спина",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "chest_open",
+            "ankle_circle",
+            "press_close",
+            "seated_knee_ext",
+            "row_one",
+            "front_raise",
+            "prone_y",
+            "dead_bug_easy",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Вс",
+          "name": "D · Восстановление и подвижность",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "neck",
+            "scap_retract",
+            "chest_open",
+            "seated_rotate",
+            "breathing",
+            "walk",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        }
+      ]
+    },
+    {
+      "phase_id": "phase_2",
+      "week_start": 5,
+      "week_end": 8,
+      "title": "5–8 · Разнообразие",
+      "subtitle": "Другие варианты тех же двигательных паттернов",
+      "days": [
+        {
+          "day_of_week": "Пн",
+          "name": "A · Грудь и тяга",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "wrist_curl",
+            "ankle_pump",
+            "wall_push",
+            "seated_knee_ext",
+            "row_seated",
+            "lateral",
+            "concentration",
+            "brace",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Ср",
+          "name": "B · Спина и плечи",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "wrist_reverse",
+            "march_seated",
+            "pullover",
+            "standing_hip_abd",
+            "rear_fly",
+            "shoulder_press",
+            "hammer",
+            "pelvic_tilt",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Пт",
+          "name": "C · Контроль верхней части",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "seated_rotate",
+            "ankle_circle",
+            "fly_floor",
+            "heel_raise_support",
+            "row_one",
+            "kickback_seated",
+            "prone_y",
+            "breathing",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Вс",
+          "name": "D · Восстановление и подвижность",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "neck",
+            "scap_retract",
+            "chest_open",
+            "seated_rotate",
+            "breathing",
+            "walk",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        }
+      ]
+    },
+    {
+      "phase_id": "phase_3",
+      "week_start": 9,
+      "week_end": 12,
+      "title": "9–12 · Закрепление",
+      "subtitle": "Смешанные комплексы, стабильная техника, без рекордов",
+      "days": [
+        {
+          "day_of_week": "Пн",
+          "name": "A · Сила и координация",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "shoulder_circles",
+            "ankle_pump",
+            "press_floor",
+            "sit_to_stand",
+            "row_one",
+            "lateral",
+            "hammer",
+            "brace",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Ср",
+          "name": "B · Осанка и руки",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "seated_rotate",
+            "toe_moves",
+            "pullover",
+            "glute_bridge_light",
+            "rear_fly",
+            "triceps_lying",
+            "concentration",
+            "pelvic_tilt",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Пт",
+          "name": "C · Контроль движений",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "chest_open",
+            "ankle_circle",
+            "press_alt",
+            "standing_hip_abd",
+            "row_seated",
+            "front_raise",
+            "reverse_angel",
+            "breathing",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        },
+        {
+          "day_of_week": "Вс",
+          "name": "D · Восстановление и подвижность",
+          "exercise_ids": [
+            "wu_breath",
+            "wu_neck",
+            "wu_shoulders",
+            "wu_chest",
+            "wu_torso",
+            "wu_elbows",
+            "wu_ankles",
+            "wu_leg",
+            "neck",
+            "scap_retract",
+            "chest_open",
+            "seated_rotate",
+            "breathing",
+            "walk",
+            "cd_breath",
+            "cd_chest",
+            "cd_shoulder",
+            "cd_back",
+            "cd_leg"
+          ]
+        }
+      ]
+    }
+  ],
+  "conditional_substitutions": {
+    "wall_push": {
+      "fallback": "press_alt",
+      "reason": "Только по разрешению врача"
+    },
+    "march_seated": {
+      "fallback": "toe_moves",
+      "reason": "Только по разрешению врача"
+    }
+  }
+}

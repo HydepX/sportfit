@@ -56,31 +56,26 @@ import SwiftUI
     func loadProgram() {
         do {
             guard let catalog else { throw ImportError.invalidProgram }
-            let local = FileManager.default.fileExists(atPath: fileURL(programName).path) ? try Data(contentsOf: fileURL(programName)) : nil
             let exactURL = bundledDirectory?.appendingPathComponent("program_12w_with_sets.v2.json") ?? Bundle.main.url(forResource: "program_12w_with_sets.v2", withExtension: "json")
-            let exact = exactURL.flatMap { try? Data(contentsOf: $0) }
-            guard let data = local ?? exact ?? content(programName) else { throw ImportError.invalidProgram }
-            var decoded = try JSONDecoder().decode(TrainingProgram.self, from: data)
-            if storageHealthy, LocalFiles.recoveryError == nil, local != nil, decoded.schemaVersion == "1.0.0", let exact,
-               let legacyURL = bundledDirectory?.appendingPathComponent(programName) ?? Bundle.main.url(forResource: "program_12w.v1", withExtension: "json"),
-               let legacyBytes = try? Data(contentsOf: legacyURL),
-               let legacy = try? JSONDecoder().decode(TrainingProgram.self, from: legacyBytes) {
-                let encoder = JSONEncoder()
-                encoder.outputFormatting = .sortedKeys
-                // Upgrade only the unchanged original plan, never a user-edited import.
-                if try encoder.encode(decoded) == encoder.encode(legacy) {
-                    let updated = try JSONDecoder().decode(TrainingProgram.self, from: exact)
-                    try DataValidation.program(updated, catalog: catalog)
-                    var archive = archivedPrograms
-                    archive.append(decoded)
-                    try LocalFiles.restore([programName: exact, "program_archive.v1.json": try encoder.encode(archive)], directory: directory)
-                    archivedPrograms = archive
-                    decoded = updated
-                }
-            }
+            let local = FileManager.default.fileExists(atPath: fileURL(programName).path) ? try Data(contentsOf: fileURL(programName)) : nil
+            guard let data = local ?? exactURL.flatMap({ try? Data(contentsOf: $0) }) ?? content(programName) else { throw ImportError.invalidProgram }
+            let decoded = try JSONDecoder().decode(TrainingProgram.self, from: data)
             try DataValidation.program(decoded, catalog: catalog)
             program = decoded
         } catch { storageHealthy = false; message = "Программа не прочитана: \(error.localizedDescription)" }
+    }
+
+    private func prepareRelease() throws {
+        func bundled(_ name: String) throws -> Data {
+            if let bundledDirectory { return try Data(contentsOf: bundledDirectory.appendingPathComponent(name)) }
+            guard let url = Bundle.main.url(forResource: name, withExtension: nil) else { throw ImportError.invalidProgram }
+            return try Data(contentsOf: url)
+        }
+        let next = try JSONDecoder().decode(TrainingProgram.self, from: bundled(programName))
+        if next.programId == PlanReplacement.programID {
+            let library = try JSONDecoder().decode(ExerciseCatalog.self, from: bundled(catalogName))
+            try PlanReplacement.apply(directory: directory, catalog: library, program: next)
+        }
     }
 
     func importJSON(from url: URL, kind: ImportKind) {
@@ -93,20 +88,16 @@ import SwiftUI
             case .catalog:
                 let decoded = try JSONDecoder().decode(ExerciseCatalog.self, from: data)
                 try DataValidation.catalog(decoded)
-                for plan in archivedPrograms + [program].compactMap({ $0 }) {
-                    try DataValidation.program(plan, catalog: decoded)
-                }
                 let ids = Set(decoded.exercises.map(\.id))
-                guard decoded.exercises.count == 53,
-                      ids.count == 53,
-                      decoded.exerciseCount == 53 else {
-                    throw ImportError.invalidCatalog
-                }
-                try data.write(to: fileURL(catalogName), options: .atomic)
-                catalog = decoded
-                message = "Каталог из 53 упражнений импортирован"
+                let retained = (catalog?.exercises ?? []).filter { $0.retired == true && !ids.contains($0.id) }
+                let merged = ExerciseCatalog(schemaVersion: "1.0.0", exerciseCount: decoded.exercises.count + retained.count, exercises: decoded.exercises + retained)
+                for plan in archivedPrograms + [program].compactMap({ $0 }) { try DataValidation.program(plan, catalog: merged) }
+                try JSONEncoder().encode(merged).write(to: fileURL(catalogName), options: .atomic)
+                catalog = merged
+                message = "Каталог импортирован: \(merged.currentExercises.count) упражнений"
             case .program:
                 let decoded = try JSONDecoder().decode(TrainingProgram.self, from: data)
+                try DataValidation.require(!PlanReplacement.retiredIDs.contains(decoded.programId), "Предыдущая программа удалена; доступны только её сохранённые результаты")
                 guard let catalog else { throw ImportError.invalidCatalog }
                 try DataValidation.program(decoded, catalog: catalog)
                 guard decoded.durationWeeks > 0, !decoded.phases.isEmpty else {
@@ -132,6 +123,8 @@ import SwiftUI
 
     func reload() {
         storageHealthy = true
+        do { try prepareRelease() }
+        catch { storageHealthy = false; message = "Замена программы не завершена: \(error.localizedDescription)"; return }
         loadCatalog()
         archivedPrograms = read([TrainingProgram].self, file: "program_archive.v1.json") ?? []
         loadProgram()
@@ -213,7 +206,7 @@ import SwiftUI
         case invalidCatalog, invalidProgram, unknownExercise
         var errorDescription: String? {
             switch self {
-            case .invalidCatalog: return "Требуется каталог ровно из 53 упражнений с уникальными ID"
+            case .invalidCatalog: return "Требуется каталог с уникальными ID и полными описаниями"
             case .invalidProgram: return "Ожидается 12-недельный план из 3 этапов"
             case .unknownExercise: return "В программе есть ID, которых нет в загруженном каталоге"
             }

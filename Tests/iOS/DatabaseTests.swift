@@ -6,7 +6,7 @@ import SQLite3
     private func setup() throws -> (URL, WorkoutEngine, FitnessStore) {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        return (directory, WorkoutEngine(directory: directory), FitnessStore(directory: directory))
+        return (directory, WorkoutEngine(directory: directory), LegacyFixture.store(directory: directory))
     }
     private func save(_ engine: WorkoutEngine, _ store: FitnessStore) throws -> WorkoutResult {
         engine.start(day: ProgramDay(dayOfWeek: "test", name: "test", exerciseIds: ["press_floor"]), date: Date(), store: store)

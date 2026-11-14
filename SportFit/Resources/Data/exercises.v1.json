@@ -1,7 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "language": "ru",
-  "exercise_count": 53,
+  "exercise_count": 89,
   "exercises": [
     {
       "id": "press_floor",
@@ -64,7 +63,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "press_alt",
@@ -127,7 +127,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "press_close",
@@ -190,7 +191,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "fly_floor",
@@ -253,7 +255,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wall_push",
@@ -319,7 +322,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "shoulder_press",
@@ -382,7 +386,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "lateral",
@@ -445,7 +450,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "front_raise",
@@ -508,7 +514,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "rear_fly",
@@ -571,7 +578,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "row_seated",
@@ -634,7 +642,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "row_one",
@@ -697,7 +706,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "pullover",
@@ -760,7 +770,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "scap_retract",
@@ -823,7 +834,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "prone_y",
@@ -886,7 +898,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "reverse_angel",
@@ -949,7 +962,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "bicep",
@@ -1012,7 +1026,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "hammer",
@@ -1075,7 +1090,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "concentration",
@@ -1138,7 +1154,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "triceps_lying",
@@ -1201,7 +1218,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "kickback_seated",
@@ -1266,7 +1284,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wrist_curl",
@@ -1331,7 +1350,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wrist_reverse",
@@ -1396,7 +1416,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "breathing",
@@ -1459,7 +1480,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "brace",
@@ -1522,7 +1544,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "pelvic_tilt",
@@ -1585,7 +1608,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "seated_rotate",
@@ -1648,7 +1672,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "shoulder_circles",
@@ -1711,7 +1736,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "neck",
@@ -1774,7 +1800,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "chest_open",
@@ -1837,7 +1864,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "ankle_pump",
@@ -1900,7 +1928,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "ankle_circle",
@@ -1963,7 +1992,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "toe_moves",
@@ -2026,7 +2056,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "walk",
@@ -2089,7 +2120,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "march_seated",
@@ -2155,7 +2187,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "sit_to_stand",
@@ -2218,7 +2251,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "seated_knee_ext",
@@ -2281,7 +2315,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "glute_bridge_light",
@@ -2344,7 +2379,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "standing_hip_abd",
@@ -2407,7 +2443,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "heel_raise_support",
@@ -2470,7 +2507,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "dead_bug_easy",
@@ -2533,7 +2571,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wu_breath",
@@ -2595,7 +2634,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wu_neck",
@@ -2657,7 +2697,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wu_shoulders",
@@ -2719,7 +2760,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wu_chest",
@@ -2781,7 +2823,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wu_torso",
@@ -2843,7 +2886,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wu_elbows",
@@ -2905,7 +2949,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wu_ankles",
@@ -2967,7 +3012,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "wu_leg",
@@ -3029,7 +3075,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "cd_breath",
@@ -3091,7 +3138,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "cd_chest",
@@ -3153,7 +3201,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "cd_shoulder",
@@ -3215,7 +3264,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "cd_back",
@@ -3277,7 +3327,8 @@
           "reviewer": null,
           "review_date": null
         }
-      }
+      },
+      "retired": true
     },
     {
       "id": "cd_leg",
@@ -3339,6 +3390,847 @@
           "reviewer": null,
           "review_date": null
         }
+      },
+      "retired": true
+    },
+    {
+      "id": "W01",
+      "title": "Ходьба на месте",
+      "primary_group": "Разминка",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Шагать спокойно, дышать свободно",
+      "instructions": [
+        "Шагать спокойно, дышать свободно"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без прыжков",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 0
+        }
+      }
+    },
+    {
+      "id": "W02",
+      "title": "Круги плечами и движения руками",
+      "primary_group": "Разминка",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Плавные вращения плечами, затем разведение рук",
+      "instructions": [
+        "Плавные вращения плечами, затем разведение рук"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без рывков",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 1
+        }
+      }
+    },
+    {
+      "id": "W03",
+      "title": "Мягкая мобилизация таза и корпуса",
+      "primary_group": "Разминка",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Плавные наклоны таза и повороты грудного отдела",
+      "instructions": [
+        "Плавные наклоны таза и повороты грудного отдела"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без болезненной амплитуды",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 2
+        }
+      }
+    },
+    {
+      "id": "W04",
+      "title": "Шаги в стороны с движениями рук",
+      "primary_group": "Разминка",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Ритмичные шаги в стороны без подскоков",
+      "instructions": [
+        "Ритмичные шаги в стороны без подскоков"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Умеренный темп",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 3
+        }
+      }
+    },
+    {
+      "id": "C01",
+      "title": "Спокойная ходьба и дыхание",
+      "primary_group": "Заминка",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Постепенно снизить темп, восстановить дыхание",
+      "instructions": [
+        "Постепенно снизить темп, восстановить дыхание"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не задерживать дыхание",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 4
+        }
+      }
+    },
+    {
+      "id": "C02",
+      "title": "Мягкая растяжка груди и плеч",
+      "primary_group": "Заминка",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Небольшое комфортное растяжение без боли",
+      "instructions": [
+        "Небольшое комфортное растяжение без боли"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без пружинящих движений",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 5
+        }
+      }
+    },
+    {
+      "id": "C03",
+      "title": "Мягкая мобилизация спины и бёдер",
+      "primary_group": "Заминка",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Плавные движения в комфортной амплитуде",
+      "instructions": [
+        "Плавные движения в комфортной амплитуде"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без глубокого натяжения",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 6
+        }
+      }
+    },
+    {
+      "id": "S01",
+      "title": "Отжимания от пола",
+      "primary_group": "Грудь/трицепс",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Корпус ровный, локти около 30–45° от туловища",
+      "instructions": [
+        "Корпус ровный, локти около 30–45° от туловища"
+      ],
+      "safety_flag": "source",
+      "safety_note": "При необходимости с колен или от устойчивой опоры",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 7
+        }
+      }
+    },
+    {
+      "id": "S02",
+      "title": "Жим гантелей лёжа на полу",
+      "primary_group": "Грудь/трицепс",
+      "equipment": [
+        "2 гантели, коврик"
+      ],
+      "description": "Локти касаются пола мягко; выжимать вверх без удара",
+      "instructions": [
+        "Локти касаются пола мягко; выжимать вверх без удара"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не разводить локти широко",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_coded.jpg",
+          "columns": 3,
+          "rows": 3,
+          "index": 8
+        }
+      }
+    },
+    {
+      "id": "S03",
+      "title": "Тяга гантели одной рукой в наклоне",
+      "primary_group": "Спина/бицепс",
+      "equipment": [
+        "гантель"
+      ],
+      "description": "Спина нейтральная, локоть вести к тазу",
+      "instructions": [
+        "Спина нейтральная, локоть вести к тазу"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Опора рукой о бедро или устойчивую поверхность",
+      "metric_type": "reps_side",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 10
+        }
+      }
+    },
+    {
+      "id": "S04",
+      "title": "Тяга двух гантелей в наклоне",
+      "primary_group": "Спина/бицепс",
+      "equipment": [
+        "2 гантели"
+      ],
+      "description": "Наклон от таза, свести лопатки без рывка",
+      "instructions": [
+        "Наклон от таза, свести лопатки без рывка"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не округлять поясницу",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 11
+        }
+      }
+    },
+    {
+      "id": "S05",
+      "title": "Жим гантелей стоя",
+      "primary_group": "Плечи/трицепс",
+      "equipment": [
+        "2 гантели"
+      ],
+      "description": "Выжимать вверх плавно, рёбра не выпячивать",
+      "instructions": [
+        "Выжимать вверх плавно, рёбра не выпячивать"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не задерживать дыхание",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "S06",
+      "title": "Разведения гантелей в стороны",
+      "primary_group": "Плечи",
+      "equipment": [
+        "2 гантели"
+      ],
+      "description": "Поднимать до уровня плеч с мягкими локтями",
+      "instructions": [
+        "Поднимать до уровня плеч с мягкими локтями"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Очень лёгкий вес",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 6
+        }
+      }
+    },
+    {
+      "id": "S07",
+      "title": "Сгибания рук с гантелями",
+      "primary_group": "Бицепс",
+      "equipment": [
+        "2 гантели"
+      ],
+      "description": "Локти у туловища, без раскачивания",
+      "instructions": [
+        "Локти у туловища, без раскачивания"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не помогать спиной",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "S08",
+      "title": "Разгибание руки с гантелью из-за головы",
+      "primary_group": "Трицепс",
+      "equipment": [
+        "1 гантель"
+      ],
+      "description": "Держать локоть стабильно, разгибать плавно",
+      "instructions": [
+        "Держать локоть стабильно, разгибать плавно"
+      ],
+      "safety_flag": "source",
+      "safety_note": "При дискомфорте плеча заменить на жим узким хватом лёжа",
+      "metric_type": "reps_side",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "S09",
+      "title": "Разведения рук в наклоне",
+      "primary_group": "Задние дельты/верх спины",
+      "equipment": [
+        "2 гантели"
+      ],
+      "description": "Слегка согнутые локти, движение от плеч",
+      "instructions": [
+        "Слегка согнутые локти, движение от плеч"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Минимальный вес",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 8
+        }
+      }
+    },
+    {
+      "id": "L01",
+      "title": "Приседания с собственным весом",
+      "primary_group": "Ноги/ягодицы",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Стопы устойчивы, колени по направлению носков",
+      "instructions": [
+        "Стопы устойчивы, колени по направлению носков"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Комфортная глубина",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 17
+        }
+      }
+    },
+    {
+      "id": "L02",
+      "title": "Выпады назад с опорой",
+      "primary_group": "Ноги/ягодицы",
+      "equipment": [
+        "устойчивая опора"
+      ],
+      "description": "Небольшой шаг назад, удерживать равновесие",
+      "instructions": [
+        "Небольшой шаг назад, удерживать равновесие"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без дополнительного веса на старте",
+      "metric_type": "reps_side",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "L03",
+      "title": "Ягодичный мостик",
+      "primary_group": "Ягодицы",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Поднять таз за счёт ягодиц, не переразгибать поясницу",
+      "instructions": [
+        "Поднять таз за счёт ягодиц, не переразгибать поясницу"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без задержки дыхания",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 13
+        }
+      }
+    },
+    {
+      "id": "L04",
+      "title": "Румынская тяга с гантелями",
+      "primary_group": "Задняя поверхность бедра/ягодицы",
+      "equipment": [
+        "2 гантели"
+      ],
+      "description": "Увести таз назад, гантели вдоль ног",
+      "instructions": [
+        "Увести таз назад, гантели вдоль ног"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Лёгкий вес, нейтральная спина",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 12
+        }
+      }
+    },
+    {
+      "id": "L05",
+      "title": "Подъём на носки стоя",
+      "primary_group": "Икры",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Плавно подняться и опуститься, держать опору",
+      "instructions": [
+        "Плавно подняться и опуститься, держать опору"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без натуживания",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 24
+        }
+      }
+    },
+    {
+      "id": "L06",
+      "title": "Шаги на месте с подъёмом колен",
+      "primary_group": "Лёгкое кардио",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Маршировать без подскоков",
+      "instructions": [
+        "Маршировать без подскоков"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без ударной нагрузки",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 21
+        }
+      }
+    },
+    {
+      "id": "L07",
+      "title": "Отведение ноги назад стоя",
+      "primary_group": "Ягодицы",
+      "equipment": [
+        "устойчивая опора"
+      ],
+      "description": "Таз ровный, небольшая амплитуда",
+      "instructions": [
+        "Таз ровный, небольшая амплитуда"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без прогиба поясницы",
+      "metric_type": "reps_side",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 15
+        }
+      }
+    },
+    {
+      "id": "K01",
+      "title": "Планка на предплечьях",
+      "primary_group": "Кор",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Держать корпус одной линией, дышать",
+      "instructions": [
+        "Держать корпус одной линией, дышать"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Можно опустить колени",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 30
+        }
+      }
+    },
+    {
+      "id": "K02",
+      "title": "Динамическая планка",
+      "primary_group": "Кор/плечи",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Плавно менять опору, не раскачивать таз",
+      "instructions": [
+        "Плавно менять опору, не раскачивать таз"
+      ],
+      "safety_flag": "source",
+      "safety_note": "При усталости заменить статической",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "K03",
+      "title": "Скручивания",
+      "primary_group": "Пресс",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Приподнимать лопатки, не тянуть шею",
+      "instructions": [
+        "Приподнимать лопатки, не тянуть шею"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не делать через боль в пояснице",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 27
+        }
+      }
+    },
+    {
+      "id": "K04",
+      "title": "Обратные скручивания",
+      "primary_group": "Пресс",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Подкручивать таз небольшим движением",
+      "instructions": [
+        "Подкручивать таз небольшим движением"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без маха ногами",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 28
+        }
+      }
+    },
+    {
+      "id": "K05",
+      "title": "Велосипед лёжа",
+      "primary_group": "Пресс",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Медленно чередовать стороны, не тянуть шею",
+      "instructions": [
+        "Медленно чередовать стороны, не тянуть шею"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Упростить, оставляя стопы ближе к полу",
+      "metric_type": "reps_total",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 26
+        }
+      }
+    },
+    {
+      "id": "K06",
+      "title": "Птица-собака",
+      "primary_group": "Кор/стабилизаторы спины",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Из четверенек вытянуть противоположные руку и ногу",
+      "instructions": [
+        "Из четверенек вытянуть противоположные руку и ногу"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не прогибать поясницу",
+      "metric_type": "reps_side",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 34
+        }
+      }
+    },
+    {
+      "id": "K07",
+      "title": "Мёртвый жук",
+      "primary_group": "Кор",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Опускать противоположные руку и ногу с контролем поясницы",
+      "instructions": [
+        "Опускать противоположные руку и ногу с контролем поясницы"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Уменьшить амплитуду при усталости",
+      "metric_type": "reps_side",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 35
+        }
+      }
+    },
+    {
+      "id": "K08",
+      "title": "Боковая планка с колен",
+      "primary_group": "Косые мышцы корпуса",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Плечо над локтем, поднять таз",
+      "instructions": [
+        "Плечо над локтем, поднять таз"
+      ],
+      "safety_flag": "source",
+      "safety_note": "При дискомфорте плеча заменить мёртвым жуком",
+      "metric_type": "time_side",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "K09",
+      "title": "Боковые наклоны к стопам лёжа",
+      "primary_group": "Косые мышцы корпуса",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Тянуться к пяткам небольшими движениями",
+      "instructions": [
+        "Тянуться к пяткам небольшими движениями"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не тянуть шею",
+      "metric_type": "reps_total",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "A01",
+      "title": "Прыжки без скакалки",
+      "primary_group": "Кардио",
+      "equipment": [
+        "нет"
+      ],
+      "description": "Невысокие мягкие подскоки",
+      "instructions": [
+        "Невысокие мягкие подскоки"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Опционально: заменить шагами в стороны",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "A02",
+      "title": "Альпинист без прыжков",
+      "primary_group": "Кардио/кор",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Подводить колени попеременно в упоре",
+      "instructions": [
+        "Подводить колени попеременно в упоре"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Без ускорения до потери техники",
+      "metric_type": "time",
+      "retired": false,
+      "media": {
+        "status": "photo",
+        "photo": {
+          "asset": "technique_numbered.jpg",
+          "columns": 8,
+          "rows": 6,
+          "index": 37
+        }
+      }
+    },
+    {
+      "id": "A03",
+      "title": "Берпи без прыжка",
+      "primary_group": "Кардио/всё тело",
+      "equipment": [
+        "коврик"
+      ],
+      "description": "Шагами уйти в упор и вернуться, встать",
+      "instructions": [
+        "Шагами уйти в упор и вернуться, встать"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Опционально; можно заменить ходьбой на месте",
+      "metric_type": "reps",
+      "retired": false,
+      "media": {
+        "status": "not_available"
+      }
+    },
+    {
+      "id": "A04",
+      "title": "Подъём на устойчивую низкую платформу",
+      "primary_group": "Ноги/кардио",
+      "equipment": [
+        "низкая устойчивая платформа"
+      ],
+      "description": "Подъём на низкую устойчивую платформу",
+      "instructions": [
+        "Подъём на низкую устойчивую платформу"
+      ],
+      "safety_flag": "source",
+      "safety_note": "Не использовать табуретку: риск падения",
+      "metric_type": "reps_side",
+      "retired": false,
+      "media": {
+        "status": "not_available"
       }
     }
   ]

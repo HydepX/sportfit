@@ -144,6 +144,7 @@ struct JournalData: Codable {
     var notes: [DayNote] = []
     var reports: [QuarterReport] = []
     var reminders = ReminderPreferences()
+    var retiredDrafts: [WorkoutDraft]? = nil
     func validate() throws {
         try DataValidation.require(format == "sportfit-journal-v1", "Неизвестный формат дневника")
         for ids in [activity.map(\.id), goals.map(\.id), notes.map(\.id), reports.map(\.id)] {
@@ -156,6 +157,10 @@ struct JournalData: Codable {
             try DataValidation.require(report.format == "sportfit-quarter-report-v1" && report.start <= report.end && report.title.count <= 150,
                                        "Некорректный отчёт")
         }
+        let drafts = retiredDrafts ?? []
+        try DataValidation.require(Set(drafts.map(\.id)).count == drafts.count && drafts.allSatisfy {
+            SportDate.from($0.date) != nil && $0.movements.indices.contains($0.currentIndex)
+        }, "Повреждён архив незавершённых тренировок")
         try reminders.validate()
     }
 }

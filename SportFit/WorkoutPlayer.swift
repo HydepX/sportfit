@@ -49,10 +49,11 @@ struct WorkoutPlayer: View {
                     Button("Отмена", role: .cancel) { engine.resume() }
                 } message: { Text("Последний результат этого подхода в черновике будет заменён новым выполнением. Остальные подходы сохранятся.") }
                 .sheet(item: $editingSet, onDismiss: finishEditing) { actual in
-                    SetEditor(actual: actual, timed: movementForSet(actual.id)?.isTimed ?? current?.isTimed ?? false) { reps, kg, seconds in
+                    SetEditor(actual: actual, timed: movementForSet(actual.id)?.isTimed ?? current?.isTimed ?? false,
+                              perSide: movementForSet(actual.id)?.isTimedPerSide ?? current?.isTimedPerSide ?? false) { reps, kg, seconds, other in
                         if engine.draft?.movements.contains(where: { $0.sets.contains(where: { $0.id == actual.id }) }) == true {
-                            engine.editSet(actual.id, reps: reps, weight: kg, seconds: seconds)
-                        } else { engine.complete(reps: reps, weight: kg, seconds: seconds) }
+                            engine.editSet(actual.id, reps: reps, weight: kg, seconds: seconds, otherSeconds: other)
+                        } else { engine.complete(reps: reps, weight: kg, seconds: seconds, otherSeconds: other) }
                     }
                 }
                 .sheet(isPresented: $showTechnique) {
@@ -104,10 +105,14 @@ struct WorkoutPlayer: View {
             Text(movement.title).font(.title2.bold()).multilineTextAlignment(.center).accessibilityIdentifier("player-exercise-title")
             ExerciseMediaView(exerciseId: movement.exerciseId).id(movement.id)
             Text("По плану: " + movement.target).foregroundStyle(.secondary)
+            if movement.isTimedPerSide {
+                Text(draft.currentSide == 2 ? "Вторая сторона · смени сторону" : "Первая сторона").font(.headline).foregroundStyle(.mint)
+                    .accessibilityIdentifier("exercise-side")
+            }
             if draft.phase == .active {
                 if movement.isTimed { PlayerClock(resting: false) }
                 else { Text(movement.plannedReps.map { "× \($0)" } ?? "В своём темпе").font(.system(size: 64, weight: .bold, design: .rounded)).accessibilityIdentifier("planned-reps") }
-                Text(movement.isTimed ? "После отсчёта откроется отдых" : "Когда закончишь подход, нажми «Выполнено»").font(.footnote).foregroundStyle(.secondary)
+                Text(movement.isTimedPerSide && draft.currentSide != 2 ? "Затем выполни другую сторону" : movement.isTimed ? "После отсчёта откроется отдых" : "Когда закончишь подход, нажми «Выполнено»").font(.footnote).foregroundStyle(.secondary)
                 Button("Начать подход заново") { engine.restartCurrentSet() }.accessibilityIdentifier("restart-active-set")
             } else if movement.prescription?.requiresClearance == true && movement.clearanceConfirmed != true {
                 Text(movement.prescription?.clearanceNote ?? "Нужно разрешение врача").foregroundStyle(.yellow)
@@ -224,7 +229,10 @@ struct WorkoutPlayer: View {
     private func movementForSet(_ id: UUID) -> WorkoutMovement? { draft?.movements.first { $0.sets.contains { $0.id == id } } }
     private func timeString(_ seconds: Int) -> String { String(format: "%02d:%02d", seconds / 60, seconds % 60) }
     private func actualLabel(_ actual: ActualSet) -> String {
-        actual.seconds.map { "Выполнено: \($0) сек" } ?? "Выполнено: \(actual.reps ?? 0) × \((actual.weightKg ?? 0).formatted()) кг"
+        if (movementForSet(actual.id) ?? current)?.isTimedPerSide == true {
+            return "Первая: \(actual.seconds ?? 0) сек · вторая: \(actual.otherSideSeconds.map { "\($0) сек" } ?? "не отмечена")"
+        }
+        return actual.seconds.map { "Выполнено: \($0) сек" } ?? "Выполнено: \(actual.reps ?? 0) × \((actual.weightKg ?? 0).formatted()) кг"
     }
     private func edit(_ actual: ActualSet) {
         resumeAfterEditing = draft?.phase == .rest || draft?.phase == .active
@@ -237,7 +245,8 @@ struct WorkoutPlayer: View {
         if movement.isTimed || movement.plannedReps == nil {
             let elapsed = movement.plannedSeconds.map { max(1, $0 - (engine.exerciseRemaining() ?? $0)) }
             let actual = ActualSet(reps: movement.isTimed ? nil : movement.plannedReps, weightKg: movement.isTimed ? nil : 0,
-                                   seconds: movement.isTimed ? (elapsed ?? 1) : nil, completedAt: Date())
+                                   seconds: movement.isTimed ? (movement.isTimedPerSide && draft?.currentSide == 2 ? draft?.firstSideSeconds : elapsed) : nil,
+                                   completedAt: Date(), otherSideSeconds: movement.isTimedPerSide && draft?.currentSide == 2 ? elapsed : nil)
             edit(actual)
         } else { engine.completePlanned() }
     }
@@ -301,16 +310,24 @@ struct SportPrimaryButton: ButtonStyle {
 private struct SetEditor: View {
     let actual: ActualSet
     let timed: Bool
-    let save: (Int?, Double?, Int?) -> Void
+    var perSide = false
+    let save: (Int?, Double?, Int?, Int?) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var reps = ""
     @State private var kg = ""
     @State private var seconds = ""
+    @State private var other = ""
     @State private var invalid = false
     var body: some View {
         NavigationStack {
             Form {
-                if timed { TextField("Секунды", text: $seconds).keyboardType(.numberPad).accessibilityIdentifier("set-seconds") }
+                if timed {
+                    TextField(perSide ? "Первая сторона, сек" : "Секунды", text: $seconds).keyboardType(.numberPad).accessibilityIdentifier("set-seconds")
+                    if perSide {
+                        TextField("Вторая сторона, сек", text: $other).keyboardType(.numberPad).accessibilityIdentifier("set-other-seconds")
+                        Text("Пустая вторая сторона остаётся невыполненной и не засчитывается автоматически.").font(.caption)
+                    }
+                }
                 else {
                     TextField("Повторы", text: $reps).keyboardType(.numberPad).accessibilityIdentifier("set-reps")
                     TextField("Вес, кг", text: $kg).keyboardType(.decimalPad).accessibilityIdentifier("set-weight")
@@ -322,7 +339,8 @@ private struct SetEditor: View {
                         (Int(reps).map({ (1...300).contains($0) }) == true && weight.map({ $0.isFinite && (0...250).contains($0) }) == true) else {
                         invalid = true; return
                     }
-                    save(Int(reps), weight, Int(seconds)); dismiss()
+                    guard !perSide || other.isEmpty || Int(other).map({ (1...3600).contains($0) }) == true else { invalid = true; return }
+                    save(Int(reps), weight, Int(seconds), perSide ? Int(other) : nil); dismiss()
                 }.accessibilityIdentifier("save-set-edit")
             }.navigationTitle("Исправить подход")
                 .toolbar { Button("Отмена") { dismiss() } }
@@ -330,6 +348,7 @@ private struct SetEditor: View {
                     reps = actual.reps.map { String($0) } ?? ""
                     kg = actual.weightKg.map { String($0) } ?? ""
                     seconds = actual.seconds.map { String($0) } ?? ""
+                    other = actual.otherSideSeconds.map { String($0) } ?? ""
                 }
         }
     }

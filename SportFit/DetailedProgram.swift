@@ -31,8 +31,12 @@ struct DetailedExercise: Codable {
     let clearanceNote: String?
     let notes: String?
     let originalHint: String?
+    var sourceItemId: String? = nil
+    var isOptional: Bool? = nil
     enum CodingKeys: String, CodingKey {
         case order, name, stage, mode, sets, unit, load, notes
+        case isOptional = "optional"
+        case sourceItemId = "source_item_id"
         case exerciseId = "exercise_id"
         case targetReps = "target_reps"
         case targetSeconds = "target_seconds"
@@ -44,11 +48,12 @@ struct DetailedExercise: Codable {
     var prescription: ExercisePrescription {
         ExercisePrescription(sets: sets, repetitions: targetDescription, restSeconds: restSeconds,
             progression: notes, mode: mode, targetReps: targetReps, targetSeconds: targetSeconds,
-            unit: unit, load: load, requiresClearance: requiresClearance, clearanceNote: clearanceNote)
+            unit: unit, load: load, requiresClearance: requiresClearance, clearanceNote: clearanceNote, sourceItemId: sourceItemId)
     }
     var targetDescription: String {
         if mode == "duration" { return "\(targetSeconds ?? 0) сек" }
-        let suffix = mode == "repetitions_per_side" ? "на каждую сторону" : mode == "breath_cycles" ? "дыхательных циклов" : "повторений"
+        if mode == "duration_per_side" { return "\(targetSeconds ?? 0) сек на каждую сторону" }
+        let suffix = mode == "repetitions_per_side" ? "на каждую сторону" : mode == "breath_cycles" ? "дыхательных циклов" : mode == "repetitions_total" ? "повторов всего" : "повторений"
         return "\(targetReps ?? 0) \(suffix)"
     }
 }

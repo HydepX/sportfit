@@ -4,7 +4,7 @@ import XCTest
 @MainActor final class GuidedWorkoutTests: XCTestCase {
     private func setup(_ ids: [String] = ["wu_breath", "wu_neck"]) throws -> (WorkoutEngine, FitnessStore, URL) {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let store = FitnessStore(directory: directory), engine = WorkoutEngine(directory: directory)
+        let store = LegacyFixture.store(directory: directory), engine = WorkoutEngine(directory: directory)
         engine.start(day: ProgramDay(dayOfWeek: "test", name: "Guided", exerciseIds: ids), date: try XCTUnwrap(SportDate.from("2026-11-09")), store: store, guided: true)
         return (engine, store, directory)
     }

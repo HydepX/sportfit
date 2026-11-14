@@ -75,7 +75,7 @@ final class WorkoutEngine: ObservableObject {
     }
 
     func start(run: ProgramRun, store: FitnessStore, guided: Bool = false) {
-        guard run.closedAt == nil, let index = run.currentDay, let day = run.workout(on: index) else {
+        guard run.closedAt == nil, !run.isRetired, let index = run.currentDay, let day = run.workout(on: index) else {
             notice = "В этот день отдых или уровень закрыт"; return
         }
         start(day: day, date: Date(), store: store, run: run, runDayIndex: index, guided: guided)
@@ -91,10 +91,10 @@ final class WorkoutEngine: ObservableObject {
             notice = "За этот день уже есть результат. Открой его в журнале"; return
         }
         let sourceDate = run.flatMap { $0.sourceDate(for: runDayIndex ?? -1) } ?? date
-        let movements = day.exerciseIds.compactMap { sourceId -> WorkoutMovement? in
+        let movements = day.exerciseIds.enumerated().compactMap { position, sourceId -> WorkoutMovement? in
             let resolved = program?.conditionalSubstitutions?[sourceId]?.fallback ?? sourceId
             guard let exercise = store.exercise(resolved) else { return nil }
-            return WorkoutMovement(sourceId: sourceId, exercise: exercise, prescription: program?.prescription(exercise.id, on: sourceDate))
+            return WorkoutMovement(sourceId: sourceId, exercise: exercise, prescription: program?.prescription(exercise.id, on: sourceDate, position: position))
         }
         guard !movements.isEmpty, movements.count == day.exerciseIds.count, let programId = program?.programId else {
             notice = "Не удалось сопоставить упражнения с библиотекой"
@@ -119,6 +119,8 @@ final class WorkoutEngine: ObservableObject {
             if clearanceConfirmed { $0.movements[$0.currentIndex].clearanceConfirmed = true }
             $0.phase = .active
             $0.autoplaySuspended = false
+            $0.currentSide = movement.isTimedPerSide ? 1 : nil
+            $0.firstSideSeconds = nil
             let seconds = movement.plannedSeconds.flatMap { (1...3600).contains($0) ? $0 : nil }
             $0.exerciseSecondsLeft = seconds
             $0.exerciseEndsAt = $0.guided == true ? seconds.map { now.addingTimeInterval(Double($0)) } : nil
@@ -156,10 +158,12 @@ final class WorkoutEngine: ObservableObject {
         guard let d = draft, d.movements.indices.contains(d.currentIndex) else { return }
         let movement = d.movements[d.currentIndex]
         complete(reps: movement.isTimed ? nil : movement.plannedReps,
-                 weight: movement.isTimed ? nil : 0, seconds: movement.isTimed ? movement.plannedSeconds : nil, now: now)
+                 weight: movement.isTimed ? nil : 0,
+                 seconds: movement.isTimedPerSide ? (d.firstSideSeconds ?? movement.plannedSeconds) : (movement.isTimed ? movement.plannedSeconds : nil),
+                 otherSeconds: movement.isTimedPerSide ? movement.plannedSeconds : nil, now: now)
     }
 
-    func complete(reps: Int?, weight: Double?, seconds: Int?, now: Date = Date()) {
+    func complete(reps: Int?, weight: Double?, seconds: Int?, otherSeconds: Int? = nil, now: Date = Date()) {
         guard let d = draft, (d.phase == .active || (d.phase == .paused && d.pausedPhase == .active)), d.movements.indices.contains(d.currentIndex) else { return }
         let movement = d.movements[d.currentIndex]
         guard movement.prescription?.requiresClearance != true || movement.clearanceConfirmed == true else {
@@ -169,7 +173,7 @@ final class WorkoutEngine: ObservableObject {
             notice = "Этот подход уже отмечен"; return
         }
         if movement.isTimed {
-            guard let seconds, (1...3600).contains(seconds) else {
+            guard let seconds, (1...3600).contains(seconds), otherSeconds.map({ (1...3600).contains($0) }) ?? true else {
                 notice = "Укажи длительность от 1 до 3600 секунд"; return
             }
         } else {
@@ -182,7 +186,7 @@ final class WorkoutEngine: ObservableObject {
             if let paused = d.pauseStartedAt { d.elapsedPausedSeconds += now.timeIntervalSince(paused) }
             d.pauseStartedAt = nil; d.pausedPhase = nil
             d.movements[d.currentIndex].sets.append(
-                ActualSet(reps: reps, weightKg: weight, seconds: seconds, completedAt: now))
+                ActualSet(reps: reps, weightKg: weight, seconds: seconds, completedAt: now, otherSideSeconds: movement.isTimedPerSide ? otherSeconds : nil))
             // Guided playback follows the prescribed set count, including multi-set exercises.
             d.movements[d.currentIndex].skipped = false
             d.movements[d.currentIndex].skipReason = nil
@@ -308,10 +312,22 @@ final class WorkoutEngine: ObservableObject {
         }
     }
     func tick(now: Date = Date(), advanceRest: Bool = true) {
-        guard let d = draft else { return }
+        guard let d = draft, d.movements.indices.contains(d.currentIndex) else { return }
         if d.guided == true, d.phase == .active, let end = d.exerciseEndsAt, end <= now {
-            // Record at most one timed set; never replay unseen exercises after a lock/relaunch.
-            completePlanned(now: now)
+            let movement = d.movements[d.currentIndex]
+            if movement.isTimedPerSide, d.currentSide != 2, let seconds = movement.plannedSeconds {
+                commit {
+                    $0.currentSide = 2; $0.firstSideSeconds = seconds; $0.exerciseSecondsLeft = seconds
+                    if advanceRest && $0.autoplaySuspended != true {
+                        $0.exerciseEndsAt = now.addingTimeInterval(Double(seconds))
+                    } else {
+                        $0.exerciseEndsAt = nil; $0.phase = .paused; $0.pausedPhase = .active; $0.pauseStartedAt = end
+                    }
+                }
+            } else {
+                // At most one set; never replay unseen movements after a lock/relaunch.
+                completePlanned(now: now)
+            }
         } else if d.phase == .rest, let end = d.restEndsAt, end <= now {
             if d.guided == true {
                 if advanceRest && d.autoplaySuspended != true { continueAfterRest(now: now) }
@@ -371,19 +387,20 @@ final class WorkoutEngine: ObservableObject {
         tick(advanceRest: false)
     }
 
-    func editSet(_ id: UUID, reps: Int?, weight: Double?, seconds: Int?) {
+    func editSet(_ id: UUID, reps: Int?, weight: Double?, seconds: Int?, otherSeconds: Int? = nil) {
         guard let d = draft,
               let movement = d.movements.first(where: { $0.sets.contains(where: { $0.id == id }) }) else { return }
         let valid = movement.isTimed
             ? seconds.map { (1...3600).contains($0) } == true
             : (reps.map { (1...300).contains($0) } == true && weight.map { $0.isFinite && (0...250).contains($0) } == true)
-        guard valid else { notice = "Проверь значения подхода"; return }
+        guard valid && (otherSeconds.map { (1...3600).contains($0) } ?? true) else { notice = "Проверь значения подхода"; return }
         commit { current in
             for i in current.movements.indices {
                 if let index = current.movements[i].sets.firstIndex(where: { $0.id == id }) {
                     current.movements[i].sets[index].reps = movement.isTimed ? nil : reps
                     current.movements[i].sets[index].weightKg = movement.isTimed ? nil : weight
                     current.movements[i].sets[index].seconds = movement.isTimed ? seconds : nil
+                    current.movements[i].sets[index].otherSideSeconds = movement.isTimedPerSide ? otherSeconds : nil
                 }
             }
         }

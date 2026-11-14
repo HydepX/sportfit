@@ -70,24 +70,33 @@ def verify(path, healthkit=False, expected_commit=None, release=False):
         catalog = json.loads(archive.read(base + 'exercises.v1.json'))
         program = json.loads(archive.read(base + 'program_12w.v1.json'))
         ids = [entry['id'] for entry in catalog['exercises']]
-        if len(ids) != 53 or len(set(ids)) != 53:
+        if len(ids) != len(set(ids)) or catalog['exercise_count'] != len(ids):
             raise ValueError('Invalid bundled catalog')
-        references = {eid for phase in program['phases'] for day in phase['days'] for eid in day['exercise_ids']}
-        if not references <= set(ids):
-            raise ValueError('Unknown bundled exercise IDs')
+        active = {entry['id'] for entry in catalog['exercises'] if not entry.get('retired')}
         exact = json.loads(archive.read(base + 'program_12w_with_sets.v2.json'))
-        if exact.get('schema_version') != '2.0.0' or exact.get('session_count') != len(exact.get('sessions', [])) or not exact.get('sessions'):
-            raise ValueError('Missing precise workout sessions')
+        if program != exact or exact.get('program_id') != 'sportfit_12w_2026q4':
+            raise ValueError('Old or inconsistent default plan remains in archive')
+        if len(active) != 36 or exact.get('exercise_count') != 36 or len(exact.get('sessions', [])) != 48:
+            raise ValueError('Invalid new workbook program')
+        if sum(len(s['items']) for s in exact['sessions']) != 624:
+            raise ValueError('Workbook assignments were changed')
         for session in exact['sessions']:
             for item in session['items']:
-                if item['exercise_id'] not in ids or item['sets'] < 1:
-                    raise ValueError('Invalid precise assignment')
-                field = 'target_seconds' if item['mode'] == 'duration' else 'target_reps'
-                if item.get(field, 0) < 1:
-                    raise ValueError('Missing precise target')
+                if item['exercise_id'] not in active or item['sets'] < 1:
+                    raise ValueError('Invalid assignment or retired exercise in new plan')
+                field = 'target_seconds' if item['mode'] in ['duration', 'duration_per_side'] else 'target_reps'
+                if item.get(field, 0) < 1: raise ValueError('Missing precise target')
+        photos = [e['media']['photo'] for e in catalog['exercises'] if e.get('media', {}).get('photo') and not e.get('retired')]
+        for photo in photos:
+            asset = base + 'media/' + photo['asset']
+            if asset not in names:
+                raise ValueError('Missing original technique collage: ' + photo['asset'])
+            data = archive.read(asset)
+            if not (data.startswith(b'\x89PNG\r\n\x1a\n') or data.startswith(b'\xff\xd8\xff')):
+                raise ValueError('Invalid technique image: ' + photo['asset'])
         if any(n.endswith('embedded.mobileprovision') for n in names):
             raise ValueError('Expected an unsigned archive without a provisioning profile')
-    print('OK: physical-iPhone IPA, ARM64 iOS executable, Info.plist, 53 IDs, bundled program and ZIP integrity')
+    print('OK: physical-iPhone IPA, ARM64 iOS executable, Info.plist, 36 current IDs, 48 workouts / 624 assignments, technique collages and ZIP integrity')
 
 
 if __name__ == '__main__':

@@ -114,7 +114,7 @@ struct ReportBuilderScreen: View {
     private var currentRun: ProgramRun? { run.flatMap { original in profile.runs.first { $0.id == original.id } ?? original } }
     private var start: Date { currentRun.map { SportDate.calendar.startOfDay(for: $0.startedAt) } ?? SportDate.calendar.date(from: DateComponents(year: year, month: (quarter - 1) * 3 + 1, day: 1))! }
     private var end: Date {
-        if let run = currentRun { return run.closedAt ?? Date() }
+        if let run = currentRun { return run.closedAt ?? run.retiredAt ?? Date() }
         let boundary = SportDate.calendar.date(byAdding: .month, value: 3, to: start)!
         return Date(timeIntervalSinceReferenceDate: boundary.timeIntervalSinceReferenceDate.nextDown)
     }
@@ -141,7 +141,7 @@ struct ReportBuilderScreen: View {
                         Text(goal.metric.rawValue)
                         Text("\(goal.direction.rawValue) \(goal.target.formatted())").font(.caption)
                         if let source = goal.source { Text(source == "manual" ? "Источник: вручную" : "Источник: " + source).font(.caption) }
-                        if currentRun.map({ $0.closedAt == nil }) ?? (end >= Date()) {
+                        if currentRun.map({ $0.closedAt == nil && !$0.isRetired }) ?? (end >= Date()) {
                             HStack {
                                 Button("Исправить цель") { editingGoal = goal }.buttonStyle(.bordered)
                                 Button("Удалить цель", role: .destructive) { deletingGoal = goal.id }.buttonStyle(.bordered)
@@ -149,7 +149,7 @@ struct ReportBuilderScreen: View {
                         }
                     }
                 }
-                if currentRun.map({ $0.closedAt == nil }) ?? (end >= Date()) { Button("Добавить числовую цель") { addingGoal = true } }
+                if currentRun.map({ $0.closedAt == nil && !$0.isRetired }) ?? (end >= Date()) { Button("Добавить числовую цель") { addingGoal = true } }
                 Text("Цели задаёшь самостоятельно; пропущенные измерения означают «оценка недоступна». Цель выполнения плана оценивается только для уровня.").font(.footnote)
             }
             ReportSummaryContent(report: current)

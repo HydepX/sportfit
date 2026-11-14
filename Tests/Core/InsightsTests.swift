@@ -4,9 +4,9 @@ import XCTest
 final class InsightsTests: XCTestCase {
     private var root: URL { URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent() }
     private func date(_ day: String) -> Date { SportDate.from(day)! }
-    private func program() throws -> TrainingProgram { try JSONDecoder().decode(TrainingProgram.self, from: Data(contentsOf: root.appendingPathComponent("SportFit/Resources/Data/program_12w_with_sets.v2.json"))) }
+    private func program() throws -> TrainingProgram { try JSONDecoder().decode(TrainingProgram.self, from: Data(contentsOf: root.appendingPathComponent("Tests/Fixtures/LegacyData/program_12w_with_sets.v2.json"))) }
     private func workout(run: ProgramRun? = nil, day: Int = 0, complete: Bool = true, reps: Int = 4, weight: Double = 3) throws -> WorkoutResult {
-        let catalog = try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: root.appendingPathComponent("SportFit/Resources/Data/exercises.v1.json")))
+        let catalog = try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: root.appendingPathComponent("Tests/Fixtures/LegacyData/exercises.v1.json")))
         var movement = WorkoutMovement(sourceId: "press_floor", exercise: try XCTUnwrap(catalog.exercises.first { $0.id == "press_floor" }))
         movement.sets = [ActualSet(reps: reps, weightKg: weight, seconds: nil, completedAt: date("2026-11-10"))]
         return WorkoutResult(id: UUID(), date: "2026-11-10", programId: "test", title: "test", startedAt: date("2026-11-10"),

@@ -32,6 +32,8 @@ class ArchiveTests(unittest.TestCase):
                 archive.write(ROOT / 'SportFit/Resources/Data/exercises.v1.json', base + 'exercises.v1.json')
             archive.write(ROOT / 'SportFit/Resources/Data/program_12w.v1.json', base + 'program_12w.v1.json')
             archive.write(ROOT / 'SportFit/Resources/Data/program_12w_with_sets.v2.json', base + 'program_12w_with_sets.v2.json')
+            for asset in ['technique_coded.jpg', 'technique_numbered.jpg']:
+                archive.writestr(base + 'media/' + asset, b'\x89PNG\r\n\x1a\nsynthetic-archive-fixture')
 
     def test_valid_archive_structure(self):
         with tempfile.TemporaryDirectory() as temp:

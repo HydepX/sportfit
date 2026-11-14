@@ -31,7 +31,7 @@ struct LocalBackupItem: Identifiable {
     }
     static func automatic(engine: WorkoutEngine, measurements: MeasurementsStore, store: FitnessStore, profile: ProfileStore, journal: JournalStore, now: Date = Date()) throws {
         guard engine.canExport && measurements.canExport && store.canExport && profile.canExport && journal.canExport,
-              !engine.history.isEmpty || !measurements.entries.isEmpty || !profile.runs.isEmpty || !journal.data.activity.isEmpty else { return }
+              !engine.history.isEmpty || !measurements.entries.isEmpty || !profile.runs.isEmpty || !journal.data.activity.isEmpty || !(journal.data.retiredDrafts ?? []).isEmpty else { return }
         if let newest = items(directory: store.directory).first(where: { $0.url.lastPathComponent.hasPrefix("sportfit-auto-") }), now.timeIntervalSince(newest.date) < 86400 { return }
         try save(SportFitBackup(engine: engine, measurements: measurements, store: store, profile: profile, journal: journal), directory: store.directory, kind: "auto")
     }

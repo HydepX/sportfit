@@ -128,7 +128,9 @@ struct WorkoutResultScreen: View {
                     ForEach(Array(movement.sets.enumerated()), id: \.element.id) { index, actual in
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Подход \(index + 1)").font(.subheadline.bold())
-                            if let seconds = actual.seconds { Text("Факт: \(seconds) сек") }
+                            if let seconds = actual.seconds {
+                                Text(movement.isTimedPerSide ? "Факт: \(seconds) сек / \(actual.otherSideSeconds.map { String($0) } ?? "вторая сторона не отмечена")" : "Факт: \(seconds) сек")
+                            }
                             else {
                                 let unit = movement.prescription?.mode == "breath_cycles" ? "дыхательных циклов" : movement.prescription?.mode == "repetitions_per_side" ? "на каждую сторону" : "повторов"
                                 Text("Факт: \(actual.reps ?? 0) \(unit) · \((actual.weightKg ?? 0).formatted()) кг")

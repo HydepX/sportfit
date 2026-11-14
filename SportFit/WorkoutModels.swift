@@ -10,6 +10,8 @@ struct ActualSet: Codable, Identifiable {
     var weightKg: Double?
     var seconds: Int?
     let completedAt: Date
+    var otherSideSeconds: Int? = nil
+    var totalSeconds: Int { (seconds ?? 0) + (otherSideSeconds ?? 0) }
 }
 
 struct WorkoutMovement: Codable, Identifiable {
@@ -26,6 +28,7 @@ struct WorkoutMovement: Codable, Identifiable {
     var skipped: Bool = false
     var skipReason: String? = nil
 
+    var isTimedPerSide: Bool { prescription?.mode == "duration_per_side" }
     var plannedSeconds: Int? {
         guard isTimed else { return nil }
         if let seconds = prescription?.targetSeconds { return seconds }
@@ -46,7 +49,7 @@ struct WorkoutMovement: Codable, Identifiable {
         exerciseId = exercise.id
         title = exercise.title
         let requestedTarget = prescription?.repetitions ?? exercise.suggestedRepsFromSource ?? "Не задано в программе"
-        isTimed = prescription?.mode.map { $0 == "duration" } ?? (requestedTarget.localizedCaseInsensitiveContains("сек") || requestedTarget.localizedCaseInsensitiveContains("мин"))
+        isTimed = prescription?.mode.map { ["duration", "duration_per_side"].contains($0) } ?? (requestedTarget.localizedCaseInsensitiveContains("сек") || requestedTarget.localizedCaseInsensitiveContains("мин"))
         self.prescription = prescription
         sourceRestSeconds = exercise.suggestedRestFromSource.flatMap { text in
             let number = text.split(whereSeparator: { !$0.isNumber }).first.flatMap { Int($0) }
@@ -81,6 +84,8 @@ struct WorkoutDraft: Codable, Identifiable {
     var exerciseSecondsLeft: Int?
     var autoplaySuspended: Bool?
     var restWaitsForUser: Bool?
+    var currentSide: Int?
+    var firstSideSeconds: Int?
 
     init(date: String, programId: String, title: String, movements: [WorkoutMovement]) {
         id = UUID()
@@ -124,7 +129,8 @@ struct WorkoutResult: Codable, Identifiable {
 
     var isComplete: Bool {
         !finishedEarly && !movements.isEmpty && movements.allSatisfy {
-            !$0.skipped && $0.sets.count >= ($0.prescription?.sets ?? 1)
+            !$0.skipped && $0.sets.count >= ($0.prescription?.sets ?? 1) &&
+            (!$0.isTimedPerSide || $0.sets.allSatisfy { $0.otherSideSeconds != nil })
         }
     }
     var completionLabel: String {

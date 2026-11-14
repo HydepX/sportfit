@@ -69,7 +69,7 @@ struct SettingsScreen: View {
                     NavigationLink("Данные и резервные копии") { StorageScreen() }.accessibilityIdentifier("open-storage")
                 }
                 Section("Данные программы") {
-                    Label(store.catalog == nil ? "Каталог не загружен" : "Каталог: \(store.catalog?.exercises.count ?? 0) упражнений",
+                    Label(store.catalog == nil ? "Каталог не загружен" : "Каталог: \(store.catalog?.currentExercises.count ?? 0) упражнений",
                           systemImage: "books.vertical")
                     Button("Импортировать exercises.v1.json") { importingCatalog = true }
                     Label(store.program == nil ? "План не загружен" : "12-недельный план загружен",

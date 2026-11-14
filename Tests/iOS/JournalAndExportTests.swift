@@ -29,7 +29,7 @@ import UserNotifications
     func testBackupV4RestoresAllNewDataAndDisablesNotificationDelivery() async throws {
         let directory = try directory(); defer { try? FileManager.default.removeItem(at: directory) }
         let engine = WorkoutEngine(directory: directory), measurements = MeasurementsStore(directory: directory)
-        let store = FitnessStore(directory: directory), profile = ProfileStore(directory: directory), journal = JournalStore(directory: directory)
+        let store = LegacyFixture.store(directory: directory), profile = ProfileStore(directory: directory), journal = JournalStore(directory: directory)
         XCTAssertTrue(journal.saveActivity(ActivityEntry(date: Date(), metric: .sleep, value: 7.5)))
         XCTAssertTrue(journal.saveGoal(QuarterGoal(scope: "test", metric: .workouts, direction: .atLeast, target: 10)))
         XCTAssertTrue(journal.saveNote(DayNote(reason: "Test", text: "synthetic note")))
@@ -46,19 +46,19 @@ import UserNotifications
     }
     func testRestoreToAnotherContainerAndRepeatDoesNotDuplicateHistory() async throws {
         let source = try directory(), target = try directory(); defer { try? FileManager.default.removeItem(at: source); try? FileManager.default.removeItem(at: target) }
-        let engine = WorkoutEngine(directory: source), store = FitnessStore(directory: source), profile = ProfileStore(directory: source)
+        let engine = WorkoutEngine(directory: source), store = LegacyFixture.store(directory: source), profile = ProfileStore(directory: source)
         engine.start(day: ProgramDay(dayOfWeek: "test", name: "test", exerciseIds: ["press_floor"]), date: Date(), store: store)
         engine.begin(); engine.complete(reps: 4, weight: 0, seconds: nil); engine.earlyFinish()
         let result = try XCTUnwrap(engine.finish(feeling: nil))
         let backup = SportFitBackup(engine: engine, measurements: MeasurementsStore(directory: source), store: store, profile: profile)
-        let targetEngine = WorkoutEngine(directory: target), targetStore = FitnessStore(directory: target), targetProfile = ProfileStore(directory: target), targetMeasurements = MeasurementsStore(directory: target)
+        let targetEngine = WorkoutEngine(directory: target), targetStore = LegacyFixture.store(directory: target), targetProfile = ProfileStore(directory: target), targetMeasurements = MeasurementsStore(directory: target)
         for _ in 0..<2 { try BackupRestore.restore(backup, engine: targetEngine, measurements: targetMeasurements, store: targetStore, profile: targetProfile) }
         XCTAssertEqual(targetEngine.history.map(\.id), [result.id])
         XCTAssertEqual(WorkoutEngine(directory: target).history.first?.movements.first?.sets.first?.reps, 4)
     }
     func testV3BackupWithoutJournalStillRestores() async throws {
         let directory = try directory(); defer { try? FileManager.default.removeItem(at: directory) }
-        let engine = WorkoutEngine(directory: directory), store = FitnessStore(directory: directory), profile = ProfileStore(directory: directory), measurements = MeasurementsStore(directory: directory)
+        let engine = WorkoutEngine(directory: directory), store = LegacyFixture.store(directory: directory), profile = ProfileStore(directory: directory), measurements = MeasurementsStore(directory: directory)
         let backup = SportFitBackup(engine: engine, measurements: measurements, store: store, profile: profile)
         var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(backup)) as? [String: Any]); json["format"] = "sportfit-backup-v3"; json.removeValue(forKey: "journal")
         let old = try JSONDecoder().decode(SportFitBackup.self, from: JSONSerialization.data(withJSONObject: json))
@@ -67,7 +67,7 @@ import UserNotifications
     }
     func testInvalidNewDataIsRejectedBeforeReplacingExistingFiles() async throws {
         let directory = try directory(); defer { try? FileManager.default.removeItem(at: directory) }
-        let engine = WorkoutEngine(directory: directory), store = FitnessStore(directory: directory), profile = ProfileStore(directory: directory), measurements = MeasurementsStore(directory: directory)
+        let engine = WorkoutEngine(directory: directory), store = LegacyFixture.store(directory: directory), profile = ProfileStore(directory: directory), measurements = MeasurementsStore(directory: directory)
         let backup = SportFitBackup(engine: engine, measurements: measurements, store: store, profile: profile)
         var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(backup)) as? [String: Any])
         var journal = try XCTUnwrap(json["journal"] as? [String: Any]); journal["format"] = "future"; json["journal"] = journal

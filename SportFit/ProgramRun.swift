@@ -28,6 +28,8 @@ struct ProgramRun: Codable, Identifiable {
     var closedAt: Date?
     var days: [RunDayClosure]
     var extraRests: [Date]
+    var retiredAt: Date? = nil
+    var isRetired: Bool { retiredAt != nil }
 
     init(title: String, program: TrainingProgram) {
         id = UUID()
@@ -60,7 +62,7 @@ struct ProgramRun: Codable, Identifiable {
     }
 
     mutating func closeDay(history: [WorkoutResult], allowIncomplete: Bool, now: Date = Date()) throws {
-        try DataValidation.require(closedAt == nil, "Уровень уже закрыт")
+        try DataValidation.require(closedAt == nil && !isRetired, "Уровень закрыт или программа заменена")
         guard let index = currentDay else { throw DataValidation.Failure(message: "Все дни уже закрыты") }
         let outcome: RunDayOutcome
         if workout(on: index) == nil { outcome = .rest }
@@ -71,7 +73,7 @@ struct ProgramRun: Codable, Identifiable {
     }
 
     mutating func close(allowIncomplete: Bool, now: Date = Date()) throws {
-        try DataValidation.require(closedAt == nil, "Уровень уже закрыт")
+        try DataValidation.require(closedAt == nil && !isRetired, "Уровень закрыт или программа заменена")
         try DataValidation.require(allowIncomplete || (days.count == dayCount &&
             days.allSatisfy { $0.outcome == .completed || $0.outcome == .rest }),
             "Подтверди закрытие уровня с незавершёнными днями")
@@ -99,16 +101,20 @@ struct ProgramRun: Codable, Identifiable {
     }
 
     static func validate(_ runs: [ProgramRun], catalog: ExerciseCatalog) throws {
-        try DataValidation.require(Set(runs.map(\.id)).count == runs.count && runs.filter { $0.closedAt == nil }.count <= 1,
+        try DataValidation.require(Set(runs.map(\.id)).count == runs.count && runs.filter { $0.closedAt == nil && !$0.isRetired }.count <= 1,
                                    "Повторяющиеся или несколько активных уровней")
         for run in runs { try run.validate(catalog: catalog) }
     }
 }
 
 extension TrainingProgram {
-    func prescription(_ id: String, on date: Date) -> ExercisePrescription? {
+    func prescription(_ id: String, on date: Date, position: Int? = nil) -> ExercisePrescription? {
         if let sessions {
-            return sessions.first { $0.date == SportDate.key(date) }?.items.first { $0.exerciseId == id }?.prescription
+            guard let session = sessions.first(where: { $0.date == SportDate.key(date) }) else { return nil }
+            if let position, session.items.indices.contains(position), session.items[position].exerciseId == id {
+                return session.items[position].prescription
+            }
+            return session.items.first { $0.exerciseId == id }?.prescription
         }
         if let start = SportDate.from(startDate) {
             let offset = SportDate.calendar.dateComponents([.day], from: start, to: date).day ?? -1

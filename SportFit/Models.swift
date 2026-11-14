@@ -5,6 +5,7 @@ struct ExerciseCatalog: Codable {
     let exerciseCount: Int
     let exercises: [Exercise]
 
+    var currentExercises: [Exercise] { exercises.filter { $0.retired != true } }
     enum CodingKeys: String, CodingKey {
         case schemaVersion = "schema_version"
         case exerciseCount = "exercise_count"
@@ -27,9 +28,12 @@ struct Exercise: Codable, Identifiable, Hashable {
     let suggestedRepsFromSource: String?
     let suggestedRestFromSource: String?
     let media: ExerciseMedia?
+    var retired: Bool? = nil
+    var metricType: String? = nil
 
     enum CodingKeys: String, CodingKey {
-        case id, title, equipment, description, instructions, media
+        case id, title, equipment, description, instructions, media, retired
+        case metricType = "metric_type"
         case primaryGroup = "primary_group"
         case commonMistakesDraft = "common_mistakes_draft"
         case commonMistakesReviewStatus = "common_mistakes_review_status"
@@ -47,6 +51,13 @@ struct Exercise: Codable, Identifiable, Hashable {
 struct ExerciseMedia: Codable {
     let status: String
     let animation: MediaAnimation?
+    var photo: ExercisePhoto? = nil
+}
+struct ExercisePhoto: Codable {
+    let asset: String
+    let columns: Int
+    let rows: Int
+    let index: Int
 }
 struct MediaAnimation: Codable {
     let path: String?
@@ -107,7 +118,7 @@ struct TrainingProgram: Codable {
                 let firstWeek = days.map(\.week).min() ?? 1
                 let lastWeek = days.map(\.week).max() ?? 1
                 return ProgramPhase(phaseId: id, weekStart: firstWeek,
-                    weekEnd: lastWeek, title: "Недели \(firstWeek)–\(lastWeek)", subtitle: "Точные назначения по датам",
+                    weekEnd: lastWeek, title: "Недели \(firstWeek)–\(lastWeek)", subtitle: "Точные назначения из программы",
                     days: days.filter { seen.insert($0.day).inserted }.map {
                         ProgramDay(dayOfWeek: $0.day, name: $0.name, exerciseIds: $0.items.map(\.exerciseId))
                     }, prescriptions: nil)

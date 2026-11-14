@@ -12,6 +12,7 @@ struct ExercisePrescription: Codable {
     var load: String? = nil
     var requiresClearance: Bool? = nil
     var clearanceNote: String? = nil
+    var sourceItemId: String? = nil
 }
 
 enum DataValidation {
@@ -25,8 +26,13 @@ enum DataValidation {
     static func catalog(_ catalog: ExerciseCatalog) throws {
         let ids = catalog.exercises.map(\.id)
         try require(catalog.schemaVersion == "1.0.0", "Неподдерживаемая версия каталога")
-        try require(catalog.exerciseCount == 53 && ids.count == 53 && Set(ids).count == 53,
-                    "Нужны 53 уникальных упражнения")
+        try require((1...10000).contains(catalog.exerciseCount) && ids.count == catalog.exerciseCount && Set(ids).count == ids.count,
+                    "Количество упражнений должно совпадать с уникальными ID")
+        for photo in catalog.exercises.compactMap({ $0.media?.photo }) {
+            try require(photo.asset.range(of: "^[A-Za-z0-9_-]+\\.(jpg|jpeg|png)$", options: .regularExpression) != nil &&
+                        (1...20).contains(photo.columns) && (1...20).contains(photo.rows) &&
+                        photo.index >= 0 && photo.index < photo.columns * photo.rows, "Некорректная ссылка на фото")
+        }
         try require(catalog.exercises.allSatisfy { !$0.id.isEmpty && !$0.title.isEmpty && !$0.instructions.isEmpty },
                     "Неполное описание упражнения")
     }
@@ -45,7 +51,8 @@ enum DataValidation {
             guard let sessions = program.sessions, !sessions.isEmpty, program.sessionCount == sessions.count else {
                 throw Failure(message: "Отсутствуют отдельные занятия v2")
             }
-            try require(program.exerciseCount == catalog.exerciseCount, "Количество упражнений v2 не совпадает с каталогом")
+            let referenced = Set(sessions.flatMap(\.items).map(\.exerciseId))
+            try require(program.exerciseCount.map { $0 >= referenced.count && $0 <= catalog.exerciseCount } == true, "Некорректное количество упражнений v2")
             try require(Set(sessions.map(\.date)).count == sessions.count && Set(sessions.map(\.sessionId)).count == sessions.count,
                         "Повторяющиеся даты или ID занятий")
             for session in sessions {
@@ -55,7 +62,7 @@ enum DataValidation {
                 try require(date >= start && date <= end && session.week == offset / 7 + 1 && session.day == weekday,
                             "Дата занятия не соответствует неделе или дню")
                 try require(!session.items.isEmpty && session.items.map(\.order) == Array(1...session.items.count) &&
-                            Set(session.items.map(\.exerciseId)).count == session.items.count, "Нарушен порядок или повторяются упражнения")
+                            Set(session.items.compactMap(\.sourceItemId)).count == session.items.compactMap(\.sourceItemId).count, "Нарушен порядок или повторяются упражнения")
                 try require(program.phases.contains { $0.phaseId == session.phaseId && $0.weekStart <= session.week && session.week <= $0.weekEnd }, "Занятие не соответствует этапу")
                 for item in session.items {
                     try require(known.contains(item.exerciseId) && (1...100).contains(item.sets) && (0...3600).contains(item.restSeconds), "Некорректные подходы или отдых")
@@ -63,10 +70,10 @@ enum DataValidation {
                     if item.requiresClearance == true {
                         try require(program.conditionalSubstitutions?[item.exerciseId] == nil, "Для этого упражнения в v2 требуется разрешение или пропуск без замены")
                     }
-                    if item.mode == "duration" {
+                    if ["duration", "duration_per_side"].contains(item.mode) {
                         try require(item.targetSeconds.map { (1...3600).contains($0) } == true && item.targetReps == nil, "Некорректное время упражнения")
                     } else {
-                        try require(["repetitions", "repetitions_per_side", "breath_cycles"].contains(item.mode) &&
+                        try require(["repetitions", "repetitions_per_side", "repetitions_total", "breath_cycles"].contains(item.mode) &&
                                     item.targetReps.map { (1...300).contains($0) } == true && item.targetSeconds == nil, "Некорректные повторы")
                     }
                 }

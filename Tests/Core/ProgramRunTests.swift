@@ -4,10 +4,10 @@ import XCTest
 final class ProgramRunTests: XCTestCase {
     private var root: URL { URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent() }
     private func program() throws -> TrainingProgram {
-        try JSONDecoder().decode(TrainingProgram.self, from: Data(contentsOf: root.appendingPathComponent("SportFit/Resources/Data/program_12w_with_sets.v2.json")))
+        try JSONDecoder().decode(TrainingProgram.self, from: Data(contentsOf: root.appendingPathComponent("Tests/Fixtures/LegacyData/program_12w_with_sets.v2.json")))
     }
     private func result(run: ProgramRun, index: Int, complete: Bool) throws -> WorkoutResult {
-        let catalog = try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: root.appendingPathComponent("SportFit/Resources/Data/exercises.v1.json")))
+        let catalog = try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: root.appendingPathComponent("Tests/Fixtures/LegacyData/exercises.v1.json")))
         let exercise = try XCTUnwrap(catalog.exercises.first)
         var movement = WorkoutMovement(sourceId: exercise.id, exercise: exercise)
         if complete { movement.sets = [ActualSet(reps: 4, weightKg: 0, seconds: nil, completedAt: Date())] }
@@ -103,7 +103,7 @@ final class ProgramRunTests: XCTestCase {
         XCTAssertThrowsError(try run.validateStructure())
         run.days = [RunDayClosure(dayIndex: 0, outcome: .rest, closedAt: Date())]
         XCTAssertThrowsError(try run.validateStructure())
-        let catalog = try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: root.appendingPathComponent("SportFit/Resources/Data/exercises.v1.json")))
+        let catalog = try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: root.appendingPathComponent("Tests/Fixtures/LegacyData/exercises.v1.json")))
         let first = ProgramRun(title: "First", program: try program())
         XCTAssertThrowsError(try ProgramRun.validate([first, first], catalog: catalog))
         XCTAssertThrowsError(try ProgramRun.validate([first, ProgramRun(title: "Second", program: first.program)], catalog: catalog))

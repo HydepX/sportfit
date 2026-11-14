@@ -4,7 +4,7 @@ import XCTest
 final class ProgramTests: XCTestCase {
     private var root: URL { URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent() }
     private func data(_ name: String) throws -> Data {
-        try Data(contentsOf: root.appendingPathComponent("SportFit/Resources/Data/\(name).v1.json"))
+        try Data(contentsOf: root.appendingPathComponent("Tests/Fixtures/LegacyData/\(name).v1.json"))
     }
     private func decoded() throws -> (ExerciseCatalog, TrainingProgram) {
         (try JSONDecoder().decode(ExerciseCatalog.self, from: data("exercises")),

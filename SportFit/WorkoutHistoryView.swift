@@ -3,6 +3,7 @@ import SwiftUI
 struct WorkoutHistoryView: View {
     @EnvironmentObject private var engine: WorkoutEngine
     @EnvironmentObject private var store: FitnessStore
+    @EnvironmentObject private var journal: JournalStore
     @State private var period = HistoryPeriod.week
     @State private var start = Date()
     @State private var end = Date()
@@ -28,6 +29,9 @@ struct WorkoutHistoryView: View {
             if workouts.isEmpty && legacyDates.isEmpty {
                 Text("За этот период тренировок нет. Можно выбрать другие даты или раскрыть всю историю.")
                     .foregroundStyle(.secondary)
+            }
+            ForEach(journal.data.retiredDrafts ?? []) { draft in
+                NavigationLink("Незавершённая прежняя тренировка · " + draft.title) { RetiredDraftScreen(draft: draft) }
             }
             ForEach(workouts) { workout in
                 NavigationLink { WorkoutResultScreen(result: workout) } label: {

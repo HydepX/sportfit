@@ -243,12 +243,12 @@ struct TrainingSummary: Codable {
             return ExerciseProgress(exerciseId: first.exerciseId, title: first.title, mode: mode, sessions: items.count,
                 firstWeight: first.sets.compactMap(\.weightKg).max(), lastWeight: last.sets.compactMap(\.weightKg).max(),
                 firstVolume: volume(first), lastVolume: volume(last), firstReps: first.sets.reduce(0) { $0 + ($1.reps ?? 0) },
-                lastReps: last.sets.reduce(0) { $0 + ($1.reps ?? 0) }, firstSeconds: first.sets.reduce(0) { $0 + ($1.seconds ?? 0) }, lastSeconds: last.sets.reduce(0) { $0 + ($1.seconds ?? 0) })
+                lastReps: last.sets.reduce(0) { $0 + ($1.reps ?? 0) }, firstSeconds: first.sets.reduce(0) { $0 + $1.totalSeconds }, lastSeconds: last.sets.reduce(0) { $0 + $1.totalSeconds })
         }
         return TrainingSummary(attempts: unique.count, completeSessions: complete, partialSessions: sessions.count - complete,
             sets: movements.reduce(0) { $0 + $1.sets.count }, reps: ordinary.flatMap(\.sets).reduce(0) { $0 + ($1.reps ?? 0) },
             breathCycles: movements.filter { $0.prescription?.mode == "breath_cycles" }.flatMap(\.sets).reduce(0) { $0 + ($1.reps ?? 0) },
-            timedSeconds: movements.filter(\.isTimed).flatMap(\.sets).reduce(0) { $0 + ($1.seconds ?? 0) },
+            timedSeconds: movements.filter(\.isTimed).flatMap(\.sets).reduce(0) { $0 + $1.totalSeconds },
             durationSeconds: unique.reduce(0) { $0 + $1.durationSeconds },
             externalVolumeKg: ordinary.flatMap(\.sets).reduce(0) { $0 + Double($1.reps ?? 0) * ($1.weightKg ?? 0) },
             activeDays: Set(measured.map { SportDate.key($0.finishedAt) }).count,

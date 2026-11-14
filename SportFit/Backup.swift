@@ -136,7 +136,10 @@ struct SportFitBackupDocument: FileDocument {
                                    "Копия содержит повторяющиеся записи")
         try DataValidation.require(backup.manualMeasurements.allSatisfy(MeasurementsStore.valid), "Некорректные измерения")
         let known = Set(catalog.exercises.map(\.id))
-        let allSets = backup.workouts.flatMap(\.movements).flatMap(\.sets) + (backup.activeWorkout?.movements.flatMap(\.sets) ?? [])
+        let retiredDrafts = backup.journal?.retiredDrafts ?? []
+        let workoutIDs = backup.workouts.map(\.id) + retiredDrafts.map(\.id) + [backup.activeWorkout?.id].compactMap { $0 }
+        try DataValidation.require(Set(workoutIDs).count == workoutIDs.count, "Повторяющиеся тренировки и черновики")
+        let allSets = backup.workouts.flatMap(\.movements).flatMap(\.sets) + (backup.activeWorkout?.movements.flatMap(\.sets) ?? []) + retiredDrafts.flatMap(\.movements).flatMap(\.sets)
         try DataValidation.require(Set(allSets.map(\.id)).count == allSets.count, "Повторяющиеся ID подходов")
         try DataValidation.require(Set((backup.schedule ?? []).map(\.id)).count == (backup.schedule ?? []).count, "Повторяющиеся переносы")
         func movementsValid(_ movements: [WorkoutMovement]) -> Bool {
@@ -145,11 +148,14 @@ struct SportFitBackupDocument: FileDocument {
                 Set(sets.map(\.id)).count == sets.count && movements.allSatisfy { movement in
                     known.contains(movement.exerciseId) && known.contains(movement.sourceId) &&
                     movement.sets.allSatisfy { actual in
-                        if movement.isTimed { return actual.seconds.map { (1...3600).contains($0) } == true }
+                        if movement.isTimed { return actual.seconds.map { (1...3600).contains($0) } == true && (actual.otherSideSeconds.map { (1...3600).contains($0) } ?? true) }
                         return actual.reps.map { (0...300).contains($0) } == true &&
                             actual.weightKg.map { $0.isFinite && (0...250).contains($0) } == true
                     }
                 }
+        }
+        for draft in retiredDrafts {
+            try DataValidation.require(draft.movements.indices.contains(draft.currentIndex) && movementsValid(draft.movements) && runReferenceValid(draft.runId, draft.runDayIndex), "Повреждён архивный черновик")
         }
         for workout in backup.workouts {
             try DataValidation.require(SportDate.from(workout.date) != nil && workout.durationSeconds >= 0 &&
@@ -168,11 +174,13 @@ struct SportFitBackupDocument: FileDocument {
             try DataValidation.require(SportDate.from(draft.date) != nil && draft.movements.indices.contains(draft.currentIndex) &&
                                        movementsValid(draft.movements) && draft.elapsedPausedSeconds.isFinite && draft.elapsedPausedSeconds >= 0 &&
                                        (draft.exerciseSecondsLeft.map { (0...3600).contains($0) } ?? true) &&
+                                       (draft.firstSideSeconds.map { (1...3600).contains($0) } ?? true) &&
+                                       (draft.currentSide.map { [1, 2].contains($0) } ?? true) &&
                                        (draft.exerciseEndsAt.map { $0.timeIntervalSinceReferenceDate.isFinite } ?? true) &&
                                        !backup.workouts.contains(where: { $0.id == draft.id }) &&
                                        runReferenceValid(draft.runId, draft.runDayIndex), "Некорректный черновик")
             if let id = draft.runId, let run = runs.first(where: { $0.id == id }) {
-                try DataValidation.require(run.closedAt == nil && run.currentDay == draft.runDayIndex, "Черновик относится к закрытому дню")
+                try DataValidation.require(run.closedAt == nil && !run.isRetired && run.currentDay == draft.runDayIndex, "Черновик относится к закрытому дню")
             }
         }
         if let profile = backup.profile {

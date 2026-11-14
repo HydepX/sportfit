@@ -73,7 +73,7 @@ struct RootView: View {
                 }
             }
         }
-        await reminders.refresh(settings: journal.data.reminders, run: profile.activeRun ?? profile.runs.last,
+        await reminders.refresh(settings: journal.data.reminders, run: profile.activeRun ?? profile.runs.last(where: { !$0.isRetired }),
             draft: engine.draft, measurements: measurements.entries, history: engine.history)
         do { try BackupVault.automatic(engine: engine, measurements: measurements, store: store, profile: profile, journal: journal) }
         catch { journal.error = "Автоматическая копия не создана: \(error.localizedDescription)" }
@@ -160,10 +160,10 @@ struct LibraryScreen: View {
     @State private var selectedGroup = "Все"
 
     private var groups: [String] {
-        ["Все"] + Array(Set(store.catalog?.exercises.map(\.primaryGroup) ?? [])).sorted()
+        ["Все"] + Array(Set(store.catalog?.currentExercises.map(\.primaryGroup) ?? [])).sorted()
     }
     private var filtered: [Exercise] {
-        (store.catalog?.exercises ?? []).filter {
+        (store.catalog?.currentExercises ?? []).filter {
             (selectedGroup == "Все" || $0.primaryGroup == selectedGroup)
                 && (query.isEmpty || $0.title.localizedCaseInsensitiveContains(query))
         }

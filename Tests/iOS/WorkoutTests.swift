@@ -5,7 +5,7 @@ import XCTest
     private func makeEngine() throws -> (WorkoutEngine, FitnessStore, URL) {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let store = FitnessStore(directory: directory)
+        let store = LegacyFixture.store(directory: directory)
         XCTAssertNotNil(store.catalog)
         XCTAssertNotNil(store.program)
         return (WorkoutEngine(directory: directory), store, directory)
@@ -134,19 +134,18 @@ import XCTest
         XCTAssertEqual(reloaded.history.first?.movements.first?.sets.first?.reps, 4)
     }
 
-    func testUpgradeOriginalPlanArchivesItOnceWithoutChangingHistory() async throws {
+    func testOldPlanIsReplacedWithoutRewritingHistoricalJSON() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let legacyURL = try XCTUnwrap(Bundle.main.url(forResource: "program_12w.v1", withExtension: "json"))
-        try Data(contentsOf: legacyURL).write(to: directory.appendingPathComponent("program_12w.v1.json"))
+        let old = try Data(contentsOf: LegacyFixture.assets.appendingPathComponent("program_12w.v1.json"))
+        try old.write(to: directory.appendingPathComponent("program_12w.v1.json"))
         let history = Data("[]".utf8)
         try history.write(to: directory.appendingPathComponent("workout_history.v1.json"))
         let store = FitnessStore(directory: directory)
-        XCTAssertEqual(store.program?.schemaVersion, "2.0.0")
-        XCTAssertEqual(store.archivedPrograms.count, 1)
-        XCTAssertEqual(store.archivedPrograms.first?.schemaVersion, "1.0.0")
-        XCTAssertEqual(FitnessStore(directory: directory).archivedPrograms.count, 1)
+        XCTAssertEqual(store.program?.programId, PlanReplacement.programID)
+        XCTAssertFalse(store.archivedPrograms.contains { PlanReplacement.retiredIDs.contains($0.programId) })
+        XCTAssertEqual(store.catalog?.currentExercises.count, 36)
         XCTAssertEqual(try Data(contentsOf: directory.appendingPathComponent("workout_history.v1.json")), history)
     }
 

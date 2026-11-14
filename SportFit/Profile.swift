@@ -4,7 +4,7 @@ import SwiftUI
     @Published var profile = UserProfile()
     @Published private(set) var changes: [ScheduleChange] = []
     @Published private(set) var runs: [ProgramRun] = []
-    var activeRun: ProgramRun? { runs.first { $0.closedAt == nil } }
+    var activeRun: ProgramRun? { runs.first { $0.closedAt == nil && !$0.isRetired } }
     @Published var error: String?
     private var storageHealthy = true
     var canExport: Bool { storageHealthy && LocalFiles.recoveryError == nil }
@@ -25,7 +25,7 @@ import SwiftUI
             runs = []
             if FileManager.default.fileExists(atPath: url("program_runs.v1.json").path) {
                 let loaded = try JSONDecoder().decode([ProgramRun].self, from: Data(contentsOf: url("program_runs.v1.json")))
-                try DataValidation.require(Set(loaded.map(\.id)).count == loaded.count && loaded.filter { $0.closedAt == nil }.count <= 1,
+                try DataValidation.require(Set(loaded.map(\.id)).count == loaded.count && loaded.filter { $0.closedAt == nil && !$0.isRetired }.count <= 1,
                                            "Повреждён список уровней")
                 for run in loaded { try run.validateStructure() }
                 runs = loaded
@@ -59,7 +59,7 @@ import SwiftUI
         } catch { self.error = error.localizedDescription }
     }
     func closeDay(history: [WorkoutResult], draft: WorkoutDraft?, allowIncomplete: Bool) {
-        guard let index = runs.firstIndex(where: { $0.closedAt == nil }) else { return }
+        guard let index = runs.firstIndex(where: { $0.closedAt == nil && !$0.isRetired }) else { return }
         do {
             try DataValidation.require(draft == nil, "Сначала сохрани результат или удали черновик")
             var updated = runs
@@ -68,7 +68,7 @@ import SwiftUI
         } catch { self.error = error.localizedDescription }
     }
     func closeRun(draft: WorkoutDraft?, allowIncomplete: Bool) {
-        guard let index = runs.firstIndex(where: { $0.closedAt == nil }) else { return }
+        guard let index = runs.firstIndex(where: { $0.closedAt == nil && !$0.isRetired }) else { return }
         do {
             try DataValidation.require(draft == nil, "Сначала сохрани результат или удали черновик")
             var updated = runs
@@ -77,7 +77,7 @@ import SwiftUI
         } catch { self.error = error.localizedDescription }
     }
     func addExtraRest(now: Date = Date()) {
-        guard let index = runs.firstIndex(where: { $0.closedAt == nil }), runs[index].currentDay != nil else { return }
+        guard let index = runs.firstIndex(where: { $0.closedAt == nil && !$0.isRetired }), runs[index].currentDay != nil else { return }
         guard !runs[index].extraRests.contains(where: { SportDate.calendar.isDate($0, inSameDayAs: now) }) else {
             error = "Дополнительный отдых сегодня уже отмечен"; return
         }

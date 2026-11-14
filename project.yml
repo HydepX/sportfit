@@ -25,7 +25,7 @@ targets:
     settings:
       base:
         CODE_SIGN_ENTITLEMENTS: ""
-        MARKETING_VERSION: 1.1.0
+        MARKETING_VERSION: 1.2.0
         CURRENT_PROJECT_VERSION: 2
         PRODUCT_BUNDLE_IDENTIFIER: com.hydepx.sportfit
         INFOPLIST_KEY_CFBundleDisplayName: SportFit
@@ -40,6 +40,8 @@ targets:
     platform: iOS
     sources:
       - path: Tests/iOS
+      - path: Tests/Fixtures/LegacyData
+        type: folder
     dependencies:
       - target: SportFit
     settings:

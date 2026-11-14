@@ -103,7 +103,7 @@ private struct RunContent: View {
     @State private var confirmDay = false
     @State private var confirmLevel = false
     @State private var confirmRest = false
-    private var active: Bool { run.closedAt == nil }
+    private var active: Bool { run.closedAt == nil && !run.isRetired }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -261,7 +261,7 @@ private struct RunDayScreen: View {
     @State private var showingPlayer = false
     private var liveRun: ProgramRun { profile.runs.first { $0.id == run.id } ?? run }
     private var matchingDraft: Bool { engine.draft?.runId == run.id && engine.draft?.runDayIndex == index }
-    private var canStart: Bool { liveRun.closedAt == nil && liveRun.currentDay == index && liveRun.workout(on: index) != nil && liveRun.outcome(on: index, history: engine.history) != .completed }
+    private var canStart: Bool { liveRun.closedAt == nil && !liveRun.isRetired && liveRun.currentDay == index && liveRun.workout(on: index) != nil && liveRun.outcome(on: index, history: engine.history) != .completed }
     var body: some View {
         List {
             Text(run.title)
@@ -302,7 +302,7 @@ private struct RunDayScreen: View {
     @ViewBuilder private func exerciseRow(_ id: String, position: Int, date: Date) -> some View {
         let resolved = run.program.conditionalSubstitutions?[id]?.fallback ?? id
         if let exercise = store.exercise(resolved) {
-            let rule = run.program.prescription(resolved, on: date)
+            let rule = run.program.prescription(resolved, on: date, position: position)
             NavigationLink { ExerciseDetailScreen(exercise: exercise) } label: {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("\(position + 1). \(exercise.title)").font(.headline)
@@ -318,9 +318,10 @@ struct RunArchiveScreen: View {
     @EnvironmentObject private var profile: ProfileStore
     var body: some View {
         List {
-            ForEach(profile.runs.filter { $0.closedAt != nil }.reversed()) { run in
+            ForEach(profile.runs.filter { $0.closedAt != nil || $0.isRetired }.reversed()) { run in
                 NavigationLink {
-                    ScrollView { RunContent(run: run).padding() }.navigationTitle(run.title)
+                    if run.isRetired { RetiredRunScreen(run: run) }
+                    else { ScrollView { RunContent(run: run).padding() }.navigationTitle(run.title) }
                 } label: {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(run.title).font(.headline)
@@ -328,10 +329,44 @@ struct RunArchiveScreen: View {
                     }
                 }
             }
-            if profile.runs.allSatisfy({ $0.closedAt == nil }) { Text("Закрытых уровней пока нет") }
+            if profile.runs.allSatisfy({ $0.closedAt == nil && !$0.isRetired }) { Text("Закрытых уровней пока нет") }
             NavigationLink("Вся история тренировок") {
                 ScrollView { WorkoutHistoryView().padding() }.navigationTitle("История")
             }
         }.navigationTitle("Архив уровней")
+    }
+}
+
+private struct RetiredRunScreen: View {
+    @EnvironmentObject private var engine: WorkoutEngine
+    @EnvironmentObject private var journal: JournalStore
+    let run: ProgramRun
+    var body: some View {
+        List {
+            Text("Программа заменена. Здесь сохранены только прежние результаты и незавершённые записи; запуск старого плана недоступен.").font(.footnote)
+            ForEach(engine.history.filter { $0.runId == run.id }) { result in
+                NavigationLink(result.title) { WorkoutResultScreen(result: result) }
+            }
+            ForEach((journal.data.retiredDrafts ?? []).filter { $0.runId == run.id }) { draft in
+                NavigationLink("Незавершённая запись · " + draft.title) { RetiredDraftScreen(draft: draft) }
+            }
+        }.navigationTitle("История · " + run.title)
+    }
+}
+
+struct RetiredDraftScreen: View {
+    let draft: WorkoutDraft
+    var body: some View {
+        List {
+            Text("Незавершённая запись прежней программы. Факты сохранены без автоматического завершения или начисления невыполненных подходов. Эта запись включается в резервную копию.").font(.footnote)
+            ForEach(draft.movements) { movement in
+                Section(movement.title) {
+                    ForEach(movement.sets) { actual in
+                        Text(actual.seconds.map { "\($0) сек" } ?? "\(actual.reps ?? 0) × \((actual.weightKg ?? 0).formatted()) кг")
+                    }
+                    if movement.skipped { Text(movement.skipReason ?? "Пропущено") }
+                }
+            }
+        }.navigationTitle("Сохранённый черновик")
     }
 }

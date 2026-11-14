@@ -4,7 +4,7 @@ import XCTest
 final class DetailedProgramTests: XCTestCase {
     private var root: URL { URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent() }
     private func load() throws -> (TrainingProgram, ExerciseCatalog) {
-        let folder = root.appendingPathComponent("SportFit/Resources/Data")
+        let folder = root.appendingPathComponent("Tests/Fixtures/LegacyData")
         return (try JSONDecoder().decode(TrainingProgram.self, from: Data(contentsOf: folder.appendingPathComponent("program_12w_with_sets.v2.json"))),
                 try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: folder.appendingPathComponent("exercises.v1.json"))))
     }
@@ -29,7 +29,7 @@ final class DetailedProgramTests: XCTestCase {
         }
     }
     func testSourceMetadataAndEveryAssignmentSurviveEncoding() throws {
-        let path = root.appendingPathComponent("SportFit/Resources/Data/program_12w_with_sets.v2.json")
+        let path = root.appendingPathComponent("Tests/Fixtures/LegacyData/program_12w_with_sets.v2.json")
         let raw = try Data(contentsOf: path)
         let program = try JSONDecoder().decode(TrainingProgram.self, from: raw)
         let source = try XCTUnwrap(JSONSerialization.jsonObject(with: raw) as? [String: Any])

@@ -3,10 +3,10 @@ import XCTest
 
 final class PlayerPlanTests: XCTestCase {
     private var root: URL { URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent() }
-    private func catalog() throws -> ExerciseCatalog { try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: root.appendingPathComponent("SportFit/Resources/Data/exercises.v1.json"))) }
+    private func catalog() throws -> ExerciseCatalog { try JSONDecoder().decode(ExerciseCatalog.self, from: Data(contentsOf: root.appendingPathComponent("Tests/Fixtures/LegacyData/exercises.v1.json"))) }
     func testExactPlanDefaultsUseTargetsRatherThanOriginalHintRanges() throws {
         let catalog = try catalog()
-        let plan = try JSONDecoder().decode(TrainingProgram.self, from: Data(contentsOf: root.appendingPathComponent("SportFit/Resources/Data/program_12w_with_sets.v2.json")))
+        let plan = try JSONDecoder().decode(TrainingProgram.self, from: Data(contentsOf: root.appendingPathComponent("Tests/Fixtures/LegacyData/program_12w_with_sets.v2.json")))
         let date = try XCTUnwrap(SportDate.from("2026-11-09"))
         let breath = try XCTUnwrap(catalog.exercises.first { $0.id == "wu_breath" })
         let press = try XCTUnwrap(catalog.exercises.first { $0.id == "press_floor" })

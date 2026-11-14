@@ -5,7 +5,7 @@ import XCTest
     private func setup() throws -> (URL, FitnessStore, ProfileStore, WorkoutEngine) {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let store = FitnessStore(directory: directory)
+        let store = LegacyFixture.store(directory: directory)
         let profile = ProfileStore(directory: directory)
         let engine = WorkoutEngine(directory: directory)
         profile.startRun(title: "Test level", program: try XCTUnwrap(store.program), catalog: try XCTUnwrap(store.catalog), draft: nil)
