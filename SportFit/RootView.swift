@@ -9,23 +9,50 @@ private enum Palette {
 
 struct RootView: View {
     @EnvironmentObject private var store: FitnessStore
+    @EnvironmentObject private var engine: WorkoutEngine
+    @EnvironmentObject private var measurements: MeasurementsStore
+    @EnvironmentObject private var profile: ProfileStore
+    @EnvironmentObject private var journal: JournalStore
+    @EnvironmentObject private var reminders: ReminderService
+    @EnvironmentObject private var imported: HealthImportStore
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selection = 0
+    @State private var progressDestination: String?
+    @State private var dataEpoch = UUID()
 
     var body: some View {
         TabView(selection: $selection) {
             HomeScreen(onWorkout: { selection = 2 })
                 .tabItem { Label("Главная", systemImage: "house") }.tag(0)
-            LibraryScreen()
-                .tabItem { Label("Упражнения", systemImage: "figure.strengthtraining.traditional") }.tag(1)
-            CalendarScreen()
+            ProgramRunScreen(title: "План")
+                .tabItem { Label("План", systemImage: "calendar") }.tag(1)
+            ProgramRunScreen(title: "Тренировка")
                 .tabItem { Label("Тренировка", systemImage: "play.circle.fill") }.tag(2)
-            ProgressScreen()
+            ProgressScreen(destination: $progressDestination)
                 .tabItem { Label("Прогресс", systemImage: "chart.xyaxis.line") }.tag(3)
             SettingsScreen()
-                .tabItem { Label("Настройки", systemImage: "gearshape") }.tag(4)
+                .tabItem { Label("Профиль", systemImage: "person.crop.circle") }.tag(4)
         }
+        .id(dataEpoch)
         .tint(Palette.accent)
         .background(Palette.background)
+        .task { await synchronize() }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await synchronize() } } }
+        .onReceive(profile.$runs) { _ in Task { await synchronize() } }
+        .onReceive(engine.$draft) { _ in Task { await synchronize() } }
+        .onReceive(journal.$data) { _ in Task { await synchronize() } }
+        .onReceive(measurements.$entries) { _ in Task { await synchronize() } }
+        .onReceive(NotificationCenter.default.publisher(for: .sportfitDataRestored)) { notification in
+            guard let folder = notification.object as? URL, folder == store.directory else { return }
+            selection = 0; progressDestination = nil; dataEpoch = UUID()
+            store.message = "Данные восстановлены. Напоминания выключены до явного включения."
+        }
+        .onChange(of: reminders.destination, initial: true) { _, target in
+            guard let target else { return }
+            if target == "plan" { selection = 1 }
+            else { selection = 3; progressDestination = target == "progress" ? nil : target }
+            reminders.destination = nil
+        }
         .alert("SportFit", isPresented: Binding(
             get: { store.message != nil },
             set: { if !$0 { store.message = nil } }
@@ -34,6 +61,22 @@ struct RootView: View {
         } message: {
             Text(store.message ?? "")
         }
+    }
+    private func synchronize() async {
+        if journal.canExport && engine.canExport && measurements.canExport {
+            for run in profile.runs where run.closedAt != nil {
+                let scope = "run:" + run.id.uuidString
+                if !journal.data.reports.contains(where: { $0.scope == scope && $0.isFinal }) {
+                    let report = QuarterReport.make(title: run.title, scope: scope, start: SportDate.calendar.startOfDay(for: run.startedAt), end: run.closedAt!, run: run,
+                        history: engine.history, measurements: measurements.entries, xml: imported.records, journal: journal.data, name: profile.profile.name, privacy: .full)
+                    _ = journal.saveReport(report)
+                }
+            }
+        }
+        await reminders.refresh(settings: journal.data.reminders, run: profile.activeRun ?? profile.runs.last(where: { !$0.isRetired }),
+            draft: engine.draft, measurements: measurements.entries, history: engine.history)
+        do { try BackupVault.automatic(engine: engine, measurements: measurements, store: store, profile: profile, journal: journal) }
+        catch { journal.error = "Автоматическая копия не создана: \(error.localizedDescription)" }
     }
 }
 
@@ -49,6 +92,7 @@ private struct Panel<Content: View>: View {
 struct HomeScreen: View {
     @EnvironmentObject private var store: FitnessStore
     @EnvironmentObject private var measurements: MeasurementsStore
+    @EnvironmentObject private var profile: ProfileStore
     let onWorkout: () -> Void
 
     var body: some View {
@@ -60,12 +104,10 @@ struct HomeScreen: View {
                     Panel {
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Личная программа", systemImage: "person.crop.circle").font(.headline)
-                            Text("12 недель · 9 ноября 2026 — 31 января 2027")
+                            Text(profile.activeRun.map { "\($0.title) · закрыто \($0.completedDayCount) из \($0.dayCount) дней" } ?? "Выбери уровень и проходи дни в своём темпе")
                                 .foregroundStyle(.secondary).font(.subheadline)
-                            if let program = store.program {
-                                Text("Программа: \(program.programId)")
-                                    .font(.caption).foregroundStyle(.secondary)
-                                Text("3 этапа · 4 дня в неделю").font(.title3.bold())
+                            if let program = profile.activeRun?.program ?? store.program {
+                                Text("\(program.phases.count) этапа · индивидуальный план").font(.title3.bold())
                             } else {
                                 Text("Импортируй план тренировок в настройках")
                                     .foregroundStyle(.secondary)
@@ -86,12 +128,13 @@ struct HomeScreen: View {
                     Panel {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Ближайшая тренировка").font(.headline)
-                            if let day = store.workout(on: Date()) {
-                                Text(day.name).font(.title3.bold())
-                                Text("\(day.exerciseIds.count) упражнений, включая разминку и заминку")
+                            if let run = profile.activeRun, let index = run.currentDay {
+                                Text("День \(index + 1)").font(.subheadline)
+                                Text(run.workout(on: index)?.name ?? "Отдых").font(.title3.bold())
+                                Text("После закрытия дня откроется следующий")
                                     .foregroundStyle(.secondary).font(.subheadline)
                             } else {
-                                Text("Сегодня отдых или программа ещё не загружена")
+                                Text("Начни новый уровень или закрой пройденный")
                                     .foregroundStyle(.secondary)
                             }
                             Button(action: onWorkout) {
@@ -102,7 +145,7 @@ struct HomeScreen: View {
                             .foregroundStyle(.black)
                         }
                     }
-                    Text("Данные сохраняются локально. Видео и Apple Health будут подключены отдельно.")
+                    Text("Данные сохраняются локально. Перерыв не создаёт пропусков в программе.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }.padding()
             }
@@ -117,10 +160,10 @@ struct LibraryScreen: View {
     @State private var selectedGroup = "Все"
 
     private var groups: [String] {
-        ["Все"] + Array(Set(store.catalog?.exercises.map(\.primaryGroup) ?? [])).sorted()
+        ["Все"] + Array(Set(store.catalog?.currentExercises.map(\.primaryGroup) ?? [])).sorted()
     }
     private var filtered: [Exercise] {
-        (store.catalog?.exercises ?? []).filter {
+        (store.catalog?.currentExercises ?? []).filter {
             (selectedGroup == "Все" || $0.primaryGroup == selectedGroup)
                 && (query.isEmpty || $0.title.localizedCaseInsensitiveContains(query))
         }
@@ -175,17 +218,13 @@ struct ExerciseDetailScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20).fill(Palette.panel)
-                    VStack(spacing: 8) {
-                        Image(systemName: "figure.strengthtraining.traditional")
-                            .font(.system(size: 58)).foregroundStyle(Palette.accent)
-                        Text("Фото и видео будут добавлены позже")
-                            .font(.footnote).foregroundStyle(.secondary)
-                    }
-                }.frame(height: 210)
+                ExerciseMediaView(exerciseId: exercise.id)
                 Text(exercise.primaryGroup).foregroundStyle(Palette.accent)
                 Text(exercise.description)
+                Text("Инвентарь: " + exercise.equipment.joined(separator: ", "))
+                if let rest = exercise.suggestedRestFromSource {
+                    Text("Отдых из источника: " + rest).font(.subheadline)
+                }
                 if !exercise.safetyFlag.isEmpty {
                     Panel {
                         Label(exercise.safetyFlag, systemImage: "exclamationmark.shield")
@@ -202,10 +241,8 @@ struct ExerciseDetailScreen: View {
                         Text(instruction)
                     }
                 }
-                if let mistakes = exercise.commonMistakesDraft, !mistakes.isEmpty {
+                if exercise.commonMistakesReviewStatus == "approved", let mistakes = exercise.commonMistakesDraft, !mistakes.isEmpty {
                     Text("На что обратить внимание").font(.title3.bold())
-                    Text("Черновые замечания — ещё не прошли проверку")
-                        .font(.caption).foregroundStyle(.yellow)
                     ForEach(mistakes, id: \.self) { Text("• " + $0) }
                 }
                 if let reps = exercise.suggestedRepsFromSource {

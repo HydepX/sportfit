@@ -11,17 +11,58 @@ targets:
   SportFit:
     type: application
     platform: iOS
+    info:
+      path: Generated/SportFit-Info.plist
+      properties:
+        SportFitHealthKitEnabled: false
+        SportFitBuildCommit: '$(SPORTFIT_BUILD_COMMIT)'
     sources:
       - path: SportFit
+        excludes:
+          - Resources/media
+      - path: SportFit/Resources/media
+        type: folder
     settings:
       base:
+        CODE_SIGN_ENTITLEMENTS: ""
+        MARKETING_VERSION: 1.2.0
+        CURRENT_PROJECT_VERSION: 2
         PRODUCT_BUNDLE_IDENTIFIER: com.hydepx.sportfit
         INFOPLIST_KEY_CFBundleDisplayName: SportFit
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_NSHealthShareUsageDescription: SportFit использует данные Apple Здоровье только с вашего разрешения для отображения прогресса.
-        INFOPLIST_KEY_NSHealthUpdateUsageDescription: Доступ к записи в Здоровье не используется в первой версии.
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         GENERATE_INFOPLIST_FILE: YES
-    entitlements:
-      path: SportFit/SportFit.entitlements
+        INFOPLIST_KEY_UIFileSharingEnabled: YES
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: YES
+  SportFitTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/iOS
+      - path: Tests/Fixtures/LegacyData
+        type: folder
+    dependencies:
+      - target: SportFit
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  SportFitUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/UI
+    dependencies:
+      - target: SportFit
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  SportFit:
+    build:
+      targets:
+        SportFit: all
+    test:
+      targets:
+        - SportFitTests
+        - SportFitUITests

@@ -1,0 +1,21 @@
+include:
+  - project.yml
+settings:
+  base:
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS: '$(inherited) SPORTFIT_HEALTHKIT'
+targets:
+  SportFit:
+    info:
+      path: Generated/SportFit-Info.plist
+      properties:
+        SportFitHealthKitEnabled: true
+        SportFitBuildCommit: '$(SPORTFIT_BUILD_COMMIT)'
+        NSHealthShareUsageDescription: SportFit читает вес, шаги и пульс, а дополнительные показатели — только по вашему запросу. Данные остаются на устройстве.
+        NSHealthUpdateUsageDescription: SportFit не записывает данные в Apple Здоровье.
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: SportFit/SportFit.entitlements
+    entitlements:
+      path: SportFit/SportFit.entitlements
+      properties:
+        com.apple.developer.healthkit: true
